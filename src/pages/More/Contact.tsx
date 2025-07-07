@@ -41,10 +41,10 @@ const Contact: FC = () => {
         >
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">Get in Touch</h2>
           <p className="text-gray-600 mb-4">
-            We're here to assist you with any questions or feedback about CricLive. Reach out to us via the form below or contact us directly.
+            We're here to assist you with any questions or feedback about CricABC. Reach out to us via the form below or contact us directly.
           </p>
           <div className="mb-6">
-            <p className="text-gray-600"><strong>Email:</strong> support@criclive.com</p>
+            <p className="text-gray-600"><strong>Email:</strong> support@cricabc.com</p>
             <p className="text-gray-600"><strong>Mobile:</strong> +91 9999999999</p>
             <p className="text-gray-600"><strong>Address:</strong> 123 Cricket Lane, HiTech City, Hyderabad-500081, India</p>
           </div>

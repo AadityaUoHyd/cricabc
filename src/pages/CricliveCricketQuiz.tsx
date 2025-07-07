@@ -23,7 +23,7 @@ interface QuestionResult extends QuizQuestion {
   points: number;
 }
 
-const CricliveCricketQuiz: FC = () => {
+const CricABCCricketQuiz: FC = () => {
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -273,7 +273,7 @@ const CricliveCricketQuiz: FC = () => {
       <div className="w-full max-w-xl bg-white bg-opacity-90 backdrop-blur-md p-8 rounded-xl shadow-lg">
         <h1 className="text-3xl sm:text-4xl font-bold text-center text-purple-600 mb-6 flex items-center justify-center">
           <Trophy className="w-8 h-8 mr-2" />
-          CricLive Cricket Quiz
+          CricABC Cricket Quiz
         </h1>
 
         <div className="w-full bg-gray-200 rounded-full h-2.5 mb-6">
@@ -391,4 +391,4 @@ const CricliveCricketQuiz: FC = () => {
   );
 };
 
-export default CricliveCricketQuiz;
+export default CricABCCricketQuiz;

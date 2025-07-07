@@ -35,10 +35,23 @@ export default function Home() {
     const pusher = initPusher();
     const channel = pusher.subscribe('match-channel');
     channel.bind('match-update', (data: Match) => {
-      setMatches(prev => {
-        const updated = prev.filter(m => m.matchId !== data.matchId);
-        return [...updated, data];
-      });
+      try {
+        // Defensive: check data shape
+        if (!data || typeof data.matchId === 'undefined') {
+          console.error('Pusher match-update received malformed data:', data);
+          return;
+        }
+        setMatches(prev => {
+          if (!Array.isArray(prev)) {
+            console.error('Previous matches state is not an array:', prev);
+            return prev || [];
+          }
+          const updated = prev.filter(m => m && m.matchId !== data.matchId);
+          return [...updated, data];
+        });
+      } catch (err) {
+        console.error('Error handling Pusher match-update event:', err, data);
+      }
     });
 
     return () => {
@@ -101,19 +114,19 @@ export default function Home() {
     <div className="container mx-auto p-4 space-y-16">
       {/* Hero Section */}
       <section className="relative rounded-2xl overflow-hidden shadow-lg mb-12">
-        <img src={HeroBanner} alt="Cricket Hero" className="w-full h-[340px] sm:h-[440px] object-cover object-center opacity-90" />
+        <img src={HeroBanner} alt="CricABC Hero Cricket Stadium" className="w-full h-[340px] sm:h-[440px] object-cover object-center opacity-90" loading="lazy" />
         <div className="absolute inset-0 bg-gradient-to-r from-purple-900/70 to-purple-600/60 flex flex-col justify-center items-center text-center">
           <motion.h1
             className="text-4xl sm:text-5xl font-bold text-white mb-4 drop-shadow-lg"
             initial={{ opacity: 0, y: -40 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            CricLive - Live Cricket Updates
+            CricABC - Live Cricket Updates
           </motion.h1>
           <p className="text-lg sm:text-2xl text-purple-100 mb-8 max-w-2xl mx-auto">
             Your ultimate cricket companion for live scores, stats, news, quizzes, and more!
           </p>
-          <a href="/teams" className="bg-yellow-400 hover:bg-yellow-500 text-purple-900 font-bold py-3 px-8 rounded-full text-lg shadow-lg transition">Explore CricLive</a>
+          <a href="/teams" className="bg-yellow-400 hover:bg-yellow-500 text-purple-900 font-bold py-3 px-8 rounded-full text-lg shadow-lg transition">Explore CricABC</a>
         </div>
       </section>
 
@@ -127,20 +140,20 @@ export default function Home() {
           { icon: NewsIcon, title: 'Cricket News', desc: 'Stay updated with the latest cricket news.' },
         ].map(f => (
           <div key={f.title} className="bg-white rounded-xl shadow p-6 flex flex-col items-center text-center hover:shadow-xl transition">
-            <img src={f.icon} alt={f.title} className="w-20 h-20 mb-4" />
+            <img src={f.icon} alt={f.title + ' icon'} className="w-20 h-20 mb-4" loading="lazy" />
             <h3 className="text-xl font-semibold text-purple-700 mb-2">{f.title}</h3>
             <p className="text-gray-500 text-sm">{f.desc}</p>
           </div>
         ))}
       </section>
 
-      {/* About CricLive */}
+      {/* About CricABC */}
       <section className="flex flex-col lg:flex-row items-center gap-10 bg-purple-50 rounded-2xl shadow p-8 max-w-6xl mx-auto">
-        <img src={AboutCricket} alt="About CricLive" className="w-full lg:w-2/5 rounded-xl object-cover shadow-md" />
+        <img src={AboutCricket} alt="About CricABC section cricket" className="w-full lg:w-2/5 rounded-xl object-cover shadow-md" loading="lazy" />
         <div className="flex-1">
-          <h2 className="text-3xl font-bold text-purple-800 mb-4">About CricLive</h2>
+          <h2 className="text-3xl font-bold text-purple-800 mb-4">About CricABC</h2>
           <p className="text-gray-700 mb-4 text-lg">
-            CricLive brings you the thrill of cricket right to your fingertips. Track live scores, explore in-depth player and team stats, enjoy interactive quizzes, and never miss a moment with real-time updates and news.
+            CricABC brings you the thrill of cricket right to your fingertips. Track live scores, explore in-depth player and team stats, enjoy interactive quizzes, and never miss a moment with real-time updates and news.
           </p>
           <ul className="list-disc list-inside text-purple-700 space-y-2 mb-4">
             <li>Comprehensive match coverage</li>
@@ -148,12 +161,12 @@ export default function Home() {
             <li>Cricket news, rankings, and schedules</li>
             <li>Fun, interactive quizzes for fans</li>
           </ul>
-          <a href="/about" className="text-purple-700 font-semibold underline hover:text-purple-900">Learn more about CricLive</a>
+          <a href="/about" className="text-purple-700 font-semibold underline hover:text-purple-900">Learn more about CricABC</a>
         </div>
       </section>
 
       {/* Stats Section */}
-      <section className="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-8 text-center mb-12">
+      <section className="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-8 text-center mb-12 bg-purple-50 rounded-2xl py-8">
         {[
           { icon: LiveScoreIcon, label: 'Matches', value: '1000+' },
           { icon: PlayerStatsIcon, label: 'Players', value: '500+' },
@@ -161,7 +174,7 @@ export default function Home() {
           { icon: NewsIcon, label: 'Articles', value: '2000+' },
         ].map(stat => (
           <div key={stat.label} className="bg-white rounded-xl shadow p-6 flex flex-col items-center hover:shadow-xl transition">
-            <img src={stat.icon} alt={stat.label} className="w-16 h-16 mb-2" />
+            <img src={stat.icon} alt={stat.label + ' stat icon'} className="w-16 h-16 mb-2" loading="lazy" />
             <div className="text-2xl font-bold text-purple-700">{stat.value}</div>
             <div className="text-gray-500 text-sm">{stat.label}</div>
           </div>
@@ -183,14 +196,14 @@ export default function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="max-w-4xl mx-auto mb-12">
+      <section className="max-w-4xl mx-auto mb-12 bg-white rounded-2xl py-8 shadow-md">
         <h2 className="text-2xl font-bold text-purple-800 mb-6 text-center">What Fans Say</h2>
         <Slider {...testimonialSliderSettings}>
           {[
-            { avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e', name: 'Rahul Sharma', quote: 'CricLive is my go-to app for everything cricket. The stats and live updates are top notch!' },
+            { avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e', name: 'Rahul Sharma', quote: 'CricABC is my go-to app for everything cricket. The stats and live updates are top notch!' },
             { avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb', name: 'Priya Singh', quote: 'Love the quizzes and news section. Makes following cricket so much fun!' },
             { avatar: 'https://images.unsplash.com/photo-1557862921-37829c790f19', name: 'Amit Patel', quote: 'The real-time rankings and player stats are incredibly detailed!' },
-            { avatar: 'https://images.unsplash.com/photo-1532170579297-281918c8ae72', name: 'Sneha Gupta', quote: 'CricLive’s interface is so user-friendly, and the quizzes are addictive!' },
+            { avatar: 'https://images.unsplash.com/photo-1532170579297-281918c8ae72', name: 'Sneha Gupta', quote: 'CricABC’s interface is so user-friendly, and the quizzes are addictive!' },
             { avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9', name: 'Vikram Rao', quote: 'Best app for keeping up with live cricket scores and news!' },
           ].map(t => (
             <div key={t.name} className="px-2">

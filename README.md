@@ -1,12 +1,12 @@
-# CricLive
+# CricABC
 A cricket live score app. Java-Springboot as backend and React as Frontend. we will use Mongodb for database.
 
 ## Backend
 ```
-criclive-backend/ 
+cricabc-backend/ 
 ├── src/ 
 │ ├── main/ 
-│ │ ├── java/com/criclive/backend/ 
+│ │ ├── java/com/cricabc/backend/ 
 │ │ │ ├── controller/ # REST controllers 
 │ │ │ ├── service/ # Business logic 
 │ │ │ ├── repository/ # MongoDB repositories 
@@ -22,7 +22,7 @@ criclive-backend/
 
 ## Frontend
 ```
-criclive/ 
+cricabc/ 
 ├── public/ # Static assets (e.g., favicon, placeholder images) 
 ├── src/ 
 │ ├── assets/ # Placeholder images (for Sora AI-generated PNGs) 

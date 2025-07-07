@@ -8,7 +8,7 @@ const Career: FC = () => {
     {
       title: 'Frontend Developer (React/TypeScript)',
       description:
-        'Join our team to build dynamic, responsive UI components for CricLive using React and TypeScript. Experience with Tailwind CSS and Framer Motion is a plus.',
+        'Join our team to build dynamic, responsive UI components for CricABC using React and TypeScript. Experience with Tailwind CSS and Framer Motion is a plus.',
       requirements: ['3+ years of React experience', 'Proficiency in TypeScript', 'Knowledge of REST APIs'],
     },
     {
@@ -20,7 +20,7 @@ const Career: FC = () => {
     {
       title: 'Full Stack Developer',
       description:
-        'Work across the CricLive stack, from React frontend to Spring Boot backend, to deliver seamless features and real-time updates using Pusher.',
+        'Work across the CricABC stack, from React frontend to Spring Boot backend, to deliver seamless features and real-time updates using Pusher.',
       requirements: ['Expertise in React and Spring Boot', 'Experience with WebSockets', 'Strong problem-solving skills'],
     },
   ];
@@ -33,7 +33,7 @@ const Career: FC = () => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        Careers at CricLive
+        Careers at CricABC
       </motion.h1>
       <div className="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md">
         <motion.section
@@ -43,7 +43,7 @@ const Career: FC = () => {
         >
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">Join Our Team</h2>
           <p className="text-gray-600 mb-4">
-            At CricLive, we're passionate about cricket and technology. Join our innovative team to build the ultimate platform for cricket fans worldwide. We offer a dynamic work environment, opportunities for growth, and the chance to work with cutting-edge technologies.
+            At CricABC, we're passionate about cricket and technology. Join our innovative team to build the ultimate platform for cricket fans worldwide. We offer a dynamic work environment, opportunities for growth, and the chance to work with cutting-edge technologies.
           </p>
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">Open Positions</h2>
           {jobOpenings.map((job, index) => (
@@ -62,8 +62,8 @@ const Career: FC = () => {
           ))}
           <p className="text-gray-600">
             Don't see a role that fits? Reach out to us at{' '}
-            <a href="mailto:careers@criclive.com" className="text-purple-600 hover:underline">
-              careers@criclive.com
+            <a href="mailto:careers@cricabc.com" className="text-purple-600 hover:underline">
+              careers@cricabc.com
             </a>{' '}
             to express your interest!
           </p>

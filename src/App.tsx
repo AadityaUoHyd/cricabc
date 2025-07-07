@@ -31,8 +31,8 @@ const Career = lazy(() => import('./pages/More/Career'));
 const Advertise = lazy(() => import('./pages/More/Advertise')); 
 const PrivacyPolicy = lazy(() => import('./pages/More/PrivacyPolicy')); 
 const TermsOfUse = lazy(() => import('./pages/More/TermsOfUse')); 
-const CricLiveTeam = lazy(() => import('./pages/More/CricLiveTeam')); 
-const CricliveCricketQuiz = lazy(() => import('./pages/CricliveCricketQuiz')); 
+const CricABCTeam = lazy(() => import('./pages/More/CricABCTeam')); 
+const CricABCCricketQuiz = lazy(() => import('./pages/CricABCCricketQuiz')); 
 const AdminMatchesPage = lazy(() => import('./pages/Admin/AdminMatchesPage'));
 const PlayerProfile = lazy(() => import('./pages/PlayerProfile'));
 const AdminTeams = lazy(() => import('./pages/Admin/AdminTeams'));
@@ -119,8 +119,8 @@ const App: FC = () => {
                 <Route path="/advertise" element={<Advertise />} />
                 <Route path="/privacy" element={<PrivacyPolicy />} />
                 <Route path="/terms" element={<TermsOfUse />} />
-                <Route path="/criclive-team" element={<CricLiveTeam />} />
-                <Route path="/quiz" element={<CricliveCricketQuiz />} />
+                <Route path="/cricabc-team" element={<CricABCTeam />} />
+                <Route path="/quiz" element={<CricABCCricketQuiz />} />
                 <Route
                   path="/admin/*"
                   element={

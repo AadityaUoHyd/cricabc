@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useUser } from '../context/UserContext'; 
 import Logo from '../assets/cl.png';
-import LoginImg from '../assets/criclive-login.png';
+import LoginImg from '../assets/cricabc-login.png';
 import { motion } from 'framer-motion';
 
 interface LoginResponse {
@@ -49,7 +49,7 @@ const Login: React.FC = () => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <img src={Logo} alt="CricLive Logo" className="w-10 h-10" />
+          <img src={Logo} alt="CricABC Logo" className="w-10 h-10" />
           Admin Login
         </motion.h1>
         {error && <p className="text-red-500 mb-4 text-center">{error}</p>}

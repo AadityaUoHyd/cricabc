@@ -31,7 +31,7 @@ const Advertise: FC = () => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        Advertise with CricLive
+        Advertise with CricABC
       </motion.h1>
       <div className="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md">
         <motion.section
@@ -41,7 +41,7 @@ const Advertise: FC = () => {
         >
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">Reach Cricket Fans Worldwide</h2>
           <p className="text-gray-600 mb-4">
-            CricLive is the premier destination for cricket enthusiasts, offering real-time scores, match updates, and engaging content for fans across the globe. Partner with us to reach a passionate audience during high-profile events like the ICC ODI and T20 World Cups, World Test Championships, bilateral tournaments, and IPL seasons.
+            CricABC is the premier destination for cricket enthusiasts, offering real-time scores, match updates, and engaging content for fans across the globe. Partner with us to reach a passionate audience during high-profile events like the ICC ODI and T20 World Cups, World Test Championships, bilateral tournaments, and IPL seasons.
           </p>
           <h3 className="text-2xl font-semibold mb-2 text-gray-800">Advertising Opportunities</h3>
           <ul className="list-disc list-inside text-gray-600 mb-4">
@@ -54,7 +54,7 @@ const Advertise: FC = () => {
             Our platform attracts millions of cricket fans, providing a unique opportunity to connect with a dedicated audience. Contact our advertising team to discuss customized solutions.
           </p>
           <div className="mb-6">
-            <p className="text-gray-600"><strong>Email:</strong> ads@criclive.com</p>
+            <p className="text-gray-600"><strong>Email:</strong> ads@cricabc.com</p>
             <p className="text-gray-600"><strong>Mobile:</strong> +91 99999 99999</p>
           </div>
           {submitted ? (

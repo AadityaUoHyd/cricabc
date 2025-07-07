@@ -20,7 +20,7 @@ const PrivacyPolicy: FC = () => {
         >
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">Introduction</h2>
           <p className="text-gray-600 mb-4">
-            At CricLive, we are committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your personal information when you use our website and services, including live scores, fantasy cricket, and match updates.
+            At CricABC, we are committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your personal information when you use our website and services, including live scores, fantasy cricket, and match updates.
           </p>
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">Information We Collect</h2>
           <ul className="list-disc list-inside text-gray-600 mb-4">
@@ -67,8 +67,8 @@ const PrivacyPolicy: FC = () => {
           </ul>
           <p className="text-gray-600 mb-4">
             To exercise these rights, contact us at{' '}
-            <a href="mailto:privacy@criclive.com" className="text-purple-600 hover:underline">
-              privacy@criclive.com
+            <a href="mailto:privacy@cricabc.com" className="text-purple-600 hover:underline">
+              privacy@cricabc.com
             </a>.
           </p>
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">Security</h2>
@@ -82,8 +82,8 @@ const PrivacyPolicy: FC = () => {
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">Contact Us</h2>
           <p className="text-gray-600">
             For questions about this Privacy Policy, contact us at{' '}
-            <a href="mailto:support@criclive.com" className="text-purple-600 hover:underline">
-              support@criclive.com
+            <a href="mailto:support@cricabc.com" className="text-purple-600 hover:underline">
+              support@cricabc.com
             </a>{' '}
             or +91 99999 99999.
           </p>

@@ -79,7 +79,7 @@ export default function NewsDetail() {
                 Comments
               </h2>
               <FacebookProvider appId={import.meta.env.VITE_API_URL}>
-                <Comments href={`https://criclive.vercel.app/news/${slug}`} width="100%" />
+                <Comments href={`https://cricabc.vercel.app/news/${slug}`} width="100%" />
               </FacebookProvider>
             </div>
           </CardContent>

@@ -8,11 +8,11 @@ export default function Footer() {
         {/* Grid Layout */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-10 md:gap-8 mb-12">
 
-          {/* 1. CricLive Info */}
+          {/* 1. CricABC Info */}
           <div className="space-y-4 text-center md:text-left"> {/* Added text-center for mobile */}
             <div className="flex items-center justify-center md:justify-start space-x-3"> {/* Centered for mobile */}
-              <a href="/"><img src="/cl.png" alt="CricLive Logo" className="w-12 h-12" /></a>
-              <span className="text-purple-500 text-2xl font-semibold"><a href="/">CricLive</a></span>
+              <a href="/"><img src="/cl.png" alt="CricABC Logo" className="w-12 h-12" /></a>
+              <span className="text-purple-500 text-2xl font-semibold"><a href="/">CricABC</a></span>
             </div>
             <p className="text-gray-400">Your ultimate cricket companion.</p>
             <p className="text-gray-400">
@@ -33,7 +33,7 @@ export default function Footer() {
           <div className="text-center md:text-left"> {/* Added text-center for mobile */}
             <h3 className="text-purple-500 font-semibold mb-4">Aware of these?</h3>
             <ul className="space-y-2">
-              <li><a href="/quiz" className="hover:text-purple-400">CricLive Cricket Quiz</a></li>
+              <li><a href="/quiz" className="hover:text-purple-400">CricABC Cricket Quiz</a></li>
               <li><a href="/about" className="hover:text-purple-400">About Us</a></li>
               <li><a href="/advertise" className="hover:text-purple-400">Privacy Policy</a></li>
               <li><a href="/terms" className="hover:text-purple-400">Terms of Use</a></li>
@@ -47,7 +47,7 @@ export default function Footer() {
               <li><a href="/careers" className="hover:text-purple-400">Careers</a></li>
               <li><a href="/contact" className="hover:text-purple-400">Contact Us</a></li>
               <li><a href="/advertise" className="hover:text-purple-400">Advertise</a></li>
-              <li><a href="/criclive-team" className="hover:text-purple-400">CricLive Team</a></li>
+              <li><a href="/cricabc-team" className="hover:text-purple-400">CricABC Team</a></li>
             </ul>
           </div>
 
@@ -88,7 +88,7 @@ export default function Footer() {
 
         {/* Copyright */}
         <div className="border-t border-gray-700 pt-6 text-center text-xs text-gray-500">
-          <p>© 2025 CricLive Limited. All rights reserved.</p>
+          <p>© 2025 CricABC Limited. All rights reserved.</p>
         </div>
       </div>
     </footer>

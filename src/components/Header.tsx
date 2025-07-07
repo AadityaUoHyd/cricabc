@@ -43,7 +43,7 @@ const Header: FC = () => {
     { name: 'Advertise', path: '/advertise' },
     { name: 'Privacy Policy', path: '/privacy' },
     { name: 'Terms of Use', path: '/terms' },
-    { name: 'CricLive Team', path: '/criclive-team' },
+    { name: 'CricABC Team', path: '/cricabc-team' },
   ];
 
   const handleLogout = () => {
@@ -60,13 +60,13 @@ const Header: FC = () => {
           <a href="/" className="flex items-center">
             <img
               src="/cl.png"
-              alt="CricLive Logo"
+              alt="CricABC Logo"
               className="w-10 h-10 hover:scale-105 transition-transform duration-200"
               onError={(e) => (e.currentTarget.src = '/fallback-logo.png')}
             />
           </a>
           <h1 className="text-2xl font-bold leading-none">
-            <a href="/" className="block mt-1 sm:mt-0">CricLive</a>
+            <a href="/" className="block mt-1 sm:mt-0">CricABC</a>
           </h1>
         </div>
 

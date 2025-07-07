@@ -20,11 +20,11 @@ const TermsOfUse: FC = () => {
         >
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">Acceptance of Terms</h2>
           <p className="text-gray-600 mb-4">
-            By accessing or using CricLive, you agree to be bound by these Terms of Use. If you do not agree, please do not use our services.
+            By accessing or using CricABC, you agree to be bound by these Terms of Use. If you do not agree, please do not use our services.
           </p>
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">Use of Services</h2>
           <p className="text-gray-600 mb-4">
-            CricLive provides live cricket scores, match schedules, fantasy cricket, and related content. You agree to:
+            CricABC provides live cricket scores, match schedules, fantasy cricket, and related content. You agree to:
           </p>
           <ul className="list-disc list-inside text-gray-600 mb-4">
             <li>Use the platform for lawful purposes only.</li>
@@ -42,15 +42,15 @@ const TermsOfUse: FC = () => {
           </ul>
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">Intellectual Property</h2>
           <p className="text-gray-600 mb-4">
-            All content on CricLive, including text, images, and logos, is owned by CricLive or its licensors. You may not reproduce, distribute, or modify content without permission.
+            All content on CricABC, including text, images, and logos, is owned by CricABC or its licensors. You may not reproduce, distribute, or modify content without permission.
           </p>
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">Third-Party Content</h2>
           <p className="text-gray-600 mb-4">
-            CricLive integrates with third-party services (e.g., CricAPI, Pusher). We are not responsible for the accuracy or availability of third-party content.
+            CricABC integrates with third-party services (e.g., CricAPI, Pusher). We are not responsible for the accuracy or availability of third-party content.
           </p>
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">Limitation of Liability</h2>
           <p className="text-gray-600 mb-4">
-            CricLive is provided “as is” without warranties. We are not liable for:
+            CricABC is provided “as is” without warranties. We are not liable for:
           </p>
           <ul className="list-disc list-inside text-gray-600 mb-4">
             <li>Inaccuracies in match data or live scores.</li>
@@ -59,7 +59,7 @@ const TermsOfUse: FC = () => {
           </ul>
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">Termination</h2>
           <p className="text-gray-600 mb-4">
-            We may suspend or end your access to CricLive for violations of these terms, with or without notice.
+            We may suspend or end your access to CricABC for violations of these terms, with or without notice.
           </p>
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">Changes to Terms</h2>
           <p className="text-gray-600 mb-4">
@@ -68,8 +68,8 @@ const TermsOfUse: FC = () => {
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">Contact Us</h2>
           <p className="text-gray-600">
             For questions about these Terms of Use, contact us at{' '}
-            <a href="mailto:support@criclive.com" className="text-purple-600 hover:underline">
-              support@criclive.com
+            <a href="mailto:support@cricabc.com" className="text-purple-600 hover:underline">
+              support@cricabc.com
             </a>{' '}
             or +91 99999 99999.
           </p>

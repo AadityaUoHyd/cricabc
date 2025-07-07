@@ -10,7 +10,7 @@ const teamMembers = [
     role: 'Founder & CEO',
     image: 'https://raw.githubusercontent.com/AadityaUoHyd/the-platenet/refs/heads/main/aadi.jpg',
     description:
-      'Aaditya is a cricket enthusiast with over 10 years of experience in tech startups. He founded CricLive to bring real-time cricket updates to fans worldwide. His vision drives our mission to create the ultimate cricket platform.',
+      'Aaditya is a cricket enthusiast with over 10 years of experience in tech startups. He founded CricABC to bring real-time cricket updates to fans worldwide. His vision drives our mission to create the ultimate cricket platform.',
     icon: <PiCricketFill className="text-purple-600 w-6 h-6" />,
   },
   {
@@ -18,7 +18,7 @@ const teamMembers = [
     role: 'Lead Developer',
     image: 'https://b2bblogassets.airtel.in/wp-content/uploads/2022/06/small-business-ideas-scaled.jpg',
     description:
-      'Priya leads our development team, specializing in React and Spring Boot. With a passion for clean code and user-friendly interfaces, she ensures CricLive delivers a seamless experience for fans.',
+      'Priya leads our development team, specializing in React and Spring Boot. With a passion for clean code and user-friendly interfaces, she ensures CricABC delivers a seamless experience for fans.',
     icon: <FaCode className="text-purple-600 w-6 h-6" />,
   },
   {
@@ -34,7 +34,7 @@ const teamMembers = [
     role: 'UI/UX Designer',
     image: 'https://interfaceauto.com/website/images/dummy-2.webp',
     description:
-      'Neha crafts CricLive’s intuitive and vibrant interface. Her designs, powered by Tailwind and Framer Motion, make navigating live scores and fantasy cricket a delight for users.',
+      'Neha crafts CricABC’s intuitive and vibrant interface. Her designs, powered by Tailwind and Framer Motion, make navigating live scores and fantasy cricket a delight for users.',
     icon: <Star className="text-purple-600 w-6 h-6" />,
   },
   {
@@ -42,7 +42,7 @@ const teamMembers = [
     role: 'Content Manager',
     image: 'https://images.unsplash.com/photo-1622151834677-70f982c9adef?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fGJ1c2luZXNzJTIwbWFufGVufDB8fDB8fA%3D%3D&w=1000&q=80',
     description:
-      'Rahul curates engaging news, videos, and match highlights. His deep knowledge of cricket ensures CricLive’s content keeps fans informed and entertained.',
+      'Rahul curates engaging news, videos, and match highlights. His deep knowledge of cricket ensures CricABC’s content keeps fans informed and entertained.',
     icon: <Award className="text-purple-600 w-6 h-6" />,
   },
   {
@@ -50,12 +50,12 @@ const teamMembers = [
     role: 'Community Manager',
     image: 'https://tse2.mm.bing.net/th?id=OIP.dh4WwKODT5hJIQPQejAdbQHaHa&pid',
     description:
-      'Anup connects with our global fanbase, managing social media and community events. He fosters a vibrant CricLive community, from IPL fans to international cricket lovers.',
+      'Anup connects with our global fanbase, managing social media and community events. He fosters a vibrant CricABC community, from IPL fans to international cricket lovers.',
     icon: <Users className="text-purple-600 w-6 h-6" />,
   },
 ];
 
-const CricLiveTeam: FC = () => {
+const CricABCTeam: FC = () => {
   return (
     <div className="container mx-auto p-4 sm:p-6 min-h-screen bg-gradient-to-b from-purple-100 to-purple-50">
       <motion.h1
@@ -64,7 +64,7 @@ const CricLiveTeam: FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        Meet the CricLive Team
+        Meet the CricABC Team
       </motion.h1>
       <motion.p
         className="text-center text-gray-600 max-w-2xl mx-auto mb-8 sm:mb-12 text-sm sm:text-base"
@@ -104,4 +104,4 @@ const CricLiveTeam: FC = () => {
   );
 };
 
-export default CricLiveTeam;
+export default CricABCTeam;

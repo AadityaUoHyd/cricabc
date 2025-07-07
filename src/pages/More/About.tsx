@@ -13,8 +13,8 @@ const About: FC = () => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <img src={Logo} alt="CricLive Logo" className="w-12 h-12" />
-        About CricLive
+        <img src={Logo} alt="CricABC Logo" className="w-12 h-12" />
+        About CricABC
       </motion.h1>
       <div className="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md">
         <motion.section
@@ -24,7 +24,7 @@ const About: FC = () => {
         >
           <h2 className="text-2xl font-semibold mb-4 text-purple-800">Our Mission</h2>
           <p className="text-black mb-4">
-            CricLive is dedicated to bringing cricket fans closer to the game they love. 
+            CricABC is dedicated to bringing cricket fans closer to the game they love. 
             Our mission is to provide real-time cricket updates, including live scores, 
             match schedules, and detailed statistics, all in one place. We aim to create 
             an engaging and seamless experience for fans to follow international and domestic 
@@ -40,14 +40,14 @@ const About: FC = () => {
           </ul>
           <h2 className="text-2xl font-semibold mb-4 text-purple-800">Our Technology</h2>
           <p className="text-black mb-4">
-            CricLive is built with modern technologies to ensure performance and reliability.
+            CricABC is built with modern technologies to ensure performance and reliability.
             Our frontend uses React with TypeScript for a dynamic user interface, while the backend 
             leverages Spring Boot and MongoDB for efficient data management. Real-time updates are 
             powered by Pusher for live match notifications, and we integrate with CricAPI for accurate cricket data.
           </p>
           <h2 className="text-2xl font-semibold mb-4 text-purple-800">Our Vision</h2>
           <p className="text-black">
-            We envision CricLive as the go-to platform for cricket enthusiasts worldwide, offering unparalleled 
+            We envision CricABC as the go-to platform for cricket enthusiasts worldwide, offering unparalleled 
             access to live matches, in-depth analytics, and community-driven features. Join us as we continue to 
             enhance the cricket-watching experience!
           </p>
@@ -58,7 +58,7 @@ const About: FC = () => {
               <h3 className="text-xl font-semibold text-purple-800">Join Us</h3>
             </div>
             <div className="px-4 py-2">
-              <p className="text-black">Be part of the CricLive community...</p>
+              <p className="text-black">Be part of the CricABC community...</p>
             </div>
             <div className="border-t px-4 py-2">
               <Button variant="default" className="w-full bg-purple-600">

@@ -19,17 +19,42 @@ export default function Teams() {
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const [category, setCategory] = useState<'international' | 'domestic' | 'league'>('international');
   const [gender, setGender] = useState<'male' | 'female'>('male');
+  const [leagueName, setLeagueName] = useState<string>('');
+
+  const maleLeagues = [
+    'Indian Premier League (IPL)',
+    'Big Bash League (BBL)',
+    'Pakistan Super League (PSL)',
+    'Caribbean Premier League (CPL)',
+    'Bangladesh Premier League (BPL)',
+    'Mzansi Super League (MSL)',
+    'The Hundred',
+    'Vitality Blast',
+    'Super Smash',
+    'Major League Cricket (MLC)',
+    'T20 Mumbai League',
+  ];
+  const femaleLeagues = [
+    "Women's Premier League (WPL)",
+    "Women's Big Bash League (WBBL)",
+    "The Hundred (Women's Competition)",
+    'Charlotte Edwards Cup',
+    "Women's Super Series",
+    "Super Smash (Women's)",
+    "Global Super League (Women's)",
+    "Women's Asia Cup",
+  ];
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchTeams();
-  }, [category, gender, page]);
+  }, [category, gender, leagueName, page]);
 
   const fetchTeams = async () => {
     setLoading(true);
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/teams`, {
-        params: { page, size: 12, category, gender },
+        params: { page, size: 12, category, gender, leagueName: category === 'league' ? leagueName || 'all' : 'all' },
       });
       const data = response.data as { teams: Team[]; totalPages: number };
       setTeams(data.teams || []);
@@ -81,7 +106,11 @@ export default function Teams() {
 
         <Tabs
           defaultValue="international"
-          onValueChange={(val: any) => setCategory(val as 'international' | 'domestic' | 'league')}
+          onValueChange={(val: any) => {
+            const cat = val as 'international' | 'domestic' | 'league';
+            setCategory(cat);
+            if (cat !== 'league') setLeagueName('');
+          }}
           className="mb-6 text-center"
         >
           <TabsList className="grid grid-cols-3 gap-2 bg-white p-2 rounded-lg shadow-sm mb-2 mx-auto">
@@ -99,6 +128,7 @@ export default function Teams() {
             </TabsTrigger>
             <TabsTrigger
               value="league"
+              onClick={() => { setLeagueName(''); }}
               className="py-2 px-4 text-sm font-medium text-gray-700 rounded-md hover:bg-purple-100 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
             >
               League
@@ -125,6 +155,21 @@ export default function Teams() {
                  </TabsTrigger>
                </TabsList>
              </Tabs>
+
+
+              {category === 'league' && (
+                <div className="flex flex-wrap justify-center gap-2 mb-4">
+                  {(gender === 'male' ? maleLeagues : femaleLeagues).map((ln) => (
+                    <button
+                      key={ln}
+                      onClick={() => { setLeagueName(ln); setPage(0); }}
+                      className={`px-3 py-1 rounded-md text-sm ${leagueName === ln ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-purple-100'}`}
+                    >
+                      {ln}
+                    </button>
+                  ))}
+                </div>
+              )}
 
               <TabsContent value={category}>
                 {teams.length === 0 && !loading && (

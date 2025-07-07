@@ -7,6 +7,31 @@ import { Edit2, Trash2, Users } from 'lucide-react';
 import { type Team } from '../../types/Team';
 
 export default function AdminTeams() {
+  const maleLeagues = [
+    'Indian Premier League (IPL)',
+    'Big Bash League (BBL)',
+    'Pakistan Super League (PSL)',
+    'Caribbean Premier League (CPL)',
+    'Bangladesh Premier League (BPL)',
+    'Mzansi Super League (MSL)',
+    'The Hundred',
+    'Vitality Blast',
+    'Super Smash',
+    'Major League Cricket (MLC)',
+    'T20 Mumbai League'
+  ];
+
+  const femaleLeagues = [
+    "Women's Premier League (WPL)",
+    "Women's Big Bash League (WBBL)",
+    "The Hundred (Women's Competition)",
+    'Charlotte Edwards Cup',
+    "Women's Super Series",
+    "Super Smash (Women's)",
+    "Global Super League (Women's)",
+    "Women's Asia Cup"
+  ];
+
   const [teams, setTeams] = useState<Team[]>([]);
   const [form, setForm] = useState<Team>({
     id: '',
@@ -14,6 +39,7 @@ export default function AdminTeams() {
     country: '',
     gender: 'male',
     category: 'international',
+    leagueName: '',
     logoUrl: '',
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -76,7 +102,7 @@ export default function AdminTeams() {
         await axios.post(`${import.meta.env.VITE_API_URL}/admin/teams`, formData, config);
       }
       fetchTeams();
-      setForm({ id: '', name: '', country: '', gender: 'male', category: 'international', logoUrl: '' });
+      setForm({ id: '', name: '', country: '', gender: 'male', category: 'international', leagueName: '', logoUrl: '' });
       setLogoFile(null);
       setError(null);
     } catch (err: any) {
@@ -88,7 +114,7 @@ export default function AdminTeams() {
   };
 
   const handleEdit = (team: Team) => {
-    setForm(team);
+    setForm({ ...team, leagueName: team.leagueName || '' });
     setLogoFile(null);
   };
 
@@ -162,7 +188,10 @@ export default function AdminTeams() {
               <select
                 id="category"
                 value={form.category}
-                onChange={(e) => setForm({ ...form, category: e.target.value as 'international' | 'domestic' | 'league' })}
+                onChange={(e) => {
+                  const cat = e.target.value as 'international' | 'domestic' | 'league';
+                  setForm({ ...form, category: cat, leagueName: cat === 'league' ? form.leagueName : '' });
+                }}
                 className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
               >
                 <option value="international">International</option>
@@ -170,6 +199,25 @@ export default function AdminTeams() {
                 <option value="league">League</option>
               </select>
             </div>
+
+            {form.category === 'league' && (
+              <div>
+                <Label htmlFor="leagueName">League Name</Label>
+                <select
+                  id="leagueName"
+                  value={form.leagueName}
+                  onChange={(e) => setForm({ ...form, leagueName: e.target.value })}
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
+                  required
+                >
+                  <option value="">Select League</option>
+                  {(form.gender === 'male' ? maleLeagues : femaleLeagues).map((ln) => (
+                    <option key={ln} value={ln}>{ln}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             <div>
               <Label htmlFor="logoFile">Team Logo</Label>
               <input

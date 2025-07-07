@@ -2,6 +2,7 @@ export interface Team {
   id: string;
   name: string;
   category: 'international' | 'domestic' | 'league';
+  leagueName?: string;
   country?: string;
   gender?: 'male' | 'female';
   logoUrl?: string;

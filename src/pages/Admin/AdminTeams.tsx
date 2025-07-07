@@ -32,6 +32,36 @@ export default function AdminTeams() {
     "Women's Asia Cup"
   ];
 
+  const maleDomestic = [
+    'Ranji Trophy',
+    'Duleep Trophy',
+    'Vijay Hazare Trophy',
+    'Syed Mushtaq Ali Trophy',
+    'Deodhar Trophy',
+    'Irani Cup',
+    'Vijay Merchant Trophy',
+    'Cooch Behar Trophy (U19)',
+    'Col. CK Nayudu Trophy (U23)',
+    'Vinoo Mankad Trophy (U19 One Day)',
+    "Men's U23 State A Trophy",
+    "Men's Under 19 One Day Challenger Trophy",
+    "Vijay Merchant Trophy (U16)",
+  ];
+  const femaleDomestic = [
+    "Senior Women's One Day Trophy",
+    "Senior Women's T20 Trophy",
+    "Senior Women's Inter Zonal T20 Trophy",
+    "Senior Women's Inter Zonal One Day Trophy",
+    "Senior Women's Inter Zonal Multi Day Trophy",
+    "Senior Women's One Day Challenger Trophy",
+    "Senior Women's T20 Challenger Trophy",
+    "Women's Under 19 One Day Trophy",
+    "Women's Under 19 T20 Trophy",
+    "Women's Under 23 One Day Trophy",
+    "Women's Under 23 T20 Trophy",
+    "Women's Under 15 One Day Trophy",
+  ];
+
   const [teams, setTeams] = useState<Team[]>([]);
   const [form, setForm] = useState<Team>({
     id: '',
@@ -40,6 +70,7 @@ export default function AdminTeams() {
     gender: 'male',
     category: 'international',
     leagueName: '',
+    domesticTournamentName: '',
     logoUrl: '',
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -102,7 +133,7 @@ export default function AdminTeams() {
         await axios.post(`${import.meta.env.VITE_API_URL}/admin/teams`, formData, config);
       }
       fetchTeams();
-      setForm({ id: '', name: '', country: '', gender: 'male', category: 'international', leagueName: '', logoUrl: '' });
+      setForm({ id: '', name: '', country: '', gender: 'male', category: 'international', leagueName: '', domesticTournamentName: '', logoUrl: '' });
       setLogoFile(null);
       setError(null);
     } catch (err: any) {
@@ -114,7 +145,7 @@ export default function AdminTeams() {
   };
 
   const handleEdit = (team: Team) => {
-    setForm({ ...team, leagueName: team.leagueName || '' });
+    setForm({ ...team, leagueName: team.leagueName || '', domesticTournamentName: team.domesticTournamentName || '' });
     setLogoFile(null);
   };
 
@@ -176,7 +207,10 @@ export default function AdminTeams() {
               <select
                 id="gender"
                 value={form.gender}
-                onChange={(e) => setForm({ ...form, gender: e.target.value as 'male' | 'female' })}
+                onChange={(e) => {
+                  const g = e.target.value as 'male' | 'female';
+                  setForm({ ...form, gender: g, leagueName: '', domesticTournamentName: '' });
+                }}
                 className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
               >
                 <option value="male">Male</option>
@@ -190,7 +224,12 @@ export default function AdminTeams() {
                 value={form.category}
                 onChange={(e) => {
                   const cat = e.target.value as 'international' | 'domestic' | 'league';
-                  setForm({ ...form, category: cat, leagueName: cat === 'league' ? form.leagueName : '' });
+                  setForm({
+                      ...form,
+                      category: cat,
+                      leagueName: cat === 'league' ? form.leagueName : '',
+                      domesticTournamentName: cat === 'domestic' ? form.domesticTournamentName : '',
+                    });
                 }}
                 className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
               >
@@ -213,6 +252,24 @@ export default function AdminTeams() {
                   <option value="">Select League</option>
                   {(form.gender === 'male' ? maleLeagues : femaleLeagues).map((ln) => (
                     <option key={ln} value={ln}>{ln}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {form.category === 'domestic' && (
+              <div>
+                <Label htmlFor="domesticTournamentName">Domestic Tournament</Label>
+                <select
+                  id="domesticTournamentName"
+                  value={form.domesticTournamentName}
+                  onChange={(e) => setForm({ ...form, domesticTournamentName: e.target.value })}
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
+                  required
+                >
+                  <option value="">Select Tournament</option>
+                  {(form.gender === 'male' ? maleDomestic : femaleDomestic).map((dt) => (
+                    <option key={dt} value={dt}>{dt}</option>
                   ))}
                 </select>
               </div>

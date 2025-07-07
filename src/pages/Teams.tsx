@@ -193,7 +193,7 @@ export default function Teams() {
           onValueChange={(val: string) => setGender(val as 'male' | 'female')}
           className="w-max mx-auto mb-4"
         >
-          <TabsList className="grid grid-cols-2 gap-2 bg-white p-2 rounded-lg shadow-sm">
+          <TabsList className="grid grid-cols-2 gap-2 bg-white p-2 rounded-lg shadow-sm mb-8">
             <TabsTrigger
               value="male"
               className="py-2 px-4 text-sm font-medium text-gray-700 rounded-md hover:bg-purple-100 data-[state=active]:bg-purple-600 data-[state=active]:text-white"

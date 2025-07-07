@@ -21,6 +21,7 @@ export default function Teams() {
   const [gender, setGender] = useState<'male' | 'female'>('male');
   const [leagueName, setLeagueName] = useState<string>('');
   const [domesticTournamentName, setDomesticTournamentName] = useState<string>('');
+  const [internationalTeamType, setInternationalTeamType] = useState<'all' | 'full member' | 'associate member'>('all');
 
   const maleLeagues = [
     'Indian Premier League (IPL)',
@@ -76,7 +77,7 @@ export default function Teams() {
 
   useEffect(() => {
     fetchTeams();
-  }, [category, gender, leagueName, domesticTournamentName, page]);
+  }, [category, gender, leagueName, domesticTournamentName, page, internationalTeamType]);
 
   const fetchTeams = async () => {
     setLoading(true);
@@ -89,6 +90,7 @@ export default function Teams() {
           gender,
           leagueName: category === 'league' ? (leagueName || 'all') : 'all',
           domesticTournamentName: category === 'domestic' ? (domesticTournamentName || 'all') : 'all',
+          internationalTeamType: category === 'international' ? internationalTeamType : undefined,
         },
       });
       const data = response.data as { teams: Team[]; totalPages: number };
@@ -146,6 +148,7 @@ export default function Teams() {
             setCategory(cat);
             if (cat !== 'league') setLeagueName('');
             if (cat !== 'domestic') setDomesticTournamentName('');
+            if (cat !== 'international') setInternationalTeamType('all');
           }}
           className="mb-6 text-center"
         >
@@ -172,6 +175,19 @@ export default function Teams() {
           </TabsList>
         </Tabs>
 
+        {category === 'international' && (
+          <div className="flex justify-center mb-4">
+            <select
+              value={internationalTeamType}
+              onChange={e => setInternationalTeamType(e.target.value as 'all' | 'full member' | 'associate member')}
+              className="border border-purple-300 rounded px-3 py-1 text-sm"
+            >
+              <option value="all">All ICC Members</option>
+              <option value="full member">Full Member</option>
+              <option value="associate member">Associate Member</option>
+            </select>
+          </div>
+        )}
         <Tabs
           value={gender}
           onValueChange={(val: string) => setGender(val as 'male' | 'female')}
@@ -250,6 +266,7 @@ export default function Teams() {
                   {team.name}
                 </CardTitle>
                 <p className="text-xs text-gray-600">{team.country} | {team.category}</p>
+                <p className="text-xs text-gray-600">{team.internationalTeamType}</p>
               </CardHeader>
               <CardContent>
                 <Button

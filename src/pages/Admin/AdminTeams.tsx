@@ -69,6 +69,7 @@ export default function AdminTeams() {
     country: '',
     gender: 'male',
     category: 'international',
+    internationalTeamType: undefined,
     leagueName: '',
     domesticTournamentName: '',
     logoUrl: '',
@@ -133,7 +134,7 @@ export default function AdminTeams() {
         await axios.post(`${import.meta.env.VITE_API_URL}/admin/teams`, formData, config);
       }
       fetchTeams();
-      setForm({ id: '', name: '', country: '', gender: 'male', category: 'international', leagueName: '', domesticTournamentName: '', logoUrl: '' });
+      setForm({ id: '', name: '', country: '', gender: 'male', category: 'international', internationalTeamType: undefined, leagueName: '', domesticTournamentName: '', logoUrl: '' });
       setLogoFile(null);
       setError(null);
     } catch (err: any) {
@@ -145,7 +146,7 @@ export default function AdminTeams() {
   };
 
   const handleEdit = (team: Team) => {
-    setForm({ ...team, leagueName: team.leagueName || '', domesticTournamentName: team.domesticTournamentName || '' });
+    setForm({ ...team, leagueName: team.leagueName || '', domesticTournamentName: team.domesticTournamentName || '', internationalTeamType: team.internationalTeamType });
     setLogoFile(null);
   };
 
@@ -202,6 +203,22 @@ export default function AdminTeams() {
                 required
               />
             </div>
+            {form.category === 'international' && (
+              <div>
+                <Label htmlFor="internationalTeamType">ICC Membership</Label>
+                <select
+                  id="internationalTeamType"
+                  value={form.internationalTeamType || ''}
+                  onChange={e => setForm({ ...form, internationalTeamType: e.target.value === '' ? undefined : (e.target.value as 'full member' | 'associate member') })}
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
+                  required
+                >
+                  <option value="">Select ICC Membership</option>
+                  <option value="full member">Full Member</option>
+                  <option value="associate member">Associate Member</option>
+                </select>
+              </div>
+            )}
             <div>
               <Label htmlFor="gender">Gender</Label>
               <select

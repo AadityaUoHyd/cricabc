@@ -29,7 +29,7 @@ export default function Teams() {
     setLoading(true);
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/teams`, {
-        params: { page, size: 10, category, gender },
+        params: { page, size: 12, category, gender },
       });
       const data = response.data as { teams: Team[]; totalPages: number };
       setTeams(data.teams || []);
@@ -104,7 +104,7 @@ export default function Teams() {
               League
             </TabsTrigger>
           </TabsList>
-          {category === 'international' && (
+
             <Tabs
               value={gender}
               onValueChange={(val: string) => setGender(val as 'male' | 'female')}
@@ -119,19 +119,19 @@ export default function Teams() {
                 </TabsTrigger>
                 <TabsTrigger
                   value="female"
-                  className="py-2 px-4 text-sm font-medium text-gray-700 rounded-md hover:bg-purple-100 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
-                >
-                  Women
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          )}
-          <TabsContent value={category}>
-            {teams.length === 0 && !loading && (
-              <p className="text-center text-gray-600">No teams found.</p>
-            )}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {teams.map((team) => (
+                   className="py-2 px-4 text-sm font-medium text-gray-700 rounded-md hover:bg-purple-100 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+                 >
+                   Women
+                 </TabsTrigger>
+               </TabsList>
+             </Tabs>
+
+              <TabsContent value={category}>
+                {teams.length === 0 && !loading && (
+                  <p className="text-center text-gray-600">No teams found.</p>
+                )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {teams.map((team) => (
                 <Card key={team.id} className="shadow-md hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <CardTitle className="text-lg font-semibold text-purple-600 flex items-center">

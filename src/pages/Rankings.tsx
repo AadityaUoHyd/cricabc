@@ -5,6 +5,8 @@ import { Tabs, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Trophy } from 'lucide-react';
+import CountryFlag from 'react-country-flag';
+import countryCodeMap from './countryCodeMap';
 import { type Player} from '../types/Player';
 import { type Team } from '../types/Team';
 
@@ -110,24 +112,6 @@ export default function Rankings() {
       console.error(err);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const getRank = (item: Player | Team) => {
-    let ranking: any;
-    if ('teamRanking' in item) {
-      ranking = item.teamRanking;
-    } else if ('ranking' in item) {
-      ranking = item.ranking;
-    } else {
-      ranking = null;
-    }
-    if (!ranking) return { rank: 0, rating: 0 };
-    switch (format) {
-      case 'test': return { rank: ranking.testRank, rating: ranking.testRating };
-      case 'odi': return { rank: ranking.odiRank, rating: ranking.odiRating };
-      case 't20': return { rank: ranking.t20Rank, rating: ranking.t20Rating };
-      default: return { rank: 0, rating: 0 };
     }
   };
 
@@ -238,23 +222,38 @@ export default function Rankings() {
           >
             <Card className="shadow-md hover:shadow-xl transition-shadow duration-300 rounded-lg bg-white">
               <CardContent className="flex items-center gap-4 p-4">
-                <Trophy className="w-6 h-6 text-yellow-500" />
+                {/* Show country flag for teams, else show player image for player rankings */}
+                <>
+                  {category === 'teams' && 'country' in item ? (
+                    <CountryFlag
+                      countryCode={countryCodeMap[item.country?.toLowerCase() || ''] || 'in'}
+                      svg
+                      style={{ width: '2em', height: '2em', borderRadius: '50%' }}
+                      title={item.country}
+                    />
+                  ) : 'photoUrl' in item && item.photoUrl ? (
+                    <img
+                      src={item.photoUrl}
+                      alt={item.name}
+                      className="w-12 h-12 rounded-full object-cover border border-gray-200"
+                      onError={e => (e.currentTarget.src = 'https://res.cloudinary.com/demo/image/upload/v1688999999/default-profile.png')}
+                    />
+                  ) : (
+                    <Trophy className="w-6 h-6 text-yellow-500" />
+                  )}
+                </>
                 <div className="flex-1">
-                  <h3 className="text-base sm:text-lg font-semibold text-purple-600">
-                    #{rank} {'name' in item ? item.name : ''}
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    {'country' in item ? item.country : ''} | Rating: {rating}
-                  </p>
+                  <h2 className="text-lg font-bold text-gray-700">{item.name}</h2>
+                  <p className="text-md text-gray-500 text-purple-500 my-2">Rank- {rank}, Rating - {rating}</p>
+                  {'role' in item && category !== 'teams' && (
+                    <Button
+                      asChild
+                      className="bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm px-4 py-2 rounded"
+                    >
+                      <a href={`/player/${item.id}`}>View Profile</a>
+                    </Button>
+                  )}
                 </div>
-                {'role' in item && category !== 'teams' && (
-                  <Button
-                    asChild
-                    className="bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm px-4 py-2 rounded"
-                  >
-                    <a href={`/player/${item.id}`}>View Profile</a>
-                  </Button>
-                )}
               </CardContent>
             </Card>
           </motion.div>

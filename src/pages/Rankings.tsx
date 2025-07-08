@@ -100,8 +100,8 @@ export default function Rankings() {
         ? `${import.meta.env.VITE_API_URL}/rankings/teams`
         : `${import.meta.env.VITE_API_URL}/rankings/players`;
       const params = category === 'teams'
-        ? { gender, page, size: 10 }
-        : { gender, category, page, size: 10 };
+        ? { gender, page, size: 12 }
+        : { gender, category, page, size: 12 };
       const response = await axios.get(url, { params });
       setItems(response.data as (Player | Team)[]);
       // We'll handle totalPages after sorting and paginating on frontend
@@ -220,8 +220,8 @@ export default function Rankings() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.1 }}
           >
-            <Card className="shadow-md hover:shadow-xl transition-shadow duration-300 rounded-lg bg-white">
-              <CardContent className="flex items-center gap-4 p-4">
+            <Card className="shadow-md hover:shadow-xl transition-shadow duration-300 rounded-lg bg-white ranking-card">
+              <CardContent className="flex items-center gap-4 p-4 card-content">
                 {/* Show country flag for teams, else show player image for player rankings */}
                 <>
                   {category === 'teams' && 'country' in item ? (
@@ -236,7 +236,7 @@ export default function Rankings() {
                       src={item.photoUrl}
                       alt={item.name}
                       className="w-12 h-12 rounded-full object-cover border border-gray-200"
-                      onError={e => (e.currentTarget.src = 'https://res.cloudinary.com/demo/image/upload/v1688999999/default-profile.png')}
+                      onError={e => (e.currentTarget.src = 'https://res.cloudinary.com/dppx4dm9a/image/upload/v1751871666/oponje3zhav82i7k1yfk.png')}
                     />
                   ) : (
                     <Trophy className="w-6 h-6 text-yellow-500" />
@@ -244,7 +244,7 @@ export default function Rankings() {
                 </>
                 <div className="flex-1">
                   <h2 className="text-lg font-bold text-gray-700">{item.name}</h2>
-                  <p className="text-md text-gray-500 text-purple-500 my-2">Rank- {rank}, Rating - {rating}</p>
+                  <p className="text-md text-purple-500 my-2">Rank- {rank}, Rating - {rating}</p>
                   {'role' in item && category !== 'teams' && (
                     <Button
                       asChild

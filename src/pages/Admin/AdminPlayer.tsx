@@ -89,7 +89,7 @@ export default function AdminPlayer() {
     setLoading(true);
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/players`, {
-        params: { teamId: '', category: 'international', page, size: 10 },
+        params: { teamId: '', category: 'international', page, size: 12 },
       });
       const data = response.data as { content: Player[]; totalPages: number };
       setPlayers((data.content || []) as Player[]);

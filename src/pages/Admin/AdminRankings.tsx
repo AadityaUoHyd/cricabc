@@ -25,7 +25,7 @@ export default function AdminRankings() {
     setLoading(true);
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/players`, {
-        params: { teamId: '', category: 'international', page, size: 10 },
+        params: { teamId: '', category: 'international', page, size: 12 },
       });
       setPlayers(response.data as Player[]);
       setTotalPages(Number(response.headers['x-total-pages']) || 1);

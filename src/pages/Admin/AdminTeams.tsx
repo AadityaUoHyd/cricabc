@@ -96,7 +96,7 @@ export default function AdminTeams() {
     setLoading(true);
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/teams`, {
-        params: { category: 'all', page, size: 10 },
+        params: { category: 'all', page, size: 12 },
       });
       const data = response.data as { teams: Team[]; totalPages: number };
       setTeams((data.teams || []) as Team[]);

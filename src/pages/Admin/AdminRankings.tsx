@@ -11,7 +11,11 @@ export default function AdminRankings() {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const [rankings, setRankings] = useState<{ [playerId: string]: { testRank: number; odiRank: number; t20Rank: number; testRating: number; odiRating: number; t20Rating: number } }>({});
+  const [rankings, setRankings] = useState<{ [playerId: string]: { 
+    testBattingRank: number; odiBattingRank: number; t20BattingRank: number; testBattingRating: number; odiBattingRating: number; t20BattingRating: number,
+    testBowlingRank: number; odiBowlingRank: number; t20BowlingRank: number; testBowlingRating: number; odiBowlingRating: number; t20BowlingRating: number,
+    testAllrounderRank: number; odiAllrounderRank: number; t20AllrounderRank: number; testAllrounderRating: number; odiAllrounderRating: number; t20AllrounderRating: number
+  } }>({});
 
   useEffect(() => {
     fetchPlayers();
@@ -30,12 +34,24 @@ export default function AdminRankings() {
       const initialRankings = (response.data as Player[]).reduce((acc: any, player: Player) => ({
         ...acc,
         [player.id]: {
-          testRank: player.ranking?.testRank || 0,
-          odiRank: player.ranking?.odiRank || 0,
-          t20Rank: player.ranking?.t20Rank || 0,
-          testRating: player.ranking?.testRating || 0,
-          odiRating: player.ranking?.odiRating || 0,
-          t20Rating: player.ranking?.t20Rating || 0,
+          testBattingRank: player.ranking.testBattingRank || 0,
+          odiBattingRank: player.ranking.odiBattingRank || 0,
+          t20BattingRank: player.ranking.t20BattingRank || 0,
+          testBattingRating: player.ranking.testBattingRating || 0,
+          odiBattingRating: player.ranking.odiBattingRating || 0,
+          t20BattingRating: player.ranking.t20BattingRating || 0,
+          testBowlingRank: player.ranking.testBowlingRank || 0,
+          odiBowlingRank: player.ranking.odiBowlingRank || 0,
+          t20BowlingRank: player.ranking.t20BowlingRank || 0,
+          testBowlingRating: player.ranking.testBowlingRating || 0,
+          odiBowlingRating: player.ranking.odiBowlingRating || 0,
+          t20BowlingRating: player.ranking.t20BowlingRating || 0,
+          testAllrounderRank: player.ranking.testAllrounderRank || 0,
+          odiAllrounderRank: player.ranking.odiAllrounderRank || 0,
+          t20AllrounderRank: player.ranking.t20AllrounderRank || 0,
+          testAllrounderRating: player.ranking.testAllrounderRating || 0,
+          odiAllrounderRating: player.ranking.odiAllrounderRating || 0,
+          t20AllrounderRating: player.ranking.t20AllrounderRating || 0,
         },
       }), {});
       setRankings(initialRankings);
@@ -106,68 +122,191 @@ export default function AdminRankings() {
               <Card key={player.id} className="shadow-sm">
                 <CardContent className="p-4">
                   <h3 className="text-lg font-semibold text-purple-600 mb-2">{player.name} ({player.country})</h3>
+                  
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor={`testRank-${player.id}`}>Test Rank</Label>
+                      <Label htmlFor={`testBattingRank-${player.id}`}>Test Batting Rank</Label>
                       <input
-                        id={`testRank-${player.id}`}
+                        id={`testBattingRank-${player.id}`}
                         type="number"
-                        value={rankings[player.id]?.testRank || 0}
-                        onChange={(e) => handleRankingChange(player.id, 'testRank', Number(e.target.value))}
+                        value={rankings[player.id]?.testBattingRank || 0}
+                        onChange={(e) => handleRankingChange(player.id, 'testBattingRank', Number(e.target.value))}
                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
                       />
                     </div>
                     <div>
-                      <Label htmlFor={`testRating-${player.id}`}>Test Rating</Label>
+                      <Label htmlFor={`testBattingRating-${player.id}`}>Test Batting Rating</Label>
                       <input
-                        id={`testRating-${player.id}`}
+                        id={`testBattingRating-${player.id}`}
                         type="number"
-                        value={rankings[player.id]?.testRating || 0}
-                        onChange={(e) => handleRankingChange(player.id, 'testRating', Number(e.target.value))}
+                        value={rankings[player.id]?.testBattingRating || 0}
+                        onChange={(e) => handleRankingChange(player.id, 'testBattingRating', Number(e.target.value))}
                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
                       />
                     </div>
                     <div>
-                      <Label htmlFor={`odiRank-${player.id}`}>ODI Rank</Label>
+                      <Label htmlFor={`odiBattingRank-${player.id}`}>ODI Batting Rank</Label>
                       <input
-                        id={`odiRank-${player.id}`}
+                        id={`odiBattingRank-${player.id}`}
                         type="number"
-                        value={rankings[player.id]?.odiRank || 0}
-                        onChange={(e) => handleRankingChange(player.id, 'odiRank', Number(e.target.value))}
+                        value={rankings[player.id]?.odiBattingRank || 0}
+                        onChange={(e) => handleRankingChange(player.id, 'odiBattingRank', Number(e.target.value))}
                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
                       />
                     </div>
                     <div>
-                      <Label htmlFor={`odiRating-${player.id}`}>ODI Rating</Label>
+                      <Label htmlFor={`odiBattingRating-${player.id}`}>ODI Batting Rating</Label>
                       <input
-                        id={`odiRating-${player.id}`}
+                        id={`odiBattingRating-${player.id}`}
                         type="number"
-                        value={rankings[player.id]?.odiRating || 0}
-                        onChange={(e) => handleRankingChange(player.id, 'odiRating', Number(e.target.value))}
+                        value={rankings[player.id]?.odiBattingRating || 0}
+                        onChange={(e) => handleRankingChange(player.id, 'odiBattingRating', Number(e.target.value))}
                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
                       />
                     </div>
                     <div>
-                      <Label htmlFor={`t20Rank-${player.id}`}>T20 Rank</Label>
+                      <Label htmlFor={`t20BattingRank-${player.id}`}>T20 Batting Rank</Label>
                       <input
-                        id={`t20Rank-${player.id}`}
+                        id={`t20BattingRank-${player.id}`}
                         type="number"
-                        value={rankings[player.id]?.t20Rank || 0}
-                        onChange={(e) => handleRankingChange(player.id, 't20Rank', Number(e.target.value))}
+                        value={rankings[player.id]?.t20BattingRank || 0}
+                        onChange={(e) => handleRankingChange(player.id, 't20BattingRank', Number(e.target.value))}
                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
                       />
                     </div>
                     <div>
-                      <Label htmlFor={`t20Rating-${player.id}`}>T20 Rating</Label>
+                      <Label htmlFor={`t20BattingRating-${player.id}`}>T20 Batting Rating</Label>
                       <input
-                        id={`t20Rating-${player.id}`}
+                        id={`t20BattingRating-${player.id}`}
                         type="number"
-                        value={rankings[player.id]?.t20Rating || 0}
-                        onChange={(e) => handleRankingChange(player.id, 't20Rating', Number(e.target.value))}
+                        value={rankings[player.id]?.t20BattingRating || 0}
+                        onChange={(e) => handleRankingChange(player.id, 't20BattingRating', Number(e.target.value))}
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor={`testBowlingRank-${player.id}`}>Test Bowling Rank</Label>
+                      <input
+                        id={`testBowlingRank-${player.id}`}
+                        type="number"
+                        value={rankings[player.id]?.testBowlingRank || 0}
+                        onChange={(e) => handleRankingChange(player.id, 'testBowlingRank', Number(e.target.value))}
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
+                      />
+                  </div>
+                  <div>
+                    <Label htmlFor={`testBowlingRating-${player.id}`}>Test Bowling Rating</Label>
+                    <input
+                      id={`testBowlingRating-${player.id}`}
+                      type="number"
+                      value={rankings[player.id]?.testBowlingRating || 0}
+                      onChange={(e) => handleRankingChange(player.id, 'testBowlingRating', Number(e.target.value))}
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor={`odiBowlingRank-${player.id}`}>ODI Bowling Rank</Label>
+                    <input
+                      id={`odiBowlingRank-${player.id}`}
+                      type="number"
+                      value={rankings[player.id]?.odiBowlingRank || 0}
+                      onChange={(e) => handleRankingChange(player.id, 'odiBowlingRank', Number(e.target.value))}
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
+                    />
+                    </div>
+                  <div>
+                    <Label htmlFor={`odiBowlingRating-${player.id}`}>ODI Bowling Rating</Label>
+                    <input
+                      id={`odiBowlingRating-${player.id}`}
+                      type="number"
+                      value={rankings[player.id]?.odiBowlingRating || 0}
+                      onChange={(e) => handleRankingChange(player.id, 'odiBowlingRating', Number(e.target.value))}
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor={`t20BowlingRank-${player.id}`}>T20 Bowling Rank</Label>
+                    <input
+                      id={`t20BowlingRank-${player.id}`}
+                      type="number"
+                      value={rankings[player.id]?.t20BowlingRank || 0}
+                      onChange={(e) => handleRankingChange(player.id, 't20BowlingRank', Number(e.target.value))}
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
+                    />
+                    </div>
+                    <div>
+                      <Label htmlFor={`t20BowlingRating-${player.id}`}>T20 Bowling Rating</Label>
+                      <input
+                        id={`t20BowlingRating-${player.id}`}
+                        type="number"
+                        value={rankings[player.id]?.t20BowlingRating || 0}
+                        onChange={(e) => handleRankingChange(player.id, 't20BowlingRating', Number(e.target.value))}
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`testAllrounderRank-${player.id}`}>Test Allrounder Rank</Label>
+                      <input
+                        id={`testAllrounderRank-${player.id}`}
+                        type="number"
+                        value={rankings[player.id]?.testAllrounderRank || 0}
+                        onChange={(e) => handleRankingChange(player.id, 'testAllrounderRank', Number(e.target.value))}
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`testAllrounderRating-${player.id}`}>Test Allrounder Rating</Label>
+                      <input
+                        id={`testAllrounderRating-${player.id}`}
+                        type="number"
+                        value={rankings[player.id]?.testAllrounderRating || 0}
+                        onChange={(e) => handleRankingChange(player.id, 'testAllrounderRating', Number(e.target.value))}
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`odiAllrounderRank-${player.id}`}>ODI Allrounder Rank</Label>
+                      <input
+                        id={`odiAllrounderRank-${player.id}`}
+                        type="number"
+                        value={rankings[player.id]?.odiAllrounderRank || 0}
+                        onChange={(e) => handleRankingChange(player.id, 'odiAllrounderRank', Number(e.target.value))}
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`odiAllrounderRating-${player.id}`}>ODI Allrounder Rating</Label>
+                      <input
+                        id={`odiAllrounderRating-${player.id}`}
+                        type="number"
+                        value={rankings[player.id]?.odiAllrounderRating || 0}
+                        onChange={(e) => handleRankingChange(player.id, 'odiAllrounderRating', Number(e.target.value))}
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`t20AllrounderRank-${player.id}`}>T20 Allrounder Rank</Label>
+                      <input
+                        id={`t20AllrounderRank-${player.id}`}
+                        type="number"
+                        value={rankings[player.id]?.t20AllrounderRank || 0}
+                        onChange={(e) => handleRankingChange(player.id, 't20AllrounderRank', Number(e.target.value))}
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`t20AllrounderRating-${player.id}`}>T20 Allrounder Rating</Label>
+                      <input
+                        id={`t20AllrounderRating-${player.id}`}
+                        type="number"
+                        value={rankings[player.id]?.t20AllrounderRating || 0}
+                        onChange={(e) => handleRankingChange(player.id, 't20AllrounderRating', Number(e.target.value))}
                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
                       />
                     </div>
                   </div>
+
                   <Button
                     onClick={() => handleSubmit(player.id)}
                     disabled={loading}

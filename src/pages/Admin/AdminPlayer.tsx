@@ -33,7 +33,10 @@ export default function AdminPlayer() {
     bowlingStyle: '',
     photoUrl: '',
     description: '',
-    ranking: { testRank: 0, odiRank: 0, t20Rank: 0, testRating: 0, odiRating: 0, t20Rating: 0 },
+    ranking: { testBattingRank: 0, odiBattingRank: 0, t20BattingRank: 0, testBattingRating: 0, odiBattingRating: 0, t20BattingRating: 0,
+          testBowlingRank: 0, odiBowlingRank: 0, t20BowlingRank: 0, testBowlingRating: 0, odiBowlingRating: 0, t20BowlingRating: 0, 
+          testAllrounderRank: 0, odiAllrounderRank: 0, t20AllrounderRank: 0, testAllrounderRating: 0, odiAllrounderRating: 0, t20AllrounderRating: 0
+         },
     testStats: initFormatStats(),
     odiStats: initFormatStats(),
     ttwentyInternationalsStats: initFormatStats(),
@@ -44,6 +47,8 @@ export default function AdminPlayer() {
     domesticTeams: [],
     internationalTeams: [],
     leagues: [],
+    capNumber:'',
+    jerseyNo:'',
   });
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [cricApiData, setCricApiData] = useState<any>({});
@@ -55,9 +60,9 @@ export default function AdminPlayer() {
   function initFormatStats(): FormatStats {
     return {
       batting: {
-        matches: 0, innings: 0, runs: 0, highestScore: 0, notOuts: 0, ballsFaced: 0,
+        matches: 0, innings: 0, runs: 0, highestScore: '0', notOuts: 0, ballsFaced: 0,
         average: 0, strikeRate: 0, fours: 0, sixes: 0, fifties: 0, hundreds: 0,
-        doubleHundreds: 0, tripleHundreds: 0, quadrupleHundreds: 0
+        doubleHundreds: 0, tripleHundreds: 0, quadrupleHundreds: 0, playerStatus: 'Active Player'
       },
       bowling: {
         matches: 0, innings: 0, ballsBowled: 0, runsGiven: 0, wickets: 0, average: 0,
@@ -67,7 +72,10 @@ export default function AdminPlayer() {
       wicketKeeperStats: { stumps: 0, catches: 0 },
       debutDate: '',
       lastPlayedDate: '',
-      ranking: { testRank: 0, odiRank: 0, t20Rank: 0, testRating: 0, odiRating: 0, t20Rating: 0 },
+      ranking: { testBattingRank: 0, odiBattingRank: 0, t20BattingRank: 0, testBattingRating: 0, odiBattingRating: 0, t20BattingRating: 0,
+          testBowlingRank: 0, odiBowlingRank: 0, t20BowlingRank: 0, testBowlingRating: 0, odiBowlingRating: 0, t20BowlingRating: 0, 
+          testAllrounderRank: 0, odiAllrounderRank: 0, t20AllrounderRank: 0, testAllrounderRating: 0, odiAllrounderRating: 0, t20AllrounderRating: 0
+         },
       capNumber: '',
       jerseyNo: '',
     };
@@ -140,7 +148,10 @@ export default function AdminPlayer() {
         bowlingStyle: '',
         photoUrl: '',
         description: '',
-        ranking: { testRank: 0, odiRank: 0, t20Rank: 0, testRating: 0, odiRating: 0, t20Rating: 0 },
+        ranking: { testBattingRank: 0, odiBattingRank: 0, t20BattingRank: 0, testBattingRating: 0, odiBattingRating: 0, t20BattingRating: 0,
+          testBowlingRank: 0, odiBowlingRank: 0, t20BowlingRank: 0, testBowlingRating: 0, odiBowlingRating: 0, t20BowlingRating: 0, 
+          testAllrounderRank: 0, odiAllrounderRank: 0, t20AllrounderRank: 0, testAllrounderRating: 0, odiAllrounderRating: 0, t20AllrounderRating: 0
+         },
         testStats: initFormatStats(),
         odiStats: initFormatStats(),
         ttwentyInternationalsStats: initFormatStats(),
@@ -151,6 +162,8 @@ export default function AdminPlayer() {
         domesticTeams: [],
         internationalTeams: [],
         leagues: [],
+        capNumber:'',
+        jerseyNo:'',
       });
       setProfileImage(null);
       setError(null);
@@ -461,7 +474,7 @@ export default function AdminPlayer() {
                     </div>
                     <h4 className="text-lg font-semibold text-purple-600">Batting Stats</h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {['matches', 'innings', 'runs', 'highestScore', 'notOuts', 'ballsFaced', 'average', 'strikeRate', 'fours', 'sixes', 'fifties', 'hundreds', 'doubleHundreds'].map((field) => (
+                      {['matches', 'innings', 'runs', 'highestScore', 'notOuts', 'ballsFaced', 'average', 'strikeRate', 'fours', 'sixes', 'fifties', 'hundreds', 'doubleHundreds', 'tripleHundreds', 'quadrupleHundreds', 'playerStatus'].map((field) => (
                         <div key={field}>
                           <Label htmlFor={`${key}-batting-${field}`}>{field.charAt(0).toUpperCase() + field.slice(1)}</Label>
                           <input

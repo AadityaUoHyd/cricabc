@@ -5,6 +5,14 @@ export interface Team {
   gender: 'male' | 'female';
   category: 'international' | 'domestic' | 'league';
   logoUrl: string;
+  teamRanking: {
+    testRank: number;
+    odiRank: number;
+    t20Rank: number;
+    testRating: number;
+    odiRating: number;
+    t20Rating: number;
+  };
 }
 
 export interface BattingStats {
@@ -12,7 +20,7 @@ export interface BattingStats {
   innings: number;
   runs: number;
   ballsFaced: number;
-  highestScore: number;
+  highestScore: string | '0';
   average: number;
   strikeRate: number;
   notOuts: number;
@@ -21,8 +29,9 @@ export interface BattingStats {
   fifties: number;
   hundreds: number;
   doubleHundreds: number;
-  tripleHundreds?: number;
-  quadrupleHundreds?: number;
+  tripleHundreds: number;
+  quadrupleHundreds: number;
+  playerStatus: string | 'Active Player';
 }
 
 export interface BowlingStats {
@@ -47,12 +56,25 @@ export interface WicketKeeperStats {
 }
 
 export interface Ranking {
-  testRank: number;
-  odiRank: number;
-  t20Rank: number;
-  testRating: number;
-  odiRating: number;
-  t20Rating: number;
+  testBattingRank: number;
+  odiBattingRank: number;
+  t20BattingRank: number;
+  testBowlingRank: number;
+  odiBowlingRank: number;
+  t20BowlingRank: number;
+  testAllrounderRank: number;
+  odiAllrounderRank: number;
+  t20AllrounderRank: number;
+
+  testBattingRating: number;
+  odiBattingRating: number;
+  t20BattingRating: number;
+  testAllrounderRating: number;
+  odiAllrounderRating: number;
+  t20AllrounderRating: number;
+  testBowlingRating: number;
+  odiBowlingRating: number;
+  t20BowlingRating: number;
 }
 
 export interface PlayerMatchStatsBase {
@@ -61,9 +83,6 @@ export interface PlayerMatchStatsBase {
   wicketKeeperStats: WicketKeeperStats;
   debutDate: string;
   lastPlayedDate: string;
-  ranking: Ranking;
-  capNumber: string;
-  jerseyNo: string;
 }
 
 export interface Player{
@@ -90,6 +109,8 @@ export interface Player{
     domesticTeams: string[];
     internationalTeams: string[];
     leagues: string[];
+    capNumber: string;
+    jerseyNo: string;
 }
 
 export interface FirstClassStats {

@@ -159,6 +159,13 @@ export default function PlayerProfile() {
   srilanka: 'lk',
   bangladesh: 'bd',
   westindies: 'jm',
+  afghanistan: 'af',
+  ireland: 'ie',
+  scotland: 'gb-sct',
+  zimbabwe: 'zw',
+  uae: 'ae',
+  netherlands: 'nl',
+  nepal: 'np',
   // Handle variations
   'united states': 'us',
   'south africa': 'za',
@@ -270,7 +277,7 @@ const getCountryCode = (country: string): string => {
                   <p className="text-sm"><strong className="text-purple-700">Birth Place:</strong> {player.birthPlace}</p>
                   <p className="text-sm"><strong className="text-purple-700">Date of Birth:</strong> {player.dateOfBirth ? formatDate(player.dateOfBirth) : '-'}</p>
                   <p className="text-sm"><strong className="text-purple-700">Height:</strong> {player.height || '-'}</p>
-                  <p className="text-sm"><strong className="text-purple-700">Test Cap No: </strong> {player.testStats?.capNumber || '-'}, <strong className="text-purple-700">Jersey No:</strong> {player.odiStats?.jerseyNo || player.odiStats?.jerseyNo || '-'}</p>
+                  <p className="text-sm"><strong className="text-purple-700">Test Cap No: </strong> {player.capNumber || '-'}, <strong className="text-purple-700">Jersey No:</strong> {player.jerseyNo || player.odiStats?.jerseyNo || '-'}</p>
                   <p className="text-sm col-span-1 sm:col-span-2 lg:col-span-3"><strong className="text-purple-700">Description:</strong> {player.description}</p>
                 </motion.div>
                 <motion.div
@@ -280,10 +287,22 @@ const getCountryCode = (country: string): string => {
                 >
                   <h3 className="text-2xl font-bold text-purple-700 mb-4">ICC Rankings</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-gray-700">
-                    <p className="text-xl text-purple-700 mb-4">{player.role} ranking : </p>
-                    <p className="text-sm"><strong className="text-purple-700">Test Rank:</strong> {player.ranking?.testRank || '-'}</p>
-                    <p className="text-sm"><strong className="text-purple-700">ODI Rank:</strong> {player.ranking?.odiRank || '-'}</p>
-                    <p className="text-sm"><strong className="text-purple-700">T20 Rank:</strong> {player.ranking?.t20Rank || '-'}</p>
+                    <p className="text-xl text-purple-700 mb-4">Test ranking : </p>
+                    <p className="text-sm"><strong className="text-purple-700">Batting Rank:</strong> {player.ranking.testBattingRank || '-'}</p>
+                    <p className="text-sm"><strong className="text-purple-700">Bowling Rank:</strong> {player.ranking.testBowlingRank || '-'}</p>
+                    <p className="text-sm"><strong className="text-purple-700">Allrounder Rank:</strong> {player.ranking.testAllrounderRank || '-'}</p>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-gray-700">
+                    <p className="text-xl text-purple-700 mb-4">ODIs ranking : </p>
+                    <p className="text-sm"><strong className="text-purple-700">Batting Rank:</strong> {player.ranking.odiBattingRank || '-'}</p>
+                    <p className="text-sm"><strong className="text-purple-700">Bowling Rank:</strong> {player.ranking.odiBowlingRank || '-'}</p>
+                    <p className="text-sm"><strong className="text-purple-700">Allrounder Rank:</strong> {player.ranking.odiAllrounderRank || '-'}</p>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-gray-700">
+                    <p className="text-xl text-purple-700 mb-4">T20Is ranking : </p>
+                    <p className="text-sm"><strong className="text-purple-700">Batting Rank:</strong> {player.ranking.t20BattingRank || '-'}</p>
+                    <p className="text-sm"><strong className="text-purple-700">Bowling Rank:</strong> {player.ranking.t20BowlingRank || '-'}</p>
+                    <p className="text-sm"><strong className="text-purple-700">Allrounder Rank:</strong> {player.ranking.t20AllrounderRank || '-'}</p>
                   </div>
                 </motion.div>
                 <div className="mt-8">

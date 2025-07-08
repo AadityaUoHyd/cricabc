@@ -73,6 +73,14 @@ export default function AdminTeams() {
     leagueName: '',
     domesticTournamentName: '',
     logoUrl: '',
+    teamRanking: {
+      testRank: 0,
+      odiRank: 0,
+      t20Rank: 0,
+      testRating: 0,
+      odiRating: 0,
+      t20Rating: 0,
+    },
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -134,7 +142,25 @@ export default function AdminTeams() {
         await axios.post(`${import.meta.env.VITE_API_URL}/admin/teams`, formData, config);
       }
       fetchTeams();
-      setForm({ id: '', name: '', country: '', gender: 'male', category: 'international', internationalTeamType: undefined, leagueName: '', domesticTournamentName: '', logoUrl: '' });
+      setForm({
+        id: '',
+        name: '',
+        country: '',
+        gender: 'male',
+        category: 'international',
+        internationalTeamType: undefined,
+        leagueName: '',
+        domesticTournamentName: '',
+        logoUrl: '',
+        teamRanking: {
+          testRank: 0,
+          odiRank: 0,
+          t20Rank: 0,
+          testRating: 0,
+          odiRating: 0,
+          t20Rating: 0,
+        },
+      });
       setLogoFile(null);
       setError(null);
     } catch (err: any) {
@@ -146,7 +172,29 @@ export default function AdminTeams() {
   };
 
   const handleEdit = (team: Team) => {
-    setForm({ ...team, leagueName: team.leagueName || '', domesticTournamentName: team.domesticTournamentName || '', internationalTeamType: team.internationalTeamType });
+    const defaultRanking = {
+      testRank: 0,
+      odiRank: 0,
+      t20Rank: 0,
+      testRating: 0,
+      odiRating: 0,
+      t20Rating: 0,
+    };
+    const ranking = team.teamRanking || defaultRanking;
+    setForm({
+      ...team,
+      leagueName: team.leagueName || '',
+      domesticTournamentName: team.domesticTournamentName || '',
+      internationalTeamType: team.internationalTeamType,
+      teamRanking: {
+        testRank: ranking.testRank ?? 0,
+        odiRank: ranking.odiRank ?? 0,
+        t20Rank: ranking.t20Rank ?? 0,
+        testRating: ranking.testRating ?? 0,
+        odiRating: ranking.odiRating ?? 0,
+        t20Rating: ranking.t20Rating ?? 0,
+      }
+    });
     setLogoFile(null);
   };
 
@@ -305,6 +353,129 @@ export default function AdminTeams() {
                 <img src={form.logoUrl} alt="Team Logo" className="mt-2 h-20 w-20 object-contain" />
               )}
             </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+              <div>
+                <Label>Test Rank</Label>
+                <input
+                  type="number"
+                  min={0}
+                  value={form.teamRanking?.testRank ?? 0}
+                  onChange={e => setForm({
+  ...form,
+  teamRanking: {
+    testRank: Number(e.target.value),
+    odiRank: form.teamRanking?.odiRank ?? 0,
+    t20Rank: form.teamRanking?.t20Rank ?? 0,
+    testRating: form.teamRanking?.testRating ?? 0,
+    odiRating: form.teamRanking?.odiRating ?? 0,
+    t20Rating: form.teamRanking?.t20Rating ?? 0,
+  }
+})}
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
+                />
+              </div>
+              <div>
+                <Label>ODI Rank</Label>
+                <input
+                  type="number"
+                  min={0}
+                  value={form.teamRanking?.odiRank ?? 0}
+                  onChange={e => setForm({
+  ...form,
+  teamRanking: {
+    testRank: form.teamRanking?.testRank ?? 0,
+    odiRank: Number(e.target.value),
+    t20Rank: form.teamRanking?.t20Rank ?? 0,
+    testRating: form.teamRanking?.testRating ?? 0,
+    odiRating: form.teamRanking?.odiRating ?? 0,
+    t20Rating: form.teamRanking?.t20Rating ?? 0,
+  }
+})}
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
+                />
+              </div>
+              <div>
+                <Label>T20I Rank</Label>
+                <input
+                  type="number"
+                  min={0}
+                  value={form.teamRanking?.t20Rank ?? 0}
+                  onChange={e => setForm({
+  ...form,
+  teamRanking: {
+    testRank: form.teamRanking?.testRank ?? 0,
+    odiRank: form.teamRanking?.odiRank ?? 0,
+    t20Rank: Number(e.target.value),
+    testRating: form.teamRanking?.testRating ?? 0,
+    odiRating: form.teamRanking?.odiRating ?? 0,
+    t20Rating: form.teamRanking?.t20Rating ?? 0,
+  }
+})}
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
+                />
+              </div>
+              <div>
+                <Label>Test Rating</Label>
+                <input
+                  type="number"
+                  min={0}
+                  value={form.teamRanking?.testRating ?? 0}
+                  onChange={e => setForm({
+  ...form,
+  teamRanking: {
+    testRank: form.teamRanking?.testRank ?? 0,
+    odiRank: form.teamRanking?.odiRank ?? 0,
+    t20Rank: form.teamRanking?.t20Rank ?? 0,
+    testRating: Number(e.target.value),
+    odiRating: form.teamRanking?.odiRating ?? 0,
+    t20Rating: form.teamRanking?.t20Rating ?? 0,
+  }
+})}
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
+                />
+              </div>
+              <div>
+                <Label>ODI Rating</Label>
+                <input
+                  type="number"
+                  min={0}
+                  value={form.teamRanking?.odiRating ?? 0}
+                  onChange={e => setForm({
+  ...form,
+  teamRanking: {
+    testRank: form.teamRanking?.testRank ?? 0,
+    odiRank: form.teamRanking?.odiRank ?? 0,
+    t20Rank: form.teamRanking?.t20Rank ?? 0,
+    testRating: form.teamRanking?.testRating ?? 0,
+    odiRating: Number(e.target.value),
+    t20Rating: form.teamRanking?.t20Rating ?? 0,
+  }
+})}
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
+                />
+              </div>
+              <div>
+                <Label>T20I Rating</Label>
+                <input
+                  type="number"
+                  min={0}
+                  value={form.teamRanking?.t20Rating ?? 0}
+                  onChange={e => setForm({
+  ...form,
+  teamRanking: {
+    testRank: form.teamRanking?.testRank ?? 0,
+    odiRank: form.teamRanking?.odiRank ?? 0,
+    t20Rank: form.teamRanking?.t20Rank ?? 0,
+    testRating: form.teamRanking?.testRating ?? 0,
+    odiRating: form.teamRanking?.odiRating ?? 0,
+    t20Rating: Number(e.target.value),
+  }
+})}
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 text-sm"
+                />
+              </div>
+            </div>
+
             <Button
               type="submit"
               disabled={loading}

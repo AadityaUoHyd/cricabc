@@ -171,6 +171,7 @@ export default function PlayerProfile() {
   'south africa': 'za',
   'new zealand': 'nz',
   'sri lanka': 'lk',
+  'west indies': 'jm',
   // Add more as per your API
 };
 

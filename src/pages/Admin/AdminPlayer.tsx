@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 import { Label } from '@radix-ui/react-label';
 import { type Player, type BowlingStats, type WicketKeeperStats, type BattingStats, type Ranking } from '../../types/Player';
@@ -20,6 +20,9 @@ type FormatStats = {
 
 export default function AdminPlayer() {
   const [players, setPlayers] = useState<Player[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchInitiated, setSearchInitiated] = useState(false);
   const [form, setForm] = useState<Player>({
     id: '',
     name: '',
@@ -54,8 +57,6 @@ export default function AdminPlayer() {
   const [cricApiData, setCricApiData] = useState<any>({});
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
 
   function initFormatStats(): FormatStats {
     return {
@@ -81,25 +82,26 @@ export default function AdminPlayer() {
     };
   }
 
-  useEffect(() => {
-    fetchPlayers();
-  }, [page]);
-
-  const fetchPlayers = async () => {
-    setLoading(true);
+  const searchPlayers = async (name: string) => {
+    if (!name.trim()) return;
+    setSearchLoading(true);
+    setSearchInitiated(true);
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/players`, {
-        params: { teamId: '', category: 'international', page, size: 12 },
-      });
-      const data = response.data as { content: Player[]; totalPages: number };
-      setPlayers((data.content || []) as Player[]);
-      setTotalPages((data.totalPages || 1) as number);
+      const response = await axios.get<Player[] | { content?: Player[]; players?: Player[] }>(
+        `${import.meta.env.VITE_API_URL}/players`,
+        { params: { name: name.trim() } }
+      );
+      // Accepts either array or paginated object
+      const data = Array.isArray(response.data)
+        ? response.data
+        : (response.data.content || response.data.players || []);
+      setPlayers(data as Player[]);
       setError(null);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch players');
-      console.error('Fetch players error:', err);
+      setError(err.response?.data?.message || 'Failed to search players');
+      setPlayers([]);
     } finally {
-      setLoading(false);
+      setSearchLoading(false);
     }
   };
 
@@ -115,9 +117,9 @@ export default function AdminPlayer() {
     try {
       const formData = new FormData();
       formData.append(
-  'player',
-  new Blob([JSON.stringify(form)], { type: 'application/json' })
-);
+        'player',
+        new Blob([JSON.stringify(form)], { type: 'application/json' })
+      );
       if (profileImage) {
         formData.append('profileImage', profileImage);
       }
@@ -134,7 +136,7 @@ export default function AdminPlayer() {
       } else {
         await axios.post(`${import.meta.env.VITE_API_URL}/admin/players`, formData, config);
       }
-      fetchPlayers();
+      searchPlayers(searchTerm);
       setForm({
         id: '',
         name: '',
@@ -186,7 +188,7 @@ export default function AdminPlayer() {
       await axios.post(`${import.meta.env.VITE_API_URL}/admin/players/import-cricapi`, cricApiData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      fetchPlayers();
+      searchPlayers(searchTerm);
       setCricApiData({});
       setError(null);
     } catch (err: any) {
@@ -224,7 +226,7 @@ export default function AdminPlayer() {
       await axios.delete(`${import.meta.env.VITE_API_URL}/admin/players/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      fetchPlayers();
+      searchPlayers(searchTerm);
       setError(null);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to delete player');
@@ -259,8 +261,29 @@ export default function AdminPlayer() {
           <CardTitle className="text-xl sm:text-2xl font-semibold text-purple-600">Manage Players</CardTitle>
         </CardHeader>
         <CardContent>
+          {/* Search Bar */}
+          <div className="mb-6 flex flex-col sm:flex-row gap-2 items-center justify-between">
+            <input
+              type="text"
+              placeholder="Search player by name..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="w-full sm:w-64 border border-gray-300 rounded-md p-2 text-sm"
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); searchPlayers(searchTerm); } }}
+            />
+            <Button
+              type="button"
+              className="bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm px-4 py-2"
+              disabled={searchLoading || !searchTerm.trim()}
+              onClick={() => searchPlayers(searchTerm)}
+            >
+              {searchLoading ? 'Searching...' : 'Search'}
+            </Button>
+          </div>
+
           {error && <p className="text-red-500 mb-4 text-sm">{error}</p>}
           {loading && <p className="text-purple-600 mb-4 text-sm">Loading...</p>}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <Tabs defaultValue="basic">
               <TabsList>
@@ -556,68 +579,51 @@ export default function AdminPlayer() {
           </div>
         </CardContent>
       </Card>
-      {players.length === 0 && !loading && (
-        <p className="text-center text-gray-600">No players found.</p>
-      )}
-      <div className="grid grid-cols-1 gap-4">
-        {players.map((player) => (
-          <Card key={player.id} className="shadow-sm">
-            <CardContent className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4">
-              <div className="flex items-center space-x-4">
-                {player.photoUrl ? (
-                  <img src={player.photoUrl} alt={player.name} className="w-12 h-12 object-cover" />
-                ) : (
-                  <User className="w-6 h-12 text-purple-600" />
-                )}
-                <div>
-                  <h3 className="text-base sm:text-lg font-semibold text-purple-600">{player.name}</h3>
-                  <p className="text-xs sm:text-sm text-gray-600">{player.country} | {player.role}</p>
-                </div>
-              </div>
-              <div className="mt-2 sm:mt-0 flex space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleEdit(player)}
-                  disabled={loading}
-                  className="text-purple-600 border-purple-600 text-xs sm:text-sm"
-                >
-                  <Edit2 className="w-3 h-3 sm:h-4 mr-1" /> Edit
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => handleDelete(player.id)}
-                  disabled={loading}
-                  className="text-xs sm:text-sm"
-                >
-                  <Trash2 className="w-3 h-3 sm:h-4 mr-1" /> Delete
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      {totalPages > 1 && (
-        <div className="mt-6 flex justify-center space-x-2">
-          <Button
-            variant="outline"
-            disabled={page === 0 || loading}
-            onClick={() => setPage((prev) => prev - 1)}
-            className="text-purple-600 border-purple-600 text-sm"
-          >
-            Previous
-          </Button>
-          <span className="text-sm text-gray-600 self-center">Page {page + 1} of {totalPages}</span>
-          <Button
-            variant="outline"
-            disabled={page >= totalPages - 1 || loading}
-            onClick={() => setPage((prev) => prev + 1)}
-            className="text-purple-600 border-purple-600 text-sm"
-          >
-            Next
-          </Button>
-        </div>
+      {/* Show player results only after a search is performed */}
+      {searchInitiated && (
+        players.length === 0 && !searchLoading ? (
+          <p className="text-center text-gray-600">No players found.</p>
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            {players.map((player) => (
+              <Card key={player.id} className="shadow-sm">
+                <CardContent className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4">
+                  <div className="flex items-center space-x-4">
+                    {player.photoUrl ? (
+                      <img src={player.photoUrl} alt={player.name} className="w-12 h-12 object-cover" />
+                    ) : (
+                      <User className="w-6 h-12 text-purple-600" />
+                    )}
+                    <div>
+                      <h3 className="text-base sm:text-lg font-semibold text-purple-600">{player.name}</h3>
+                      <p className="text-xs sm:text-sm text-gray-600">{player.country} | {player.role}</p>
+                    </div>
+                  </div>
+                  <div className="mt-2 sm:mt-0 flex space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(player)}
+                      disabled={loading}
+                      className="text-purple-600 border-purple-600 text-xs sm:text-sm"
+                    >
+                      <Edit2 className="w-3 h-3 sm:h-4 mr-1" /> Edit
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDelete(player.id)}
+                      disabled={loading}
+                      className="text-xs sm:text-sm"
+                    >
+                      <Trash2 className="w-3 h-3 sm:h-4 mr-1" /> Delete
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )
       )}
     </div>
   );

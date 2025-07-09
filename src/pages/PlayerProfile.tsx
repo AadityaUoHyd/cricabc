@@ -142,7 +142,7 @@ export default function PlayerProfile() {
     { id: 'test', label: 'Test' },
     { id: 'odi', label: 'ODI' },
     { id: 't20i', label: 'T20I' },
-    { id: 'ipl', label: 'IPL' },
+    { id: 'ipl', label: (player?.gender === 'male' ? 'IPL' : 'WPL') },
     { id: 'lista', label: 'List A' },
     { id: 'twenty20', label: 'Twenty20' },
     { id: 'firstclass', label: 'First Class' },
@@ -325,10 +325,13 @@ const getCountryCode = (country: string): string => {
                   {selectedFormat === 'test' && renderStatsTable(player.testStats, 'Test')}
                   {selectedFormat === 'odi' && renderStatsTable(player.odiStats, 'ODI')}
                   {selectedFormat === 't20i' && renderStatsTable(player.ttwentyInternationalsStats, 'T20I')}
-                  {selectedFormat === 'ipl' && renderStatsTable(player.iplStats, 'IPL')}
+
                   {selectedFormat === 'lista' && renderStatsTable(player.listAstats, 'List A')}
                   {selectedFormat === 'twenty20' && renderStatsTable(player.twenty20, 'Twenty20')}
                   {selectedFormat === 'firstclass' && renderStatsTable(player.firstClass, 'First Class')}
+                  
+                  {player.gender === 'female' && selectedFormat === 'ipl'
+                      ? renderStatsTable(player.iplStats, 'WPL')  : renderStatsTable(player.iplStats, 'IPL')}
                 </div>
               </CardContent>
             </Card>

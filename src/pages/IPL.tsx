@@ -45,7 +45,7 @@ export default function IPL() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
-        IPL 2025
+        IPL 2026
       </motion.h1>
       <div className="flex space-x-4 mb-6 justify-center">
   <button

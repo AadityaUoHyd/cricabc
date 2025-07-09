@@ -1,19 +1,3 @@
-export interface Team {
-  id: string;
-  name: string;
-  country: string;
-  gender: 'male' | 'female';
-  category: 'international' | 'domestic' | 'league';
-  logoUrl: string;
-  teamRanking: {
-    testRank: number;
-    odiRank: number;
-    t20Rank: number;
-    testRating: number;
-    odiRating: number;
-    t20Rating: number;
-  };
-}
 
 export interface BattingStats {
   matches: number;

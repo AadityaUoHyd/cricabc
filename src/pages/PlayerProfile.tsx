@@ -329,9 +329,11 @@ const getCountryCode = (country: string): string => {
                   {selectedFormat === 'lista' && renderStatsTable(player.listAstats, 'List A')}
                   {selectedFormat === 'twenty20' && renderStatsTable(player.twenty20, 'Twenty20')}
                   {selectedFormat === 'firstclass' && renderStatsTable(player.firstClass, 'First Class')}
-                  
-                  {player.gender === 'female' && selectedFormat === 'ipl'
-                      ? renderStatsTable(player.iplStats, 'WPL')  : renderStatsTable(player.iplStats, 'IPL')}
+                  {selectedFormat === 'ipl' && (
+                    player.gender === 'female' 
+                      ? renderStatsTable(player.iplStats, 'WPL')
+                      : renderStatsTable(player.iplStats, 'IPL')
+                  )}
                 </div>
               </CardContent>
             </Card>

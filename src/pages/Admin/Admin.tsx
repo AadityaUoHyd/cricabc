@@ -43,7 +43,6 @@ const Admin: FC = () => {
     { to: 'teams', label: 'Teams' },
     { to: 'player', label: 'Players' }, // Changed from 'Player' to 'Players'
     { to: 'videos', label: 'Videos' },
-    { to: 'rankings', label: 'Rankings' },
     { to: 'quiz', label: 'Quiz' },
   ];
 

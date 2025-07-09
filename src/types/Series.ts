@@ -3,5 +3,5 @@ export interface Series {
   name: string;
   startDate: string;
   endDate: string;
-  teams: string;
+  teams: string; // Stored as comma-separated string in backend
 }

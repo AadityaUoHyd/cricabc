@@ -235,7 +235,7 @@ export default function Rankings() {
                     <img
                       src={item.photoUrl}
                       alt={item.name}
-                      className="w-12 h-12 rounded-full object-cover border border-gray-200"
+                      className="w-24 h-24 rounded-full object-cover border border-gray-200"
                       onError={e => (e.currentTarget.src = 'https://res.cloudinary.com/dppx4dm9a/image/upload/v1751871666/oponje3zhav82i7k1yfk.png')}
                     />
                   ) : (

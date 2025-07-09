@@ -223,13 +223,13 @@ const getCountryCode = (country: string): string => {
             transition={{ duration: 0.6, ease: 'easeOut' }}
           >
             <Card className="shadow-xl border-none bg-white/95 backdrop-blur-sm rounded-2xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-purple-600 to-purple-800 text-white p-6">
+              <CardHeader className="bg-gradient-to-r from-purple-600 to-purple-800 text-white p-4">
   <CardTitle className="text-3xl sm:text-4xl font-extrabold flex items-center">
     {player.photoUrl ? (
       <motion.img
         src={player.photoUrl}
         alt={player.name}
-        className="w-20 h-20 rounded-full mr-4 object-cover border-2 border-white shadow-md"
+        className="w-40 h-40 mr-4 object-cover border-2 border-white shadow-md"
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.4 }}

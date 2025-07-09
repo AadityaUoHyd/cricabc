@@ -251,7 +251,7 @@ export default function Teams() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {teams.map((team) => (
-            <Card key={team.id} className="shadow-md hover:shadow-lg transition-shadow">
+            <Card key={team.id} className="flex flex-col justify-between shadow-md hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="text-lg font-semibold text-purple-600 flex items-center">
                   {team.logoUrl ? (
@@ -268,16 +268,20 @@ export default function Teams() {
                 <p className="text-xs text-gray-600">{team.country} | {team.category}</p>
                 <p className="text-xs text-gray-600">{team.internationalTeamType}</p>
               </CardHeader>
-              <CardContent>
+
+              <div className="flex-grow" /> {/* Pushes the button down */}
+
+              <CardContent className="pt-0">
                 <Button
                   size="sm"
-                  className="bg-purple-600 hover:bg-purple-700 text-white mt-2"
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white mt-2"
                   onClick={() => fetchPlayers(team)}
                 >
                   View Players
                 </Button>
               </CardContent>
             </Card>
+
           ))}
         </div>
 

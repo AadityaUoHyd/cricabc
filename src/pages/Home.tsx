@@ -130,6 +130,20 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Live Matches Slider */}
+      <section className="mb-12">
+        <motion.h2 className="text-2xl font-bold text-purple-800 mb-6 text-center">Live Matches</motion.h2>
+        {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
+        {matches.length === 0 && !error && <p className="text-center text-gray-600">Loading matches...</p>}
+        <Slider {...matchSliderSettings}>
+          {matches.map(match => (
+            <div key={match.matchId} className="px-2">
+              <MatchCard match={match} />
+            </div>
+          ))}
+        </Slider>
+      </section>
+
       {/* Feature Highlights */}
       <section className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
         {[
@@ -170,8 +184,8 @@ export default function Home() {
         {[
           { icon: LiveScoreIcon, label: 'Matches', value: '1000+' },
           { icon: PlayerStatsIcon, label: 'Players', value: '500+' },
-          { icon: QuizIcon, label: 'Quizzes', value: '50+' },
           { icon: NewsIcon, label: 'Articles', value: '2000+' },
+          { icon: QuizIcon, label: 'Quizzes', value: 'Unlimited' },
         ].map(stat => (
           <div key={stat.label} className="bg-white rounded-xl shadow p-6 flex flex-col items-center hover:shadow-xl transition">
             <img src={stat.icon} alt={stat.label + ' stat icon'} className="w-16 h-16 mb-2" loading="lazy" />
@@ -181,19 +195,7 @@ export default function Home() {
         ))}
       </section>
 
-      {/* Live Matches Slider */}
-      <section className="mb-12">
-        <motion.h2 className="text-2xl font-bold text-purple-800 mb-6 text-center">Live Matches</motion.h2>
-        {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
-        {matches.length === 0 && !error && <p className="text-center text-gray-600">Loading matches...</p>}
-        <Slider {...matchSliderSettings}>
-          {matches.map(match => (
-            <div key={match.matchId} className="px-2">
-              <MatchCard match={match} />
-            </div>
-          ))}
-        </Slider>
-      </section>
+      
 
       {/* Testimonials */}
       <section className="max-w-4xl mx-auto mb-12 bg-white rounded-2xl py-8 shadow-md">

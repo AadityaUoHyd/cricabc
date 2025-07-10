@@ -86,7 +86,7 @@ const Admin: FC = () => {
               to={`/admin/${item.to}`}
               className={({ isActive }) =>
                 `block px-3 py-2 rounded-md text-sm sm:text-base text-white ${
-                  isActive ? 'bg-purple-800 border-2 border-purple-900' : 'bg-purple-600 hover:bg-purple-700'
+                  isActive ? 'bg-black border-2 border-green-600' : 'bg-purple-600 hover:bg-purple-700'
                 }`
               }
               onClick={() => setIsMenuOpen(false)}

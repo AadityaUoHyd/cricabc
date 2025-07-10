@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { motion } from 'framer-motion';
-import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
+import { Button } from '../../components/ui/button';
 import { type Team } from '../../types/Team';
 import { type Match } from '../../types/Match';
 import { type Player } from '../../types/Player';
@@ -224,14 +223,6 @@ function AdminWPL() {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 min-h-screen bg-gray-100">
-      <motion.h1
-        className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-center text-purple-600"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        WPL Admin Dashboard
-      </motion.h1>
 
       {error && (
         <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">

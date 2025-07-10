@@ -22,10 +22,26 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.get<Player[]>(`/api/players`, { params: { page: 0, size: 1000 } });
+      const res = await axios.get<Player[]>(
+        `${import.meta.env.VITE_API_URL || ''}/api/players`, 
+        { 
+          params: { 
+            page: 0, 
+            size: 1000 
+          },
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        }
+      );
       setPlayers(Array.isArray(res.data) ? res.data : []);
     } catch (err: any) {
-      setError(err.response?.data || 'Failed to fetch players');
+      const errorMessage = err.response?.data?.message || 
+                         err.message || 
+                         'Failed to fetch players. Please try again later.';
+      setError(errorMessage);
+      console.error('Error fetching players:', err);
       setPlayers([]);
     } finally {
       setLoading(false);

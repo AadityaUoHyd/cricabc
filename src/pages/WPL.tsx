@@ -3,9 +3,9 @@ import axios from 'axios';
 import { initPusher } from '../lib/pusher';
 import MatchCard from '../components/MatchCard';
 import { motion, AnimatePresence } from 'framer-motion';
-import iplLogo from '../assets/ipl_logo.png';
+import WPLLogo from '../assets/wpl_logo.png';
 import { type Match } from '../types/Match';
-import {type Team } from '../types/Team';
+import { type Team } from '../types/Team';
 import { type Player, type BattingStats, type BowlingStats } from '../types/Player';
 import { usePlayers } from '../context/PlayerContext';
 import { FaCalendarAlt, FaNewspaper, FaTable, FaChartLine, FaUsers, FaInfoCircle } from 'react-icons/fa';
@@ -20,8 +20,6 @@ interface NewsItem {
 
 interface TeamsResponse {
   content: Team[];
-  // Add other pagination properties if they exist in the response
-  // For example: page, size, totalElements, totalPages, etc.
 }
 
 interface PointsTableEntry {
@@ -33,7 +31,9 @@ interface PointsTableEntry {
   nrr: number;
 }
 
-function IPL() {
+
+
+function WPL() {
   const [activeTab, setActiveTab] = useState('matches');
   const [matches, setMatches] = useState<Match[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -71,30 +71,30 @@ function IPL() {
       };
 
       try {
-        // Fetch IPL matches
+        // Fetch WPL matches
         const matchesPromise = axios.get<Match[]>(
-          `${import.meta.env.VITE_API_URL}/matches/tournament/IPL`
+          `${import.meta.env.VITE_API_URL}/matches/tournament/WPL`
         ).then(response => {
           setMatches(response.data);
           loadingStates.matches = false;
           setIsLoading(prev => ({ ...prev, matches: false }));
         }).catch(err => {
-          console.error('Error fetching matches:', err);
+          console.error('Error fetching WPL matches:', err);
           setError(prev => prev || 'Failed to load matches. Some data may be incomplete.');
           loadingStates.matches = false;
           setIsLoading(prev => ({ ...prev, matches: false }));
         });
 
-        // Fetch IPL teams
+        // Fetch WPL teams
         const teamsPromise = axios.get<TeamsResponse>(
-          `${import.meta.env.VITE_API_URL}/teams/ipl`,
-          { params: { category: 'league', leagueName: 'Indian Premier League (IPL)' } }
+          `${import.meta.env.VITE_API_URL}/teams/wpl`,
+          { params: { category: 'league', leagueName: "Women's Premier League (WPL)" } }
         ).then(response => {
           setTeams(response.data.content);
           loadingStates.teams = false;
           setIsLoading(prev => ({ ...prev, teams: false }));
         }).catch(err => {
-          console.error('Error fetching teams:', err);
+          console.error('Error fetching WPL teams:', err);
           setError(prev => prev || 'Failed to load teams. Some data may be incomplete.');
           loadingStates.teams = false;
           setIsLoading(prev => ({ ...prev, teams: false }));
@@ -102,13 +102,13 @@ function IPL() {
 
         // Fetch points table
         const pointsPromise = axios.get<PointsTableEntry[]>(
-          `${import.meta.env.VITE_API_URL}/points-table/ipl`
+          `${import.meta.env.VITE_API_URL}/points-table/wpl`
         ).then(response => {
           setPointsTable(response.data);
           loadingStates.stats = false;
           setIsLoading(prev => ({ ...prev, stats: false }));
         }).catch(err => {
-          console.error('Error fetching points table:', err);
+          console.error('Error fetching WPL points table:', err);
           setError(prev => prev || 'Failed to load points table. Some data may be incomplete.');
           loadingStates.stats = false;
           setIsLoading(prev => ({ ...prev, stats: false }));
@@ -117,13 +117,13 @@ function IPL() {
         // Fetch news
         const newsPromise = axios.get<NewsItem[]>(
           `${import.meta.env.VITE_API_URL}/news`,
-          { params: { tournament: 'IPL' } }
+          { params: { tournament: 'WPL' } }
         ).then(response => {
           setNews(response.data);
           loadingStates.news = false;
           setIsLoading(prev => ({ ...prev, news: false }));
         }).catch(err => {
-          console.error('Error fetching news:', err);
+          console.error('Error fetching WPL news:', err);
           setError(prev => prev || 'Failed to load news. Some data may be incomplete.');
           loadingStates.news = false;
           setIsLoading(prev => ({ ...prev, news: false }));
@@ -131,14 +131,14 @@ function IPL() {
 
         // Fetch top players
         const playersPromise = axios.get<{ runScorers: Player[]; wicketTakers: Player[] }>(
-          `${import.meta.env.VITE_API_URL}/players/stats/ipl`
+          `${import.meta.env.VITE_API_URL}/players/stats/wpl`
         ).then(response => {
           setTopRunScorers(response.data.runScorers);
           setTopWicketTakers(response.data.wicketTakers);
           loadingStates.stats = false;
           setIsLoading(prev => ({ ...prev, stats: false }));
         }).catch(err => {
-          console.error('Error fetching player stats:', err);
+          console.error('Error fetching WPL player stats:', err);
           setError(prev => prev || 'Failed to load player statistics. Some data may be incomplete.');
           loadingStates.stats = false;
           setIsLoading(prev => ({ ...prev, stats: false }));
@@ -154,8 +154,8 @@ function IPL() {
         ]);
 
       } catch (err) {
-        console.error('Unexpected error in fetchData:', err);
-        setError('An unexpected error occurred while loading IPL data. Please try again later.');
+        console.error('Unexpected error in WPL fetchData:', err);
+        setError('An unexpected error occurred while loading WPL data. Please try again later.');
       } finally {
         // Ensure all loading states are set to false
         setIsLoading({
@@ -173,7 +173,7 @@ function IPL() {
     const pusher = initPusher();
     const channel = pusher.subscribe('match-channel');
     channel.bind('match-update', (data: Match) => {
-      if (data.tournament === 'IPL') {
+      if (data.tournament === 'WPL') {
         setMatches((prev) => {
           const updated = prev.filter((m) => m.matchId !== data.matchId);
           return [...updated, data];
@@ -323,9 +323,9 @@ function IPL() {
       case 'about':
         return (
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-2xl font-bold mb-4 text-gray-800">About IPL</h2>
+            <h2 className="text-2xl font-bold mb-4 text-gray-800">About WPL</h2>
             <p className="text-gray-600">
-              The Indian Premier League (IPL) is a professional Twenty20 cricket league in India, established in 2008 by the Board of Control for Cricket in India (BCCI). Contested annually, it features franchise-based teams representing Indian cities and regions, attracting top international and domestic players. Known for its high-octane matches, massive fan following, and significant commercial impact, the IPL has become one of the world's most popular cricket leagues, revolutionizing the sport with its fast-paced format and vibrant atmosphere.
+              The Women's Premier League (WPL) is a professional Twenty20 cricket league in India, launched in 2023 by the Board of Control for Cricket in India (BCCI). It features franchise-based teams representing Indian cities, showcasing top international and domestic women cricketers. The WPL aims to promote women's cricket, providing a platform for talent to shine and inspiring the next generation of players with its competitive matches and vibrant atmosphere.
             </p>
           </div>
         );
@@ -393,11 +393,11 @@ function IPL() {
             className="text-center"
           >
             <div className="flex justify-center mb-4">
-              <img src={iplLogo} alt="IPL Logo" className="h-24" />
+              <img src={WPLLogo} alt="WPL Logo" className="h-24" />
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-purple-500">Indian Premier League</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-purple-500">Women's Premier League</h1>
             <p className="text-xl text-purple-100 max-w-3xl mx-auto">
-              The most exciting T20 cricket league in the world. Catch all the live action, scores, and updates here.
+              The most exciting T20 cricket league in the world for women's cricket. Catch all the live action, scores, and updates here.
             </p>
           </motion.div>
         </div>
@@ -471,4 +471,4 @@ function IPL() {
   );
 }
 
-export default IPL;
+export default WPL;

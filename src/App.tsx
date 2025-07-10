@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { type FC, Suspense, lazy, Component, type ReactNode } from 'react';
 import { useRestoreUser } from './hooks/useRestoreUser';
+import { PlayerProvider } from './context/PlayerContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
 
@@ -36,6 +37,9 @@ const CricABCCricketQuiz = lazy(() => import('./pages/CricAbcCricketQuiz'));
 const AdminMatchesPage = lazy(() => import('./pages/Admin/AdminMatchesPage'));
 const PlayerProfile = lazy(() => import('./pages/PlayerProfile'));
 const AdminTeams = lazy(() => import('./pages/Admin/AdminTeams'));
+const AdminIPL = lazy(() => import('./pages/Admin/AdminIPL'));
+const AdminWPL = lazy(() => import('./pages/Admin/AdminWPL'));
+const WPL = lazy(() => import('./pages/WPL'));
 
 // Protected Route component
 interface ProtectedRouteProps {
@@ -94,6 +98,7 @@ const App: FC = () => {
         <Header />
         <main className="flex-grow">
           <ErrorBoundary>
+            <PlayerProvider>
             <Suspense fallback={
               <div className="flex justify-center items-center h-screen">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
@@ -103,6 +108,7 @@ const App: FC = () => {
                 <Route path="/" element={<Home />} />
                 <Route path="/live/:matchId" element={<LiveScore />} />
                 <Route path="/ipl" element={<IPL />} />
+                <Route path="/wpl" element={<WPL />} />
                 <Route path="/schedules" element={<Schedules />} />
                 <Route path="/archives" element={<Archive />} />
                 <Route path="/news" element={<News />} />
@@ -136,6 +142,8 @@ const App: FC = () => {
                   <Route path="player" element={<AdminPlayer />} /> 
                   <Route path="schedules" element={<AdminSchedules />} />
                   <Route path="series" element={<AdminSeries />} />
+                  <Route path="ipl" element={<AdminIPL />} />
+                  <Route path="wpl" element={<AdminWPL />} />
                   <Route path="videos" element={<AdminVideos />} />
                   <Route path="teams" element={<AdminTeams />} />
                   <Route path="quiz" element={<AdminQuiz />} />
@@ -143,6 +151,7 @@ const App: FC = () => {
                 <Route path="*" element={<h1 className="text-center">404 - Page Not Found</h1>} />
               </Routes>
             </Suspense>
+            </PlayerProvider>
           </ErrorBoundary>
         </main>
         <Footer />

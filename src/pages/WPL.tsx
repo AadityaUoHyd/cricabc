@@ -9,6 +9,7 @@ import { type Team } from '../types/Team';
 import { type Player, type BattingStats, type BowlingStats } from '../types/Player';
 import { usePlayers } from '../context/PlayerContext';
 import { FaCalendarAlt, FaNewspaper, FaTable, FaChartLine, FaUsers, FaInfoCircle } from 'react-icons/fa';
+import { Trophy, Award } from 'lucide-react';
 
 interface NewsItem {
   _id: string;
@@ -203,7 +204,7 @@ function WPL() {
                   <div className="flex items-center space-x-4">
                     <img src={team.logoUrl} alt={team.name} className="w-16 h-16 object-contain" />
                     <div>
-                      <h3 className="text-xl font-bold text-gray-800">{team.name}</h3>
+                      <h3 className="text-xl font-bold text-purple-500">{team.name}</h3>
                       <p className="text-gray-600">{team.country}</p>
                     </div>
                   </div>
@@ -243,15 +244,15 @@ function WPL() {
         return (
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead className="bg-purple-500">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Played</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Won</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lost</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Points</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NRR</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">#</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Team</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Played</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Won</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Lost</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Points</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">NRR</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -322,19 +323,61 @@ function WPL() {
 
       case 'about':
         return (
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-2xl font-bold mb-4 text-gray-800">About WPL</h2>
-            <p className="text-gray-600">
-              The Women's Premier League (WPL) is a professional Twenty20 cricket league in India, launched in 2023 by the Board of Control for Cricket in India (BCCI). It features franchise-based teams representing Indian cities, showcasing top international and domestic women cricketers. The WPL aims to promote women's cricket, providing a platform for talent to shine and inspiring the next generation of players with its competitive matches and vibrant atmosphere.
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-white p-6 rounded-lg shadow-md"
+          >
+            <h2 className="text-2xl font-bold mb-4 text-gray-800 flex items-center">
+              <Trophy className="w-6 h-6 mr-2 text-purple-600" />
+              About WPL
+            </h2>
+            <p className="text-gray-600 mb-6">
+              The Women's Premier League (WPL), launched in 2023 by the Board of Control for Cricket in India (BCCI), is a professional Twenty20 cricket league in India, modeled after the Indian Premier League (IPL). It features five franchise-based teams representing Indian cities, showcasing top international and domestic women cricketers. The WPL succeeded the Women's T20 Challenge (2018–2022), providing a robust platform to elevate women's cricket. With a double round-robin format and playoffs, the league has grown in popularity, featuring high-energy matches and significant fan engagement. The inaugural season saw Mumbai Indians clinch the title, followed by Royal Challengers Bengaluru in 2024. The 2025 season expanded to multiple cities, including Mumbai, Bengaluru, Lucknow, and Vadodara. Backed by substantial investments, such as the Tata Group's title sponsorship and Viacom18's media rights, the WPL continues to inspire the next generation of cricketers and promote gender equality in the sport.
             </p>
-          </div>
+            <h3 className="text-xl font-semibold mb-4 text-gray-800 flex items-center">
+              <Award className="w-6 h-6 mr-2 text-purple-600" />
+              WPL Winners and Runners-Up (2023–2025)
+            </h3>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-purple-500">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Year</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Winner</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Runner-Up</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {[
+                    { year: 2023, winner: 'Mumbai Indians', runnerUp: 'Delhi Capitals' },
+                    { year: 2024, winner: 'Royal Challengers Bengaluru', runnerUp: 'Delhi Capitals' },
+                    { year: 2025, winner: 'Mumbai Indians', runnerUp: 'Delhi Capitals' },
+                  ].map((season, index) => (
+                    <motion.tr
+                      key={season.year}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="hover:bg-gray-50"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{season.year}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{season.winner}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{season.runnerUp}</td>
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </motion.div>
         );
 
       default: // matches
         return (
           <div className="space-y-6">
             {matches.length > 0 && matches.some((m) => m.status === 'Live') ? (
-              <div className="bg-gradient-to-r from-purple-700 to-indigo-800 text-white p-6 rounded-lg shadow-lg">
+              <div className="bg-gradient-to-r from-purple-400 to-indigo-800 text-white p-6 rounded-lg shadow-lg">
                 <h2 className="text-2xl font-bold mb-2">Live Match</h2>
                 <div className="flex items-center justify-between">
                   <div className="text-center">

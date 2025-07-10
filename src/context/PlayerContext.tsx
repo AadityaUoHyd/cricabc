@@ -23,7 +23,7 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     setError(null);
     try {
       const res = await axios.get<Player[]>(
-        `${import.meta.env.VITE_API_URL || ''}/api/players`, 
+        `${import.meta.env.VITE_API_URL || ''}/players`, 
         { 
           params: { 
             page: 0, 

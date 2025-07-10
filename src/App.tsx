@@ -148,7 +148,7 @@ const App: FC = () => {
                   <Route path="teams" element={<AdminTeams />} />
                   <Route path="quiz" element={<AdminQuiz />} />
                 </Route>
-                <Route path="*" element={<h1 className="text-center">404 - Page Not Found</h1>} />
+                <Route path="*" element={<h1 className="text-center py-5 font-extrabold">Sorry for the inconvenience. CricABC will develop this page soon...</h1>} />
               </Routes>
             </Suspense>
             </PlayerProvider>

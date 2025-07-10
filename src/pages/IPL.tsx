@@ -3,6 +3,7 @@ import axios from 'axios';
 import { initPusher } from '../lib/pusher';
 import MatchCard from '../components/MatchCard';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Trophy, Award } from 'lucide-react';
 import iplLogo from '../assets/ipl_logo.png';
 import { type Match } from '../types/Match';
 import {type Team } from '../types/Team';
@@ -203,7 +204,7 @@ function IPL() {
                   <div className="flex items-center space-x-4">
                     <img src={team.logoUrl} alt={team.name} className="w-16 h-16 object-contain" />
                     <div>
-                      <h3 className="text-xl font-bold text-gray-800">{team.name}</h3>
+                      <h3 className="text-xl font-bold text-purple-500">{team.name}</h3>
                       <p className="text-gray-600">{team.country}</p>
                     </div>
                   </div>
@@ -243,15 +244,15 @@ function IPL() {
         return (
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead className="bg-purple-500">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Played</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Won</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lost</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Points</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NRR</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">#</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Team</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Played</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Won</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Lost</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Points</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">NRR</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -321,20 +322,77 @@ function IPL() {
         );
 
       case 'about':
-        return (
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-2xl font-bold mb-4 text-gray-800">About IPL</h2>
-            <p className="text-gray-600">
-              The Indian Premier League (IPL) is a professional Twenty20 cricket league in India, established in 2008 by the Board of Control for Cricket in India (BCCI). Contested annually, it features franchise-based teams representing Indian cities and regions, attracting top international and domestic players. Known for its high-octane matches, massive fan following, and significant commercial impact, the IPL has become one of the world's most popular cricket leagues, revolutionizing the sport with its fast-paced format and vibrant atmosphere.
-            </p>
-          </div>
-        );
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="bg-white p-6 rounded-lg shadow-md"
+    >
+      <h2 className="text-2xl font-bold mb-4 text-gray-800 flex items-center">
+        <Trophy className="w-6 h-6 mr-2 text-purple-600" />
+        About IPL
+      </h2>
+      <p className="text-gray-600 mb-6">
+        The Indian Premier League (IPL), established in 2008 by the Board of Control for Cricket in India (BCCI), is a professional Twenty20 cricket league that has transformed the sport's global landscape. Held annually, it features franchise-based teams representing Indian cities and regions, attracting top international and domestic players. Known for its high-octane matches, massive fanbase, and significant commercial success, the IPL is one of the world's most popular cricket leagues. Over the years, it has introduced innovations like the Decision Review System (DRS), strategic timeouts, and a vibrant mix of cricket and entertainment, influencing other T20 leagues worldwide. The league has grown from eight teams to ten, with expansions in 2011 and 2022, and has faced challenges like the 2008 spot-fixing scandal and temporary relocations to South Africa (2009) and the UAE (2014, 2020) due to logistical issues. Despite these, the IPL continues to thrive, fostering new talent and delivering thrilling cricket.
+      </p>
+      <h3 className="text-xl font-semibold mb-4 text-gray-800 flex items-center">
+        <Award className="w-6 h-6 mr-2 text-purple-600" />
+        IPL Winners and Runners-Up (2008–2025)
+      </h3>
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-purple-500">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Year</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Winner</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Runner-Up</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {[
+              { year: 2008, winner: 'Rajasthan Royals', runnerUp: 'Chennai Super Kings' },
+              { year: 2009, winner: 'Deccan Chargers', runnerUp: 'Royal Challengers Bangalore' },
+              { year: 2010, winner: 'Chennai Super Kings', runnerUp: 'Mumbai Indians' },
+              { year: 2011, winner: 'Chennai Super Kings', runnerUp: 'Royal Challengers Bangalore' },
+              { year: 2012, winner: 'Kolkata Knight Riders', runnerUp: 'Chennai Super Kings' },
+              { year: 2013, winner: 'Mumbai Indians', runnerUp: 'Chennai Super Kings' },
+              { year: 2014, winner: 'Kolkata Knight Riders', runnerUp: 'Kings XI Punjab' },
+              { year: 2015, winner: 'Mumbai Indians', runnerUp: 'Chennai Super Kings' },
+              { year: 2016, winner: 'Sunrisers Hyderabad', runnerUp: 'Royal Challengers Bangalore' },
+              { year: 2017, winner: 'Mumbai Indians', runnerUp: 'Rising Pune Supergiant' },
+              { year: 2018, winner: 'Chennai Super Kings', runnerUp: 'Sunrisers Hyderabad' },
+              { year: 2019, winner: 'Mumbai Indians', runnerUp: 'Chennai Super Kings' },
+              { year: 2020, winner: 'Mumbai Indians', runnerUp: 'Delhi Capitals' },
+              { year: 2021, winner: 'Chennai Super Kings', runnerUp: 'Kolkata Knight Riders' },
+              { year: 2022, winner: 'Gujarat Titans', runnerUp: 'Rajasthan Royals' },
+              { year: 2023, winner: 'Chennai Super Kings', runnerUp: 'Gujarat Titans' },
+              { year: 2024, winner: 'Kolkata Knight Riders', runnerUp: 'Sunrisers Hyderabad' },
+              { year: 2025, winner: 'Royal Challengers Bangalore', runnerUp: 'Punjab Kings' },
+            ].map((season, index) => (
+              <motion.tr
+                key={season.year}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className="hover:bg-gray-50"
+              >
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{season.year}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{season.winner}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{season.runnerUp}</td>
+              </motion.tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </motion.div>
+  );
 
       default: // matches
         return (
           <div className="space-y-6">
             {matches.length > 0 && matches.some((m) => m.status === 'Live') ? (
-              <div className="bg-gradient-to-r from-purple-700 to-indigo-800 text-white p-6 rounded-lg shadow-lg">
+              <div className="bg-gradient-to-r from-purple-400 to-indigo-800 text-white p-6 rounded-lg shadow-lg">
                 <h2 className="text-2xl font-bold mb-2">Live Match</h2>
                 <div className="flex items-center justify-between">
                   <div className="text-center">

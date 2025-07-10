@@ -19,7 +19,7 @@ const tournaments: Tournament[] = [
   { id: 'ipl', name: 'IPL', logo: '💎' },
   { id: 'bbl', name: 'Big Bash', logo: '🔥' },
   { id: 'cpl', name: 'CPL', logo: '☀️' },
-  { id: 'psl', name: 'PSL', logo: '🏏' },
+  { id: 'wpl', name: 'WPL', logo: '🏏' },
 ];
 
 export default function Archives() {

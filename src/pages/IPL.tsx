@@ -3,13 +3,15 @@ import axios from 'axios';
 import { initPusher } from '../lib/pusher';
 import MatchCard from '../components/MatchCard';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, Award } from 'lucide-react';
+import { Trophy, Award, ChevronLeft, ChevronRight } from 'lucide-react';
 import iplLogo from '../assets/ipl_logo.png';
 import { type Match } from '../types/Match';
-import {type Team } from '../types/Team';
+import { type Team } from '../types/Team';
 import { type Player, type BattingStats, type BowlingStats } from '../types/Player';
 import { usePlayers } from '../context/PlayerContext';
 import { FaCalendarAlt, FaNewspaper, FaTable, FaChartLine, FaUsers, FaInfoCircle } from 'react-icons/fa';
+import { RiAuctionFill } from "react-icons/ri";
+import IplAuction from './IplAuction';
 
 interface NewsItem {
   _id: string;
@@ -49,7 +51,21 @@ function IPL() {
     stats: true,
   });
   const [error, setError] = useState<string | null>(null);
-  
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const images = [
+    'src/assets/about-ipl1.png',
+    'src/assets/about-ipl2.png',
+    'src/assets/about-ipl3.png',
+    'src/assets/about-ipl4.png',
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+    }, 5000); // Change image every 5 seconds
+    return () => clearInterval(interval);
+  }, [images.length]);
+
   // Safely get player context with error handling
   let playersLoading = false;
   let playersError = null;
@@ -321,72 +337,117 @@ function IPL() {
           </div>
         );
 
+      case 'auction':
+        return <IplAuction />;
+
       case 'about':
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="bg-white p-6 rounded-lg shadow-md"
-    >
-      <h2 className="text-2xl font-bold mb-4 text-gray-800 flex items-center">
-        <Trophy className="w-6 h-6 mr-2 text-purple-600" />
-        About IPL
-      </h2>
-      <p className="text-gray-600 mb-6">
-        The Indian Premier League (IPL), established in 2008 by the Board of Control for Cricket in India (BCCI), is a professional Twenty20 cricket league that has transformed the sport's global landscape. Held annually, it features franchise-based teams representing Indian cities and regions, attracting top international and domestic players. Known for its high-octane matches, massive fanbase, and significant commercial success, the IPL is one of the world's most popular cricket leagues. Over the years, it has introduced innovations like the Decision Review System (DRS), strategic timeouts, and a vibrant mix of cricket and entertainment, influencing other T20 leagues worldwide. The league has grown from eight teams to ten, with expansions in 2011 and 2022, and has faced challenges like the 2008 spot-fixing scandal and temporary relocations to South Africa (2009) and the UAE (2014, 2020) due to logistical issues. Despite these, the IPL continues to thrive, fostering new talent and delivering thrilling cricket.
-      </p>
-      <h3 className="text-xl font-semibold mb-4 text-gray-800 flex items-center">
-        <Award className="w-6 h-6 mr-2 text-purple-600" />
-        IPL Winners and Runners-Up (2008–2025)
-      </h3>
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-purple-500">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Year</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Winner</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Runner-Up</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {[
-              { year: 2008, winner: 'Rajasthan Royals', runnerUp: 'Chennai Super Kings' },
-              { year: 2009, winner: 'Deccan Chargers', runnerUp: 'Royal Challengers Bangalore' },
-              { year: 2010, winner: 'Chennai Super Kings', runnerUp: 'Mumbai Indians' },
-              { year: 2011, winner: 'Chennai Super Kings', runnerUp: 'Royal Challengers Bangalore' },
-              { year: 2012, winner: 'Kolkata Knight Riders', runnerUp: 'Chennai Super Kings' },
-              { year: 2013, winner: 'Mumbai Indians', runnerUp: 'Chennai Super Kings' },
-              { year: 2014, winner: 'Kolkata Knight Riders', runnerUp: 'Kings XI Punjab' },
-              { year: 2015, winner: 'Mumbai Indians', runnerUp: 'Chennai Super Kings' },
-              { year: 2016, winner: 'Sunrisers Hyderabad', runnerUp: 'Royal Challengers Bangalore' },
-              { year: 2017, winner: 'Mumbai Indians', runnerUp: 'Rising Pune Supergiant' },
-              { year: 2018, winner: 'Chennai Super Kings', runnerUp: 'Sunrisers Hyderabad' },
-              { year: 2019, winner: 'Mumbai Indians', runnerUp: 'Chennai Super Kings' },
-              { year: 2020, winner: 'Mumbai Indians', runnerUp: 'Delhi Capitals' },
-              { year: 2021, winner: 'Chennai Super Kings', runnerUp: 'Kolkata Knight Riders' },
-              { year: 2022, winner: 'Gujarat Titans', runnerUp: 'Rajasthan Royals' },
-              { year: 2023, winner: 'Chennai Super Kings', runnerUp: 'Gujarat Titans' },
-              { year: 2024, winner: 'Kolkata Knight Riders', runnerUp: 'Sunrisers Hyderabad' },
-              { year: 2025, winner: 'Royal Challengers Bangalore', runnerUp: 'Punjab Kings' },
-            ].map((season, index) => (
-              <motion.tr
-                key={season.year}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className="hover:bg-gray-50"
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-white p-6 rounded-lg shadow-md"
+          >
+            <h2 className="text-2xl font-bold mb-4 text-gray-800 flex items-center">
+              <Trophy className="w-6 h-6 mr-2 text-purple-600" />
+              About IPL
+            </h2>
+            
+            <p className="text-gray-600 mb-6">
+              The Indian Premier League (IPL), established in 2008 by the Board of Control for Cricket in India (BCCI), is a professional Twenty20 cricket league that has redefined global cricket. Held annually, it features ten franchise-based teams representing Indian cities and regions, attracting top international and domestic players. Renowned for its high-octane matches, massive fanbase, and unparalleled commercial success, the IPL is the world's second-largest sports league financially, valued at ₹92,500 crore ($11.1 billion) in 2024, trailing only the NFL. Its media rights for 2023–2027 were sold to Star India and Viacom18 for ₹48,390 crore ($8.9 billion), equating to ₹118 crore per match, the highest per-match value globally for any team sport.
+              <p className='mt-2'>The IPL has significantly bolstered the BCCI’s financial clout, contributing over 60% of its revenue, enabling investments in domestic cricket infrastructure and grassroots programs. The league has driven cricket’s growth by introducing innovations like the Decision Review System (DRS), strategic timeouts, and a vibrant blend of sport and entertainment, influencing T20 leagues worldwide. It has created opportunities for young talent, with players like Yashasvi Jaiswal and Umran Malik rising to prominence, and supports women’s cricket through initiatives like the WPL. The IPL’s viewership reached 510 million in 2024, with digital streaming on JioCinema hitting 2,600 crore minutes of watch time. Despite challenges like the 2013 spot-fixing scandal and relocations to South Africa (2009) and the UAE (2014, 2020), the IPL continues to thrive, fostering talent and delivering thrilling cricket that captivates a global audience.
+              </p>
+            </p>
+
+            <div className="relative w-full max-w-4xl mx-auto aspect-[16/9] bg-gray-200 rounded-lg overflow-hidden mb-6">
+              <motion.img
+                key={images[currentImageIndex]}
+                src={images[currentImageIndex]}
+                alt={`IPL Highlight ${currentImageIndex + 1}`}
+                className="w-full h-full object-cover"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
+              />
+              <button
+                onClick={() => setCurrentImageIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length)}
+                className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 p-2 rounded-full text-white hover:bg-opacity-75"
+                aria-label="Previous Image"
               >
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{season.year}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{season.winner}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{season.runnerUp}</td>
-              </motion.tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </motion.div>
-  );
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              <button
+                onClick={() => setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length)}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 p-2 rounded-full text-white hover:bg-opacity-75"
+                aria-label="Next Image"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+              <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                {images.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentImageIndex(index)}
+                    className={`w-2 h-2 rounded-full ${currentImageIndex === index ? 'bg-purple-600' : 'bg-gray-400'
+                      }`}
+                    aria-label={`Go to image ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <h3 className="text-xl font-semibold mb-4 text-gray-800 flex items-center">
+              <Award className="w-6 h-6 mr-2 text-purple-600 mt-4" />
+              IPL Winners and Runners-Up (2008–2025)
+            </h3>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-purple-500">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Year</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Winner</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Runner-Up</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {[
+                    { year: 2008, winner: 'Rajasthan Royals', runnerUp: 'Chennai Super Kings' },
+                    { year: 2009, winner: 'Deccan Chargers', runnerUp: 'Royal Challengers Bangalore' },
+                    { year: 2010, winner: 'Chennai Super Kings', runnerUp: 'Mumbai Indians' },
+                    { year: 2011, winner: 'Chennai Super Kings', runnerUp: 'Royal Challengers Bangalore' },
+                    { year: 2012, winner: 'Kolkata Knight Riders', runnerUp: 'Chennai Super Kings' },
+                    { year: 2013, winner: 'Mumbai Indians', runnerUp: 'Chennai Super Kings' },
+                    { year: 2014, winner: 'Kolkata Knight Riders', runnerUp: 'Kings XI Punjab' },
+                    { year: 2015, winner: 'Mumbai Indians', runnerUp: 'Chennai Super Kings' },
+                    { year: 2016, winner: 'Sunrisers Hyderabad', runnerUp: 'Royal Challengers Bangalore' },
+                    { year: 2017, winner: 'Mumbai Indians', runnerUp: 'Rising Pune Supergiant' },
+                    { year: 2018, winner: 'Chennai Super Kings', runnerUp: 'Sunrisers Hyderabad' },
+                    { year: 2019, winner: 'Mumbai Indians', runnerUp: 'Chennai Super Kings' },
+                    { year: 2020, winner: 'Mumbai Indians', runnerUp: 'Delhi Capitals' },
+                    { year: 2021, winner: 'Chennai Super Kings', runnerUp: 'Kolkata Knight Riders' },
+                    { year: 2022, winner: 'Gujarat Titans', runnerUp: 'Rajasthan Royals' },
+                    { year: 2023, winner: 'Chennai Super Kings', runnerUp: 'Gujarat Titans' },
+                    { year: 2024, winner: 'Kolkata Knight Riders', runnerUp: 'Sunrisers Hyderabad' },
+                    { year: 2025, winner: 'Royal Challengers Bangalore', runnerUp: 'Punjab Kings' },
+                  ].map((season, index) => (
+                    <motion.tr
+                      key={season.year}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="hover:bg-gray-50"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{season.year}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{season.winner}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{season.runnerUp}</td>
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </motion.div>
+        );
 
       default: // matches
         return (
@@ -471,16 +532,16 @@ function IPL() {
               { id: 'points', label: 'Points Table', icon: <FaTable className="mr-2" /> },
               { id: 'stats', label: 'Stats', icon: <FaChartLine className="mr-2" /> },
               { id: 'news', label: 'News', icon: <FaNewspaper className="mr-2" /> },
+              { id: 'auction', label: 'Auction', icon: <RiAuctionFill className="mr-2" /> },
               { id: 'about', label: 'About', icon: <FaInfoCircle className="mr-2" /> },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-6 py-4 font-medium text-sm flex items-center whitespace-nowrap transition-colors ${
-                  activeTab === tab.id
-                    ? 'text-purple-600 border-b-2 border-purple-600'
-                    : 'text-gray-600 hover:text-purple-600 hover:bg-gray-50'
-                }`}
+                className={`px-6 py-4 font-medium text-sm flex items-center whitespace-nowrap transition-colors ${activeTab === tab.id
+                  ? 'text-purple-600 border-b-2 border-purple-600'
+                  : 'text-gray-600 hover:text-purple-600 hover:bg-gray-50'
+                  }`}
               >
                 {tab.icon}
                 {tab.label}

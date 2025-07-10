@@ -9,7 +9,9 @@ import { type Team } from '../types/Team';
 import { type Player, type BattingStats, type BowlingStats } from '../types/Player';
 import { usePlayers } from '../context/PlayerContext';
 import { FaCalendarAlt, FaNewspaper, FaTable, FaChartLine, FaUsers, FaInfoCircle } from 'react-icons/fa';
+import { RiAuctionFill } from "react-icons/ri";
 import { Trophy, Award } from 'lucide-react';
+import WplAuction from './WplAuction';
 
 interface NewsItem {
   _id: string;
@@ -321,6 +323,9 @@ function WPL() {
           </div>
         );
 
+      case 'auction':
+        return <WplAuction />;
+
       case 'about':
         return (
           <motion.div
@@ -333,9 +338,19 @@ function WPL() {
               <Trophy className="w-6 h-6 mr-2 text-purple-600" />
               About WPL
             </h2>
+            
             <p className="text-gray-600 mb-6">
-              The Women's Premier League (WPL), launched in 2023 by the Board of Control for Cricket in India (BCCI), is a professional Twenty20 cricket league in India, modeled after the Indian Premier League (IPL). It features five franchise-based teams representing Indian cities, showcasing top international and domestic women cricketers. The WPL succeeded the Women's T20 Challenge (2018–2022), providing a robust platform to elevate women's cricket. With a double round-robin format and playoffs, the league has grown in popularity, featuring high-energy matches and significant fan engagement. The inaugural season saw Mumbai Indians clinch the title, followed by Royal Challengers Bengaluru in 2024. The 2025 season expanded to multiple cities, including Mumbai, Bengaluru, Lucknow, and Vadodara. Backed by substantial investments, such as the Tata Group's title sponsorship and Viacom18's media rights, the WPL continues to inspire the next generation of cricketers and promote gender equality in the sport.
+              The Women's Premier League (WPL), launched in 2023 by the Board of Control for Cricket in India (BCCI), is a professional Twenty20 cricket league in India, modeled after the Indian Premier League (IPL). It features five franchise-based teams representing Indian cities, showcasing top international and domestic women cricketers. The WPL succeeded the Women's T20 Challenge (2018–2022), providing a robust platform to elevate women's cricket. With a double round-robin format and playoffs, the league has grown in popularity, featuring high-energy matches and significant fan engagement, with the opening match of WPL 2025 attracting 30 million viewers. The inaugural season saw Mumbai Indians clinch the title, followed by Royal Challengers Bengaluru in 2024, with Mumbai Indians reclaiming the title in 2025. The 2025 season expanded to multiple cities, including Mumbai, Bengaluru, Lucknow, and Vadodara. 
+              <p className='mt-2'>Backed by substantial investments, the WPL has a valuation of ₹1,350 crore ($162 million) in 2024, up 8% from ₹1,250 crore ($150 million) in 2023, driven by a ₹951 crore ($176 million) five-year media rights deal with Viacom18, translating to ₹7.09 crore per match, making it the second most valuable broadcast contract for a women’s sports league globally, behind the WNBA. The Tata Group secured title sponsorship for ₹165 crore over five years, further bolstering the league’s financial strength. The WPL continues to inspire the next generation of cricketers and promote gender equality in the sport.
+              </p>
             </p>
+            <div className="relative w-full max-w-4xl mx-auto aspect-[16/9] bg-gray-200 rounded-lg overflow-hidden m-6">
+              <img
+                src="src/assets/about-wpl.png"
+                alt="Women's Premier League"
+                className="w-full h-full object-cover p-4"
+              />
+            </div>
             <h3 className="text-xl font-semibold mb-4 text-gray-800 flex items-center">
               <Award className="w-6 h-6 mr-2 text-purple-600" />
               WPL Winners and Runners-Up (2023–2025)
@@ -456,6 +471,7 @@ function WPL() {
               { id: 'points', label: 'Points Table', icon: <FaTable className="mr-2" /> },
               { id: 'stats', label: 'Stats', icon: <FaChartLine className="mr-2" /> },
               { id: 'news', label: 'News', icon: <FaNewspaper className="mr-2" /> },
+              { id: 'auction', label: 'Auction', icon: <RiAuctionFill className="mr-2" /> },
               { id: 'about', label: 'About', icon: <FaInfoCircle className="mr-2" /> },
             ].map((tab) => (
               <button

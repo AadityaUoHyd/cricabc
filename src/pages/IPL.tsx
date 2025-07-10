@@ -12,6 +12,14 @@ import { usePlayers } from '../context/PlayerContext';
 import { FaCalendarAlt, FaNewspaper, FaTable, FaChartLine, FaUsers, FaInfoCircle } from 'react-icons/fa';
 import { RiAuctionFill } from "react-icons/ri";
 import IplAuction from './IplAuction';
+import Papa from 'papaparse';
+import auctionData from '../utils/ipl-auction-data.csv?raw';
+
+interface Winner {
+  year: number;
+  winner: string;
+  runnerUp: string;
+}
 
 interface NewsItem {
   _id: string;
@@ -23,8 +31,6 @@ interface NewsItem {
 
 interface TeamsResponse {
   content: Team[];
-  // Add other pagination properties if they exist in the response
-  // For example: page, size, totalElements, totalPages, etc.
 }
 
 interface PointsTableEntry {
@@ -44,11 +50,13 @@ function IPL() {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [topRunScorers, setTopRunScorers] = useState<Player[]>([]);
   const [topWicketTakers, setTopWicketTakers] = useState<Player[]>([]);
+  const [winners, setWinners] = useState<Winner[]>([]);
   const [isLoading, setIsLoading] = useState({
     matches: true,
     teams: true,
     news: true,
     stats: true,
+    winners: true,
   });
   const [error, setError] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -62,131 +70,211 @@ function IPL() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 5000); // Change image every 5 seconds
+    }, 5000);
     return () => clearInterval(interval);
   }, [images.length]);
 
-  // Safely get player context with error handling
+  // Player context with error handling
   let playersLoading = false;
-  let playersError = null;
+  let playersError: string | null = null;
   try {
     const context = usePlayers();
     playersLoading = context.loading;
     playersError = context.error;
   } catch (err) {
     console.warn('PlayerContext not available:', err);
-    // Continue without player data if context is not available
   }
 
   useEffect(() => {
     const fetchData = async () => {
-      const loadingStates = {
+      setIsLoading({
         matches: true,
         teams: true,
         news: true,
         stats: true,
-      };
+        winners: true,
+      });
 
       try {
         // Fetch IPL matches
-        const matchesPromise = axios.get<Match[]>(
-          `${import.meta.env.VITE_API_URL}/matches/tournament/IPL`
-        ).then(response => {
-          setMatches(response.data);
-          loadingStates.matches = false;
-          setIsLoading(prev => ({ ...prev, matches: false }));
-        }).catch(err => {
-          console.error('Error fetching matches:', err);
-          setError(prev => prev || 'Failed to load matches. Some data may be incomplete.');
-          loadingStates.matches = false;
-          setIsLoading(prev => ({ ...prev, matches: false }));
-        });
+        const matchesPromise = axios
+          .get<Match[]>(`${import.meta.env.VITE_API_URL}/matches/tournament/IPL`)
+          .then((response) => {
+            setMatches(response.data);
+            setIsLoading((prev) => ({ ...prev, matches: false }));
+          })
+          .catch((err) => {
+            console.error('Error fetching matches:', err);
+            setError((prev) => prev || 'Failed to load matches. Some data may be incomplete.');
+            setIsLoading((prev) => ({ ...prev, matches: false }));
+          });
 
         // Fetch IPL teams
-        const teamsPromise = axios.get<TeamsResponse>(
-          `${import.meta.env.VITE_API_URL}/teams/ipl`,
-          { params: { category: 'league', leagueName: 'Indian Premier League (IPL)' } }
-        ).then(response => {
-          setTeams(response.data.content);
-          loadingStates.teams = false;
-          setIsLoading(prev => ({ ...prev, teams: false }));
-        }).catch(err => {
-          console.error('Error fetching teams:', err);
-          setError(prev => prev || 'Failed to load teams. Some data may be incomplete.');
-          loadingStates.teams = false;
-          setIsLoading(prev => ({ ...prev, teams: false }));
-        });
+        const teamsPromise = axios
+          .get<TeamsResponse>(`${import.meta.env.VITE_API_URL}/teams/ipl`, {
+            params: { category: 'league', leagueName: 'Indian Premier League (IPL)' },
+          })
+          .then((response) => {
+            setTeams(response.data.content);
+            setIsLoading((prev) => ({ ...prev, teams: false }));
+          })
+          .catch((err) => {
+            console.error('Error fetching teams:', err);
+            setError((prev) => prev || 'Failed to load teams. Some data may be incomplete.');
+            setIsLoading((prev) => ({ ...prev, teams: false }));
+          });
 
         // Fetch points table
-        const pointsPromise = axios.get<PointsTableEntry[]>(
-          `${import.meta.env.VITE_API_URL}/points-table/ipl`
-        ).then(response => {
-          setPointsTable(response.data);
-          loadingStates.stats = false;
-          setIsLoading(prev => ({ ...prev, stats: false }));
-        }).catch(err => {
-          console.error('Error fetching points table:', err);
-          setError(prev => prev || 'Failed to load points table. Some data may be incomplete.');
-          loadingStates.stats = false;
-          setIsLoading(prev => ({ ...prev, stats: false }));
-        });
+        const pointsPromise = axios
+          .get<PointsTableEntry[]>(`${import.meta.env.VITE_API_URL}/points-table/ipl`)
+          .then((response) => {
+            setPointsTable(response.data);
+            setIsLoading((prev) => ({ ...prev, stats: false }));
+          })
+          .catch((err) => {
+            console.error('Error fetching points table:', err);
+            setError((prev) => prev || 'Failed to load points table. Some data may be incomplete.');
+            setIsLoading((prev) => ({ ...prev, stats: false }));
+          });
 
         // Fetch news
-        const newsPromise = axios.get<NewsItem[]>(
-          `${import.meta.env.VITE_API_URL}/news`,
-          { params: { tournament: 'IPL' } }
-        ).then(response => {
-          setNews(response.data);
-          loadingStates.news = false;
-          setIsLoading(prev => ({ ...prev, news: false }));
-        }).catch(err => {
-          console.error('Error fetching news:', err);
-          setError(prev => prev || 'Failed to load news. Some data may be incomplete.');
-          loadingStates.news = false;
-          setIsLoading(prev => ({ ...prev, news: false }));
-        });
+        const newsPromise = axios
+          .get<NewsItem[]>(`${import.meta.env.VITE_API_URL}/news`, {
+            params: { tournament: 'IPL' },
+          })
+          .then((response) => {
+            setNews(response.data);
+            setIsLoading((prev) => ({ ...prev, news: false }));
+          })
+          .catch((err) => {
+            console.error('Error fetching news:', err);
+            setError((prev) => prev || 'Failed to load news. Some data may be incomplete.');
+            setIsLoading((prev) => ({ ...prev, news: false }));
+          });
 
         // Fetch top players
-        const playersPromise = axios.get<{ runScorers: Player[]; wicketTakers: Player[] }>(
-          `${import.meta.env.VITE_API_URL}/players/stats/ipl`
-        ).then(response => {
-          setTopRunScorers(response.data.runScorers);
-          setTopWicketTakers(response.data.wicketTakers);
-          loadingStates.stats = false;
-          setIsLoading(prev => ({ ...prev, stats: false }));
-        }).catch(err => {
-          console.error('Error fetching player stats:', err);
-          setError(prev => prev || 'Failed to load player statistics. Some data may be incomplete.');
-          loadingStates.stats = false;
-          setIsLoading(prev => ({ ...prev, stats: false }));
-        });
+        const playersPromise = axios
+          .get<{ runScorers: Player[]; wicketTakers: Player[] }>(`${import.meta.env.VITE_API_URL}/players/stats/ipl`)
+          .then((response) => {
+            setTopRunScorers(response.data.runScorers);
+            setTopWicketTakers(response.data.wicketTakers);
+            setIsLoading((prev) => ({ ...prev, stats: false }));
+          })
+          .catch((err) => {
+            console.error('Error fetching player stats:', err);
+            setError((prev) => prev || 'Failed to load player statistics. Some data may be incomplete.');
+            setIsLoading((prev) => ({ ...prev, stats: false }));
+          });
 
-        // Wait for all requests to complete
-        await Promise.allSettled([
-          matchesPromise,
-          teamsPromise,
-          pointsPromise,
-          newsPromise,
-          playersPromise
-        ]);
+        // Parse winners from CSV
+        const parseWinnersData = () => {
+          try {
+            const parsed = Papa.parse(auctionData, {
+              header: false,
+              skipEmptyLines: true,
+              transform: (value) => value.trim(),
+            });
 
+            if (parsed.errors.length > 0) {
+              console.warn('CSV parsing errors encountered:', parsed.errors);
+            }
+
+            const data = parsed.data as string[][];
+            let currentSection: string | null = null;
+            let currentHeaders: string[] = [];
+            const winners: Winner[] = [];
+            let winnersSectionFound = false;
+
+            for (let i = 0; i < data.length; i++) {
+              const row = data[i];
+
+              if (row.length === 1) {
+                const sectionHeader = row[0].toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
+                if (sectionHeader === 'winners') {
+                  currentSection = 'winners';
+                  winnersSectionFound = true;
+                  currentHeaders = [];
+                  continue;
+                } else if (['sold players', 'unsold players', 'team budgets'].includes(sectionHeader)) {
+                  currentSection = null;
+                  currentHeaders = [];
+                  continue;
+                } else {
+                  console.warn(`Unknown section header at row ${i}: "${row[0]}"`);
+                  continue;
+                }
+              }
+
+              if (currentSection === 'winners' && currentHeaders.length === 0) {
+                if (row.includes('year') && row.includes('winner') && row.includes('runnerUp')) {
+                  currentHeaders = row;
+                  continue;
+                } else {
+                  console.warn(`Expected winners headers at row ${i}, but got:`, row);
+                }
+              }
+
+              if (currentSection === 'winners' && currentHeaders.length > 0) {
+                if (row.length >= currentHeaders.length) {
+                  const rowData = Object.fromEntries(currentHeaders.map((header, index) => [header, row[index] || '']));
+
+                  if (rowData.year && rowData.winner && rowData.runnerUp) {
+                    const year = parseInt(rowData.year);
+                    if (!isNaN(year)) {
+                      winners.push({
+                        year,
+                        winner: rowData.winner,
+                        runnerUp: rowData.runnerUp,
+                      });
+                    } else {
+                      console.warn(`Skipping winners row ${i} due to invalid year:`, rowData);
+                    }
+                  } else {
+                    console.warn(`Skipping invalid winners row ${i}:`, rowData);
+                  }
+                } else {
+                  console.warn(`Skipping row ${i} due to column mismatch in winners section (expected ${currentHeaders.length} columns, got ${row.length}):`, row);
+                }
+              }
+            }
+
+            if (!winnersSectionFound) {
+              console.warn('Winners section not found in CSV.');
+              setError('Winners section not found in CSV. Ensure the section header is "# Winners".');
+            }
+
+            if (winners.length === 0 && winnersSectionFound) {
+              console.warn('No valid winners data found in CSV.');
+              setError('No valid winners data found. Please check the "# Winners" section in the CSV.');
+            }
+
+            setWinners(winners);
+            setIsLoading((prev) => ({ ...prev, winners: false }));
+          } catch (err) {
+            console.error('Error parsing winners data:', err);
+            setError('Failed to load IPL winners data. Please verify the "# Winners" section in the CSV.');
+            setIsLoading((prev) => ({ ...prev, winners: false }));
+          }
+        };
+
+        parseWinnersData();
+
+        await Promise.allSettled([matchesPromise, teamsPromise, pointsPromise, newsPromise, playersPromise]);
       } catch (err) {
         console.error('Unexpected error in fetchData:', err);
         setError('An unexpected error occurred while loading IPL data. Please try again later.');
-      } finally {
-        // Ensure all loading states are set to false
         setIsLoading({
           matches: false,
           teams: false,
           news: false,
           stats: false,
+          winners: false,
         });
       }
     };
 
     fetchData();
 
-    // Subscribe to Pusher updates
     const pusher = initPusher();
     const channel = pusher.subscribe('match-channel');
     channel.bind('match-update', (data: Match) => {
@@ -352,10 +440,11 @@ function IPL() {
               <Trophy className="w-6 h-6 mr-2 text-purple-600" />
               About IPL
             </h2>
-            
+
             <p className="text-gray-600 mb-6">
               The Indian Premier League (IPL), established in 2008 by the Board of Control for Cricket in India (BCCI), is a professional Twenty20 cricket league that has redefined global cricket. Held annually, it features ten franchise-based teams representing Indian cities and regions, attracting top international and domestic players. Renowned for its high-octane matches, massive fanbase, and unparalleled commercial success, the IPL is the world's second-largest sports league financially, valued at ₹92,500 crore ($11.1 billion) in 2024, trailing only the NFL. Its media rights for 2023–2027 were sold to Star India and Viacom18 for ₹48,390 crore ($8.9 billion), equating to ₹118 crore per match, the highest per-match value globally for any team sport.
-              <p className='mt-2'>The IPL has significantly bolstered the BCCI’s financial clout, contributing over 60% of its revenue, enabling investments in domestic cricket infrastructure and grassroots programs. The league has driven cricket’s growth by introducing innovations like the Decision Review System (DRS), strategic timeouts, and a vibrant blend of sport and entertainment, influencing T20 leagues worldwide. It has created opportunities for young talent, with players like Yashasvi Jaiswal and Umran Malik rising to prominence, and supports women’s cricket through initiatives like the WPL. The IPL’s viewership reached 510 million in 2024, with digital streaming on JioCinema hitting 2,600 crore minutes of watch time. Despite challenges like the 2013 spot-fixing scandal and relocations to South Africa (2009) and the UAE (2014, 2020), the IPL continues to thrive, fostering talent and delivering thrilling cricket that captivates a global audience.
+              <p className="mt-2">
+                The IPL has significantly bolstered the BCCI’s financial clout, contributing over 60% of its revenue, enabling investments in domestic cricket infrastructure and grassroots programs. The league has driven cricket’s growth by introducing innovations like the Decision Review System (DRS), strategic timeouts, and a vibrant blend of sport and entertainment, influencing T20 leagues worldwide. It has created opportunities for young talent, with players like Yashasvi Jaiswal and Umran Malik rising to prominence, and supports women’s cricket through initiatives like the WPL. The IPL’s viewership reached 510 million in 2024, with digital streaming on JioCinema hitting 2,600 crore minutes of watch time. Despite challenges like the 2013 spot-fixing scandal and relocations to South Africa (2009) and the UAE (2014, 2020), the IPL continues to thrive, fostering talent and delivering thrilling cricket that captivates a global audience.
               </p>
             </p>
 
@@ -389,8 +478,7 @@ function IPL() {
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
-                    className={`w-2 h-2 rounded-full ${currentImageIndex === index ? 'bg-purple-600' : 'bg-gray-400'
-                      }`}
+                    className={`w-2 h-2 rounded-full ${currentImageIndex === index ? 'bg-purple-600' : 'bg-gray-400'}`}
                     aria-label={`Go to image ${index + 1}`}
                   />
                 ))}
@@ -401,51 +489,40 @@ function IPL() {
               <Award className="w-6 h-6 mr-2 text-purple-600 mt-4" />
               IPL Winners and Runners-Up (2008–2025)
             </h3>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-purple-500">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Year</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Winner</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Runner-Up</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {[
-                    { year: 2008, winner: 'Rajasthan Royals', runnerUp: 'Chennai Super Kings' },
-                    { year: 2009, winner: 'Deccan Chargers', runnerUp: 'Royal Challengers Bangalore' },
-                    { year: 2010, winner: 'Chennai Super Kings', runnerUp: 'Mumbai Indians' },
-                    { year: 2011, winner: 'Chennai Super Kings', runnerUp: 'Royal Challengers Bangalore' },
-                    { year: 2012, winner: 'Kolkata Knight Riders', runnerUp: 'Chennai Super Kings' },
-                    { year: 2013, winner: 'Mumbai Indians', runnerUp: 'Chennai Super Kings' },
-                    { year: 2014, winner: 'Kolkata Knight Riders', runnerUp: 'Kings XI Punjab' },
-                    { year: 2015, winner: 'Mumbai Indians', runnerUp: 'Chennai Super Kings' },
-                    { year: 2016, winner: 'Sunrisers Hyderabad', runnerUp: 'Royal Challengers Bangalore' },
-                    { year: 2017, winner: 'Mumbai Indians', runnerUp: 'Rising Pune Supergiant' },
-                    { year: 2018, winner: 'Chennai Super Kings', runnerUp: 'Sunrisers Hyderabad' },
-                    { year: 2019, winner: 'Mumbai Indians', runnerUp: 'Chennai Super Kings' },
-                    { year: 2020, winner: 'Mumbai Indians', runnerUp: 'Delhi Capitals' },
-                    { year: 2021, winner: 'Chennai Super Kings', runnerUp: 'Kolkata Knight Riders' },
-                    { year: 2022, winner: 'Gujarat Titans', runnerUp: 'Rajasthan Royals' },
-                    { year: 2023, winner: 'Chennai Super Kings', runnerUp: 'Gujarat Titans' },
-                    { year: 2024, winner: 'Kolkata Knight Riders', runnerUp: 'Sunrisers Hyderabad' },
-                    { year: 2025, winner: 'Royal Challengers Bangalore', runnerUp: 'Punjab Kings' },
-                  ].map((season, index) => (
-                    <motion.tr
-                      key={season.year}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="hover:bg-gray-50"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{season.year}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{season.winner}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{season.runnerUp}</td>
-                    </motion.tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            {isLoading.winners ? (
+              <div className="flex justify-center items-center py-16">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+              </div>
+            ) : winners.length === 0 ? (
+              <p className="text-gray-500 text-center">No winners data available.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-purple-500">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Year</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Winner</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Runner-Up</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {winners.map((season, index) => (
+                      <motion.tr
+                        key={season.year}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="hover:bg-gray-50"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{season.year}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{season.winner}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{season.runnerUp}</td>
+                      </motion.tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </motion.div>
         );
 
@@ -538,10 +615,11 @@ function IPL() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-6 py-4 font-medium text-sm flex items-center whitespace-nowrap transition-colors ${activeTab === tab.id
-                  ? 'text-purple-600 border-b-2 border-purple-600'
-                  : 'text-gray-600 hover:text-purple-600 hover:bg-gray-50'
-                  }`}
+                className={`px-6 py-4 font-medium text-sm flex items-center whitespace-nowrap transition-colors ${
+                  activeTab === tab.id
+                    ? 'text-purple-600 border-b-2 border-purple-600'
+                    : 'text-gray-600 hover:text-purple-600 hover:bg-gray-50'
+                }`}
               >
                 {tab.icon}
                 {tab.label}
@@ -557,8 +635,17 @@ function IPL() {
           <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
             <div className="flex">
               <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                <svg
+                  className="h-5 w-5 text-red-400"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </div>
               <div className="ml-3">
@@ -576,7 +663,8 @@ function IPL() {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
           >
-            {(isLoading.matches || isLoading.teams || isLoading.news || isLoading.stats || playersLoading) && activeTab !== 'about' ? (
+            {(isLoading.matches || isLoading.teams || isLoading.news || isLoading.stats || isLoading.winners || playersLoading) &&
+            activeTab !== 'auction' ? (
               <div className="flex justify-center items-center py-16">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
               </div>

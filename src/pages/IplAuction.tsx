@@ -1,21 +1,23 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Trophy, DollarSign, Users, ExternalLink } from 'lucide-react';
+import Papa from 'papaparse';
+import auctionData from '../utils/ipl-auction-data.csv?raw';
 
 interface AuctionPlayer {
   id: string;
   name: string;
   role: string;
   nationality: string;
-  basePrice: number; // in INR Lakhs
-  purchasedPrice?: number; // in INR Lakhs
-  team?: string; // Team name or undefined if unsold
+  basePrice: number;
+  purchasedPrice?: number;
+  team?: string;
 }
 
 interface TeamBudget {
   team: string;
-  totalBudget: number; // in INR Crores
-  remainingBudget: number; // in INR Crores
+  totalBudget: number;
+  remainingBudget: number;
 }
 
 function IplAuction() {
@@ -26,55 +28,146 @@ function IplAuction() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchAuctionData = async () => {
+    const parseAuctionData = () => {
       try {
-        // Simulated API response (replace with actual API calls when available)
-        // Example: const response = await axios.get(`${import.meta.env.VITE_API_URL}/auction/ipl/2025`);
-        const mockAuctionData = {
-          soldPlayers: [
-            { id: '1', name: 'Rishabh Pant', role: 'Wicketkeeper-Batsman', nationality: 'India', basePrice: 200, purchasedPrice: 2700, team: 'Lucknow Super Giants' },
-            { id: '2', name: 'Shreyas Iyer', role: 'Batsman', nationality: 'India', basePrice: 200, purchasedPrice: 2675, team: 'Punjab Kings' },
-            { id: '3', name: 'Jos Buttler', role: 'Wicketkeeper-Batsman', nationality: 'England', basePrice: 200, purchasedPrice: 1525, team: 'Gujarat Titans' },
-            { id: '4', name: 'Jofra Archer', role: 'Bowler', nationality: 'England', basePrice: 200, purchasedPrice: 1250, team: 'Mumbai Indians' },
-            { id: '5', name: 'KL Rahul', role: 'Wicketkeeper-Batsman', nationality: 'India', basePrice: 200, purchasedPrice: 1400, team: 'Delhi Capitals' },
-            { id: '6', name: 'Yuzvendra Chahal', role: 'Bowler', nationality: 'India', basePrice: 200, purchasedPrice: 1800, team: 'Royal Challengers Bengaluru' },
-            { id: '7', name: 'David Warner', role: 'Batsman', nationality: 'Australia', basePrice: 200, purchasedPrice: 625, team: 'Sunrisers Hyderabad' },
-            { id: '8', name: 'Kagiso Rabada', role: 'Bowler', nationality: 'South Africa', basePrice: 200, purchasedPrice: 975, team: 'Kolkata Knight Riders' },
-            { id: '9', name: 'Faf du Plessis', role: 'Batsman', nationality: 'South Africa', basePrice: 200, purchasedPrice: 700, team: 'Chennai Super Kings' },
-            { id: '10', name: 'Trent Boult', role: 'Bowler', nationality: 'New Zealand', basePrice: 200, purchasedPrice: 1250, team: 'Rajasthan Royals' },
-          ],
-          unsoldPlayers: [
-            { id: '11', name: 'Ben Stokes', role: 'Allrounder', nationality: 'England', basePrice: 200, purchasedPrice: undefined, team: undefined },
-            { id: '12', name: 'Joe Root', role: 'Batsman', nationality: 'England', basePrice: 200, purchasedPrice: undefined, team: undefined },
-            { id: '13', name: 'Jason Holder', role: 'Allrounder', nationality: 'West Indies', basePrice: 150, purchasedPrice: undefined, team: undefined },
-            { id: '14', name: 'Shakib Al Hasan', role: 'Allrounder', nationality: 'Bangladesh', basePrice: 150, purchasedPrice: undefined, team: undefined },
-          ],
-          teamBudgets: [
-            { team: 'Chennai Super Kings', totalBudget: 120, remainingBudget: 2.87 },
-            { team: 'Delhi Capitals', totalBudget: 120, remainingBudget: 9.9 },
-            { team: 'Gujarat Titans', totalBudget: 120, remainingBudget: 4.1 },
-            { team: 'Kolkata Knight Riders', totalBudget: 120, remainingBudget: 1.35 },
-            { team: 'Lucknow Super Giants', totalBudget: 120, remainingBudget: 0.95 },
-            { team: 'Mumbai Indians', totalBudget: 120, remainingBudget: 1.65 },
-            { team: 'Punjab Kings', totalBudget: 120, remainingBudget: 4.15 },
-            { team: 'Rajasthan Royals', totalBudget: 120, remainingBudget: 4.1 },
-            { team: 'Royal Challengers Bengaluru', totalBudget: 120, remainingBudget: 2.85 },
-            { team: 'Sunrisers Hyderabad', totalBudget: 120, remainingBudget: 5.1 },
-          ],
-        };
+        const parsed = Papa.parse(auctionData, {
+          header: false, // Treat CSV as raw rows
+          skipEmptyLines: true,
+          transform: value => value.trim(),
+        });
 
-        setSoldPlayers(mockAuctionData.soldPlayers);
-        setUnsoldPlayers(mockAuctionData.unsoldPlayers);
-        setTeamBudgets(mockAuctionData.teamBudgets);
+        if (parsed.errors.length > 0) {
+          console.warn('CSV parsing errors encountered:', parsed.errors);
+        }
+
+        const data = parsed.data as string[][];
+        let currentSection: string | null = null;
+        let currentHeaders: string[] = [];
+        const sold: AuctionPlayer[] = [];
+        const unsold: AuctionPlayer[] = [];
+        const budgets: TeamBudget[] = [];
+        let unsoldSectionFound = false;
+
+        for (let i = 0; i < data.length; i++) {
+          const row = data[i];
+
+          // Detect section headers
+          if (row.length === 1) {
+            const sectionHeader = row[0].toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
+            if (sectionHeader === 'sold players' || sectionHeader.includes('soldplayers')) {
+              currentSection = 'sold';
+              currentHeaders = []; // Reset headers
+              continue;
+            } else if (sectionHeader === 'unsold players' || sectionHeader.includes('unsoldplayers')) {
+              currentSection = 'unsold';
+              unsoldSectionFound = true;
+              currentHeaders = []; // Reset headers
+              continue;
+            } else if (sectionHeader === 'team budgets' || sectionHeader.includes('teambudgets')) {
+              currentSection = 'budgets';
+              currentHeaders = []; // Reset headers
+              continue;
+            } else {
+              console.warn(`Unknown section header at row ${i}: "${row[0]}"`);
+              continue;
+            }
+          }
+
+          // Detect headers for the current section
+          if (currentSection && currentHeaders.length === 0) {
+            if (
+              (currentSection === 'sold' && row.includes('id') && row.includes('name') && row.includes('purchasedPrice') && row.includes('team')) ||
+              (currentSection === 'unsold' && row.includes('id') && row.includes('name') && row.includes('basePrice')) ||
+              (currentSection === 'budgets' && row.includes('team') && row.includes('totalBudget'))
+            ) {
+              currentHeaders = row;
+              continue;
+            } else {
+              console.warn(`Expected headers for ${currentSection} at row ${i}, but got:`, row);
+            }
+          }
+
+          // Process data rows
+          if (currentSection && currentHeaders.length > 0) {
+            if (row.length >= currentHeaders.length) {
+              const rowData = Object.fromEntries(currentHeaders.map((header, index) => [header, row[index] || '']));
+
+              if (currentSection === 'sold' && rowData.id && rowData.name && rowData.basePrice && rowData.purchasedPrice && rowData.team) {
+                const basePrice = parseFloat(rowData.basePrice);
+                const purchasedPrice = parseFloat(rowData.purchasedPrice);
+                if (!isNaN(basePrice) && !isNaN(purchasedPrice)) {
+                  sold.push({
+                    id: rowData.id,
+                    name: rowData.name,
+                    role: rowData.role || 'Unknown',
+                    nationality: rowData.nationality || 'Unknown',
+                    basePrice,
+                    purchasedPrice,
+                    team: rowData.team,
+                  });
+                } else {
+                  console.warn(`Skipping sold player row ${i} due to invalid numbers:`, rowData);
+                }
+              } else if (currentSection === 'unsold' && rowData.id && rowData.name && rowData.basePrice) {
+                const basePrice = parseFloat(rowData.basePrice);
+                if (!isNaN(basePrice)) {
+                  unsold.push({
+                    id: rowData.id,
+                    name: rowData.name,
+                    role: rowData.role || 'Unknown',
+                    nationality: rowData.nationality || 'Unknown',
+                    basePrice,
+                    purchasedPrice: undefined,
+                    team: undefined,
+                  });
+                } else {
+                  console.warn(`Skipping unsold player row ${i} due to invalid basePrice:`, rowData);
+                }
+              } else if (currentSection === 'budgets' && rowData.team && rowData.totalBudget && rowData.remainingBudget) {
+                const totalBudget = parseFloat(rowData.totalBudget);
+                const remainingBudget = parseFloat(rowData.remainingBudget);
+                if (!isNaN(totalBudget) && !isNaN(remainingBudget)) {
+                  budgets.push({
+                    team: rowData.team,
+                    totalBudget,
+                    remainingBudget,
+                  });
+                } else {
+                  console.warn(`Skipping budgets row ${i} due to invalid numbers:`, rowData);
+                }
+              } else {
+                console.warn(`Skipping invalid row in ${currentSection} section at row ${i}:`, rowData);
+              }
+            } else {
+              console.warn(`Skipping row ${i} due to column mismatch in ${currentSection} section (expected ${currentHeaders.length} columns, got ${row.length}):`, row);
+            }
+          } else {
+            console.warn(`Skipping row ${i} (no section or headers defined):`, row);
+          }
+        }
+
+        if (!unsoldSectionFound) {
+          console.warn('Unsold Players section not found in CSV.');
+          setError('Unsold Players section not found in CSV. Ensure the section header is "# Unsold Players".');
+        }
+
+        if (sold.length === 0 && unsold.length === 0 && budgets.length === 0) {
+          throw new Error('No valid data found in CSV. Please check section headers and data rows.');
+        }
+
+        setSoldPlayers(sold);
+        setUnsoldPlayers(unsold);
+        setTeamBudgets(budgets);
         setIsLoading(false);
+        setError(null);
       } catch (err) {
-        console.error('Error fetching auction data:', err);
-        setError('Failed to load IPL 2025 auction data.');
+        console.error('Error parsing auction data:', err);
+        setError('Failed to load IPL 2025 auction data. Please verify the CSV file has correct sections (# Sold Players, # Unsold Players, # Team Budgets) and column headers.');
         setIsLoading(false);
       }
     };
 
-    fetchAuctionData();
+    parseAuctionData();
   }, []);
 
   return (
@@ -94,13 +187,13 @@ function IplAuction() {
             </p>
             <div className="relative w-full max-w-4xl mx-auto aspect-[16/9] bg-gray-200 rounded-lg overflow-hidden">
               <img
-                src="src/assets/ipl-auction-2025.png" // Placeholder for 16:9 hero image
+                src="src/assets/ipl-auction-2025.png"
                 alt="IPL 2025 Auction"
                 className="w-full h-full object-cover"
               />
             </div>
             <a
-              href="https://www.youtube.com/watch?v=YpbjdI1HRg4" // Replace with actual YouTube link
+              href="https://www.youtube.com/watch?v=YpbjdI1HRg4"
               target="_blank"
               rel="noopener noreferrer"
               className="mt-4 inline-flex items-center text-purple-400 hover:text-purple-300 font-medium"
@@ -137,6 +230,7 @@ function IplAuction() {
                 <Trophy className="w-6 h-6 mr-2 text-purple-600" />
                 Sold Players
               </h2>
+              {soldPlayers.length === 0 && <p className="text-gray-500 text-center">No sold players data available.</p>}
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-purple-500">
@@ -162,8 +256,8 @@ function IplAuction() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{player.role}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{player.nationality}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{player.basePrice}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{player.purchasedPrice}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{player.team}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{player.purchasedPrice ?? 'N/A'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{player.team ?? 'N/A'}</td>
                       </motion.tr>
                     ))}
                   </tbody>
@@ -182,6 +276,7 @@ function IplAuction() {
                 <Users className="w-6 h-6 mr-2 text-purple-600" />
                 Unsold Players
               </h2>
+              {unsoldPlayers.length === 0 && <p className="text-gray-500 text-center">No unsold players data available.</p>}
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-purple-500">
@@ -223,6 +318,7 @@ function IplAuction() {
                 <DollarSign className="w-6 h-6 mr-2 text-purple-600" />
                 Team Budgets
               </h2>
+              {teamBudgets.length === 0 && <p className="text-gray-500 text-center">No team budgets data available.</p>}
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-purple-500">

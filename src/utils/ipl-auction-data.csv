@@ -1,0 +1,141 @@
+# Sold Players
+id,name,role,nationality,basePrice,purchasedPrice,team
+1,Rishabh Pant,Wicketkeeper-Batsman,India,200,2700,Lucknow Super Giants
+2,Shreyas Iyer,Batsman,India,200,2675,Punjab Kings
+3,Jos Buttler,Wicketkeeper-Batsman,England,200,1525,Gujarat Titans
+4,Jofra Archer,Bowler,England,200,1250,Mumbai Indians
+5,KL Rahul,Wicketkeeper-Batsman,India,200,1400,Delhi Capitals
+6,Yuzvendra Chahal,Bowler,India,200,1800,Punjab Kings
+7,David Warner,Batsman,Australia,200,625,Sunrisers Hyderabad
+8,Kagiso Rabada,Bowler,South Africa,200,975,Kolkata Knight Riders
+9,Faf du Plessis,Batsman,South Africa,200,700,Chennai Super Kings
+10,Trent Boult,Bowler,New Zealand,200,1250,Rajasthan Royals
+15,Bhuvneshwar Kumar,Bowler,India,200,1075,Royal Challengers Bengaluru
+16,Deepak Chahar,Bowler,India,200,925,Mumbai Indians
+17,Mukesh Kumar,Bowler,India,200,800,Delhi Capitals
+18,Akash Deep,Bowler,India,200,800,Lucknow Super Giants
+19,Venkatesh Iyer,Allrounder,India,200,2375,Kolkata Knight Riders
+20,Arshdeep Singh,Bowler,India,200,1800,Punjab Kings
+21,Ishan Kishan,Wicketkeeper-Batsman,India,200,1125,Sunrisers Hyderabad
+22,Mohammed Shami,Bowler,India,200,1000,Sunrisers Hyderabad
+23,Mohammed Siraj,Bowler,India,200,1225,Gujarat Titans
+24,Mitchell Starc,Bowler,Australia,200,1175,Delhi Capitals
+25,Ravichandran Ashwin,Allrounder,India,200,975,Chennai Super Kings
+26,Marcus Stoinis,Allrounder,Australia,200,1100,Punjab Kings
+27,Vaibhav Suryavanshi,Batsman,India,30,110,Rajasthan Royals
+28,Marco Jansen,Allrounder,South Africa,125,700,Punjab Kings
+29,Krunal Pandya,Allrounder,India,200,575,Royal Challengers Bengaluru
+30,Nitish Rana,Allrounder,India,200,420,Rajasthan Royals
+31,Ryan Rickelton,Wicketkeeper-Batsman,South Africa,100,100,Mumbai Indians
+32,Tushar Deshpande,Bowler,India,200,650,Rajasthan Royals
+33,Gerald Coetzee,Bowler,South Africa,200,240,Gujarat Titans
+34,Lockie Ferguson,Bowler,New Zealand,200,200,Punjab Kings
+35,Rasikh Salam Dar,Bowler,India,30,600,Royal Challengers Bengaluru
+36,Nehal Wadhera,Batsman,India,30,420,Punjab Kings
+37,Abdul Samad,Allrounder,India,30,420,Lucknow Super Giants
+38,Josh Hazlewood,Bowler,Australia,200,1250,Mumbai Indians
+39,Noor Ahmad,Bowler,Afghanistan,200,975,Chennai Super Kings
+40,Devon Conway,Wicketkeeper-Batsman,New Zealand,200,975,Chennai Super Kings
+41,Syed Khaleel Ahmed,Bowler,India,200,975,Chennai Super Kings
+42,Rachin Ravindra,Allrounder,New Zealand,200,975,Chennai Super Kings
+43,Rahul Tripathi,Batsman,India,200,975,Chennai Super Kings
+44,Vijay Shankar,Allrounder,India,200,975,Chennai Super Kings
+45,T. Natarajan,Bowler,India,200,975,Delhi Capitals
+46,Jake Fraser-McGurk,Batsman,Australia,200,975,Delhi Capitals
+47,Harry Brook,Batsman,England,200,975,Delhi Capitals
+48,Ashutosh Sharma,Allrounder,India,30,975,Delhi Capitals
+49,Mohit Sharma,Bowler,India,200,975,Delhi Capitals
+50,Sameer Rizvi,Batsman,India,30,975,Delhi Capitals
+51,Karun Nair,Batsman,India,200,975,Delhi Capitals
+52,Prasidh Krishna,Bowler,India,200,975,Gujarat Titans
+53,Mahipal Lomror,Allrounder,India,200,975,Gujarat Titans
+54,Kumar Kushagra,Wicketkeeper-Batsman,India,30,975,Gujarat Titans
+55,Manav Suthar,Bowler,India,30,975,Gujarat Titans
+56,Anuj Rawat,Wicketkeeper-Batsman,India,30,975,Gujarat Titans
+57,Nishant Sindhu,Allrounder,India,30,975,Gujarat Titans
+58,Anrich Nortje,Bowler,South Africa,200,975,Kolkata Knight Riders
+59,Quinton de Kock,Wicketkeeper-Batsman,South Africa,200,975,Kolkata Knight Riders
+60,Rahmanullah Gurbaz,Wicketkeeper-Batsman,Afghanistan,200,975,Kolkata Knight Riders
+61,Angkrish Raghuvanshi,Batsman,India,30,975,Kolkata Knight Riders
+62,Vaibhav Arora,Bowler,India,30,975,Kolkata Knight Riders
+63,Mayank Markande,Bowler,India,30,975,Kolkata Knight Riders
+64,Glenn Maxwell,Allrounder,Australia,200,975,Punjab Kings
+65,Vyshak Vijaykumar,Bowler,India,30,975,Punjab Kings
+66,Yash Thakur,Bowler,India,30,975,Punjab Kings
+67,Harpreet Brar,Bowler,India,30,975,Punjab Kings
+68,Vishnu Vinod,Wicketkeeper-Batsman,India,30,975,Punjab Kings
+69,Harshal Patel,Bowler,India,200,975,Sunrisers Hyderabad
+70,Rahul Chahar,Bowler,India,200,975,Sunrisers Hyderabad
+71,Adam Zampa,Bowler,Australia,200,975,Sunrisers Hyderabad
+72,Abhinav Manohar,Batsman,India,30,975,Sunrisers Hyderabad
+73,Simarjeet Singh,Bowler,India,30,975,Sunrisers Hyderabad
+74,Atharva Taide,Batsman,India,30,975,Sunrisers Hyderabad
+75,Mitchell Santner,Allrounder,New Zealand,200,200,Mumbai Indians
+76,Jayant Yadav,Bowler,India,30,75,Gujarat Titans
+77,Fazalhaq Farooqi,Bowler,Afghanistan,200,200,Rajasthan Royals
+78,Devdutt Padikkal,Batsman,India,200,200,Royal Challengers Bengaluru
+
+# Unsold Players
+id,name,role,nationality,basePrice
+11,Ben Stokes,Allrounder,England,200
+12,Joe Root,Batsman,England,200
+13,Jason Holder,Allrounder,West Indies,150
+14,Shakib Al Hasan,Allrounder,Bangladesh,150
+79,Shardul Thakur,Allrounder,India,200
+80,Prithvi Shaw,Batsman,India,200
+81,Ajinkya Rahane,Batsman,India,200
+82,Kane Williamson,Batsman,New Zealand,200
+83,Glenn Phillips,Allrounder,New Zealand,200
+84,Jonny Bairstow,Wicketkeeper-Batsman,England,200
+85,Mayank Agarwal,Batsman,India,200
+86,Mustafizur Rahman,Bowler,Bangladesh,200
+87,Naveen-ul-Haq,Bowler,Afghanistan,200
+88,Kartik Tyagi,Bowler,India,200
+89,Mujeeb Ur Rahman,Bowler,Afghanistan,200
+90,Daryl Mitchell,Allrounder,New Zealand,200
+91,Piyush Chawla,Bowler,India,200
+92,Sikandar Raza,Allrounder,Zimbabwe,200
+93,Steve Smith,Batsman,Australia,200
+94,Pathum Nissanka,Batsman,Sri Lanka,200
+95,Gus Atkinson,Bowler,England,200
+96,Brandon King,Batsman,West Indies,75
+97,Tom Latham,Wicketkeeper-Batsman,New Zealand,150
+98,Murugan Ashwin,Bowler,India,30
+99,Matthew Breetzke,Batsman,South Africa,75
+100,Anmolpreet Singh,Batsman,India,30
+101,Luvnith Sisodia,Wicketkeeper-Batsman,India,30
+102,Khrievitso Kense,Bowler,India,30
+
+# Team Budgets
+team,totalBudget,remainingBudget
+Chennai Super Kings,120,2.87
+Delhi Capitals,120,9.9
+Gujarat Titans,120,4.1
+Kolkata Knight Riders,120,1.35
+Lucknow Super Giants,120,0.95
+Mumbai Indians,120,1.65
+Punjab Kings,120,4.15
+Rajasthan Royals,120,4.1
+Royal Challengers Bengaluru,120,2.85
+Sunrisers Hyderabad,120,5.1
+
+# Winners
+year,winner,runnerUp
+2008,Rajasthan Royals,Chennai Super Kings
+2009,Deccan Chargers,Royal Challengers Bangalore
+2010,Chennai Super Kings,Mumbai Indians
+2011,Chennai Super Kings,Royal Challengers Bangalore
+2012,Kolkata Knight Riders,Chennai Super Kings
+2013,Mumbai Indians,Chennai Super Kings
+2014,Kolkata Knight Riders,Kings XI Punjab
+2015,Mumbai Indians,Chennai Super Kings
+2016,Sunrisers Hyderabad,Royal Challengers Bangalore
+2017,Mumbai Indians,Rising Pune Supergiant
+2018,Chennai Super Kings,Sunrisers Hyderabad
+2019,Mumbai Indians,Chennai Super Kings
+2020,Mumbai Indians,Delhi Capitals
+2021,Chennai Super Kings,Kolkata Knight Riders
+2022,Gujarat Titans,Rajasthan Royals
+2023,Chennai Super Kings,Gujarat Titans
+2024,Kolkata Knight Riders,Sunrisers Hyderabad
+2025,Royal Challengers Bangalore,Punjab Kings

@@ -1,21 +1,23 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Trophy, DollarSign, Users, ExternalLink } from 'lucide-react';
+import Papa from 'papaparse';
+import auctionData from '../utils/wpl-auction-data.csv?raw';
 
 interface AuctionPlayer {
   id: string;
   name: string;
   role: string;
   nationality: string;
-  basePrice: number; // in INR Lakhs
-  purchasedPrice?: number; // in INR Lakhs
-  team?: string; // Team name or undefined if unsold
+  basePrice: number;
+  purchasedPrice?: number;
+  team?: string;
 }
 
 interface TeamBudget {
   team: string;
-  totalBudget: number; // in INR Crores
-  remainingBudget: number; // in INR Crores
+  totalBudget: number;
+  remainingBudget: number;
 }
 
 function WplAuction() {
@@ -26,70 +28,145 @@ function WplAuction() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchAuctionData = async () => {
+    const parseAuctionData = () => {
       try {
-        // Simulated API response (replace with actual API calls when available)
-        // Example: const response = await axios.get(`${import.meta.env.VITE_API_URL}/auction/wpl/2025`);
-        const mockAuctionData = {
-          soldPlayers: [
-            { id: '1', name: 'Simran Shaikh', role: 'Allrounder', nationality: 'India', basePrice: 10, purchasedPrice: 190, team: 'Gujarat Giants' },
-            { id: '2', name: 'Deandra Dottin', role: 'Allrounder', nationality: 'West Indies', basePrice: 50, purchasedPrice: 170, team: 'Gujarat Giants' },
-            { id: '3', name: 'G Kamalini', role: 'Wicketkeeper-Batter', nationality: 'India', basePrice: 10, purchasedPrice: 160, team: 'Mumbai Indians' },
-            { id: '4', name: 'Prema Rawat', role: 'Allrounder', nationality: 'India', basePrice: 10, purchasedPrice: 120, team: 'Royal Challengers Bengaluru' },
-            { id: '5', name: 'N Charani', role: 'Allrounder', nationality: 'India', basePrice: 10, purchasedPrice: 55, team: 'Delhi Capitals' },
-            { id: '6', name: 'Nandini Kashyap', role: 'Wicketkeeper-Batter', nationality: 'India', basePrice: 10, purchasedPrice: 30, team: 'Delhi Capitals' },
-            { id: '7', name: 'Sarah Bryce', role: 'Wicketkeeper-Batter', nationality: 'Scotland', basePrice: 10, purchasedPrice: 10, team: 'Delhi Capitals' },
-            { id: '8', name: 'Arushi Goel', role: 'Batter', nationality: 'India', basePrice: 10, purchasedPrice: 10, team: 'Delhi Capitals' },
-            { id: '9', name: 'Nadine de Klerk', role: 'Allrounder', nationality: 'South Africa', basePrice: 30, purchasedPrice: 30, team: 'Mumbai Indians' },
-            { id: '10', name: 'Sanskriti Gupta', role: 'Batter', nationality: 'India', basePrice: 10, purchasedPrice: 10, team: 'Mumbai Indians' },
-            { id: '11', name: 'Raghvi Bist', role: 'Batter', nationality: 'India', basePrice: 10, purchasedPrice: 10, team: 'Royal Challengers Bengaluru' },
-            { id: '12', name: 'Charlie Dean', role: 'Allrounder', nationality: 'England', basePrice: 30, purchasedPrice: 30, team: 'Royal Challengers Bengaluru' },
-            { id: '13', name: 'Prakakshika Naik', role: 'Bowler', nationality: 'India', basePrice: 10, purchasedPrice: 10, team: 'Gujarat Giants' },
-            { id: '14', name: 'Danielle Gibson', role: 'Allrounder', nationality: 'England', basePrice: 30, purchasedPrice: 30, team: 'Gujarat Giants' },
-            { id: '15', name: 'Mansi Joshi', role: 'Bowler', nationality: 'India', basePrice: 30, purchasedPrice: 30, team: 'UP Warriorz' },
-            { id: '16', name: 'Alana King', role: 'Bowler', nationality: 'Australia', basePrice: 30, purchasedPrice: 30, team: 'UP Warriorz' },
-            { id: '17', name: 'Kranti Goud', role: 'Allrounder', nationality: 'India', basePrice: 10, purchasedPrice: 10, team: 'UP Warriorz' },
-            { id: '18', name: 'S Yashasri', role: 'Bowler', nationality: 'India', basePrice: 10, purchasedPrice: 10, team: 'UP Warriorz' },
-            { id: '19', name: 'Archana Shinde', role: 'Bowler', nationality: 'India', basePrice: 10, purchasedPrice: 10, team: 'UP Warriorz' },
-          ],
-          unsoldPlayers: [
-            { id: '20', name: 'Heather Knight', role: 'Batter', nationality: 'England', basePrice: 50, purchasedPrice: undefined, team: undefined },
-            { id: '21', name: 'Poonam Yadav', role: 'Bowler', nationality: 'India', basePrice: 30, purchasedPrice: undefined, team: undefined },
-            { id: '22', name: 'Sneh Rana', role: 'Allrounder', nationality: 'India', basePrice: 30, purchasedPrice: undefined, team: undefined },
-            { id: '23', name: 'Sarah Glenn', role: 'Bowler', nationality: 'England', basePrice: 30, purchasedPrice: undefined, team: undefined },
-            { id: '24', name: 'Lauren Bell', role: 'Bowler', nationality: 'England', basePrice: 30, purchasedPrice: undefined, team: undefined },
-            { id: '25', name: 'Anshu Nagar', role: 'Bowler', nationality: 'India', basePrice: 10, purchasedPrice: undefined, team: undefined },
-            { id: '26', name: 'Darcie Brown', role: 'Bowler', nationality: 'Australia', basePrice: 30, purchasedPrice: undefined, team: undefined },
-            { id: '27', name: 'Chinelle Henry', role: 'Allrounder', nationality: 'West Indies', basePrice: 30, purchasedPrice: undefined, team: undefined },
-            { id: '28', name: 'Maia Bouchier', role: 'Batter', nationality: 'England', basePrice: 30, purchasedPrice: undefined, team: undefined },
-            { id: '29', name: 'Heather Graham', role: 'Allrounder', nationality: 'Australia', basePrice: 30, purchasedPrice: undefined, team: undefined },
-          ],
-          teamBudgets: [
-            { team: 'Royal Challengers Bengaluru', totalBudget: 15, remainingBudget: 1.95 },
-            { team: 'Mumbai Indians', totalBudget: 15, remainingBudget: 0.65 },
-            { team: 'Delhi Capitals', totalBudget: 15, remainingBudget: 1.75 },
-            { team: 'Gujarat Giants', totalBudget: 15, remainingBudget: 0.80 },
-            { team: 'UP Warriorz', totalBudget: 15, remainingBudget: 3.70 },
-          ],
-        };
+        const parsed = Papa.parse(auctionData, {
+          header: false,
+          skipEmptyLines: true,
+          transform: value => value.trim(),
+        });
 
-        setSoldPlayers(mockAuctionData.soldPlayers);
-        setUnsoldPlayers(mockAuctionData.unsoldPlayers);
-        setTeamBudgets(mockAuctionData.teamBudgets);
+        if (parsed.errors.length > 0) {
+          console.warn('CSV parsing errors encountered:', parsed.errors);
+        }
+
+        const data = parsed.data as string[][];
+        let currentSection: string | null = null;
+        let currentHeaders: string[] = [];
+        const sold: AuctionPlayer[] = [];
+        const unsold: AuctionPlayer[] = [];
+        const budgets: TeamBudget[] = [];
+        let unsoldSectionFound = false;
+
+        for (let i = 0; i < data.length; i++) {
+          const row = data[i];
+
+          if (row.length === 1) {
+            const sectionHeader = row[0].toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
+            if (sectionHeader === 'sold players') {
+              currentSection = 'sold';
+              currentHeaders = [];
+              continue;
+            } else if (sectionHeader === 'unsold players') {
+              currentSection = 'unsold';
+              unsoldSectionFound = true;
+              currentHeaders = [];
+              continue;
+            } else if (sectionHeader === 'team budgets') {
+              currentSection = 'budgets';
+              currentHeaders = [];
+              continue;
+            } else if (sectionHeader === 'winners') {
+              currentSection = null;
+              currentHeaders = [];
+              continue;
+            } else {
+              console.warn(`Unknown section header at row ${i}: "${row[0]}"`);
+              continue;
+            }
+          }
+
+          if (currentSection && currentHeaders.length === 0) {
+            if (
+              (currentSection === 'sold' && row.includes('id') && row.includes('name') && row.includes('purchasedPrice') && row.includes('team')) ||
+              (currentSection === 'unsold' && row.includes('id') && row.includes('name') && row.includes('basePrice')) ||
+              (currentSection === 'budgets' && row.includes('team') && row.includes('totalBudget'))
+            ) {
+              currentHeaders = row;
+              continue;
+            } else {
+              console.warn(`Expected headers for ${currentSection} at row ${i}, but got:`, row);
+            }
+          }
+
+          if (currentSection && currentHeaders.length > 0) {
+            if (row.length >= currentHeaders.length) {
+              const rowData = Object.fromEntries(currentHeaders.map((header, index) => [header, row[index] || '']));
+
+              if (currentSection === 'sold' && rowData.id && rowData.name && rowData.basePrice && rowData.purchasedPrice && rowData.team) {
+                const basePrice = parseFloat(rowData.basePrice);
+                const purchasedPrice = parseFloat(rowData.purchasedPrice);
+                if (!isNaN(basePrice) && !isNaN(purchasedPrice)) {
+                  sold.push({
+                    id: rowData.id,
+                    name: rowData.name,
+                    role: rowData.role || 'Unknown',
+                    nationality: rowData.nationality || 'Unknown',
+                    basePrice,
+                    purchasedPrice,
+                    team: rowData.team,
+                  });
+                } else {
+                  console.warn(`Skipping sold player row ${i} due to invalid numbers:`, rowData);
+                }
+              } else if (currentSection === 'unsold' && rowData.id && rowData.name && rowData.basePrice) {
+                const basePrice = parseFloat(rowData.basePrice);
+                if (!isNaN(basePrice)) {
+                  unsold.push({
+                    id: rowData.id,
+                    name: rowData.name,
+                    role: rowData.role || 'Unknown',
+                    nationality: rowData.nationality || 'Unknown',
+                    basePrice,
+                  });
+                } else {
+                  console.warn(`Skipping unsold player row ${i} due to invalid basePrice:`, rowData);
+                }
+              } else if (currentSection === 'budgets' && rowData.team && rowData.totalBudget && rowData.remainingBudget) {
+                const totalBudget = parseFloat(rowData.totalBudget);
+                const remainingBudget = parseFloat(rowData.remainingBudget);
+                if (!isNaN(totalBudget) && !isNaN(remainingBudget)) {
+                  budgets.push({
+                    team: rowData.team,
+                    totalBudget,
+                    remainingBudget,
+                  });
+                } else {
+                  console.warn(`Skipping budgets row ${i} due to invalid numbers:`, rowData);
+                }
+              } else {
+                console.warn(`Skipping invalid row in ${currentSection} section at row ${i}:`, rowData);
+              }
+            } else {
+              console.warn(`Skipping row ${i} due to column mismatch in ${currentSection} section (expected ${currentHeaders.length} columns, got ${row.length}):`, row);
+            }
+          } else if (row.length > 0) {
+            console.warn(`Skipping row ${i} (no section or headers defined):`, row);
+          }
+        }
+
+        if (!unsoldSectionFound) {
+          console.warn('Unsold Players section not found in CSV.');
+          setError('Unsold Players section not found in CSV. Ensure the section header is "# Unsold Players".');
+        }
+
+        setSoldPlayers(sold);
+        setUnsoldPlayers(unsold);
+        setTeamBudgets(budgets);
         setIsLoading(false);
+        setError(null);
       } catch (err) {
-        console.error('Error fetching WPL auction data:', err);
-        setError('Failed to load WPL 2025 auction data.');
+        console.error('Error parsing auction data:', err);
+        setError('Failed to load WPL 2025 auction data. Please verify the CSV file has correct sections (# Sold Players, # Unsold Players, # Team Budgets) and column headers.');
         setIsLoading(false);
       }
     };
 
-    fetchAuctionData();
+    parseAuctionData();
   }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
       <div className="relative bg-black text-white">
         <div className="container mx-auto px-4 py-16">
           <motion.div
@@ -104,13 +181,13 @@ function WplAuction() {
             </p>
             <div className="relative w-full max-w-4xl mx-auto aspect-[16/9] bg-gray-200 rounded-lg overflow-hidden">
               <img
-                src="src/assets/wpl-auction-2025.png" // Placeholder for 16:9 hero image
+                src="src/assets/wpl-auction-2025.png"
                 alt="WPL 2025 Auction"
                 className="w-full h-full object-cover"
               />
             </div>
             <a
-              href="https://www.youtube.com/watch?v=hDyUQf5LwDw" // Placeholder YouTube link
+              href="https://www.youtube.com/watch?v=hDyUQf5LwDw"
               target="_blank"
               rel="noopener noreferrer"
               className="mt-4 inline-flex items-center text-purple-400 hover:text-purple-300 font-medium"
@@ -122,7 +199,6 @@ function WplAuction() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         {error && (
           <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
@@ -136,7 +212,6 @@ function WplAuction() {
           </div>
         ) : (
           <div className="space-y-12">
-            {/* Sold Players Section */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -147,41 +222,44 @@ function WplAuction() {
                 <Trophy className="w-6 h-6 mr-2 text-purple-600" />
                 Sold Players
               </h2>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-purple-500">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Player</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Role</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Nationality</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Base Price (₹ Lakhs)</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Purchased Price (₹ Lakhs)</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Team</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {soldPlayers.map((player, index) => (
-                      <motion.tr
-                        key={player.id}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="hover:bg-gray-50"
-                      >
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{player.name}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{player.role}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{player.nationality}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{player.basePrice}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{player.purchasedPrice}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{player.team}</td>
-                      </motion.tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              {soldPlayers.length === 0 ? (
+                <p className="text-gray-500">No sold players data available.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-purple-500">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Player</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Role</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Nationality</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Base Price (₹ Lakhs)</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Purchased Price (₹ Lakhs)</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Team</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {soldPlayers.map((player, index) => (
+                        <motion.tr
+                          key={player.id}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                          className="hover:bg-gray-50"
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{player.name}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{player.role}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{player.nationality}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{player.basePrice}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{player.purchasedPrice || 'N/A'}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{player.team || 'N/A'}</td>
+                        </motion.tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </motion.div>
 
-            {/* Unsold Players Section */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -192,37 +270,40 @@ function WplAuction() {
                 <Users className="w-6 h-6 mr-2 text-purple-600" />
                 Unsold Players
               </h2>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-purple-500">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Player</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Role</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Nationality</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Base Price (₹ Lakhs)</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {unsoldPlayers.map((player, index) => (
-                      <motion.tr
-                        key={player.id}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="hover:bg-gray-50"
-                      >
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{player.name}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{player.role}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{player.nationality}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{player.basePrice}</td>
-                      </motion.tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              {unsoldPlayers.length === 0 ? (
+                <p className="text-gray-500">No unsold players data available.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-purple-500">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Player</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Role</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Nationality</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Base Price (₹ Lakhs)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {unsoldPlayers.map((player, index) => (
+                        <motion.tr
+                          key={player.id}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                          className="hover:bg-gray-50"
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{player.name}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{player.role}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{player.nationality}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{player.basePrice}</td>
+                        </motion.tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </motion.div>
 
-            {/* Team Budgets Section */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -233,32 +314,36 @@ function WplAuction() {
                 <DollarSign className="w-6 h-6 mr-2 text-purple-600" />
                 Team Budgets
               </h2>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-purple-500">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Team</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Total Budget (₹ Crores)</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Remaining Budget (₹ Crores)</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {teamBudgets.map((budget, index) => (
-                      <motion.tr
-                        key={budget.team}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="hover:bg-gray-50"
-                      >
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{budget.team}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{budget.totalBudget}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{budget.remainingBudget}</td>
-                      </motion.tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              {teamBudgets.length === 0 ? (
+                <p className="text-gray-500">No team budgets data available.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-purple-500">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Team</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Total Budget (₹ Crores)</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Remaining Budget (₹ Crores)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {teamBudgets.map((budget, index) => (
+                        <motion.tr
+                          key={budget.team}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                          className="hover:bg-gray-50"
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{budget.team}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{budget.totalBudget}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{budget.remainingBudget}</td>
+                        </motion.tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </motion.div>
           </div>
         )}

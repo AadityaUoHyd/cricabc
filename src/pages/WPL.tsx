@@ -12,6 +12,8 @@ import { FaCalendarAlt, FaNewspaper, FaTable, FaChartLine, FaUsers, FaInfoCircle
 import { RiAuctionFill } from "react-icons/ri";
 import { Trophy, Award } from 'lucide-react';
 import WplAuction from './WplAuction';
+import Papa from 'papaparse';
+import wplAuctionData from '../utils/wpl-auction-data.csv?raw';
 
 interface NewsItem {
   _id: string;
@@ -34,7 +36,11 @@ interface PointsTableEntry {
   nrr: number;
 }
 
-
+interface WinnerEntry {
+  year: number;
+  winner: string;
+  runnerUp: string;
+}
 
 function WPL() {
   const [activeTab, setActiveTab] = useState('matches');
@@ -44,15 +50,16 @@ function WPL() {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [topRunScorers, setTopRunScorers] = useState<Player[]>([]);
   const [topWicketTakers, setTopWicketTakers] = useState<Player[]>([]);
+  const [winners, setWinners] = useState<WinnerEntry[]>([]);
   const [isLoading, setIsLoading] = useState({
     matches: true,
     teams: true,
     news: true,
     stats: true,
+    winners: true,
   });
   const [error, setError] = useState<string | null>(null);
-  
-  // Safely get player context with error handling
+
   let playersLoading = false;
   let playersError = null;
   try {
@@ -61,7 +68,6 @@ function WPL() {
     playersError = context.error;
   } catch (err) {
     console.warn('PlayerContext not available:', err);
-    // Continue without player data if context is not available
   }
 
   useEffect(() => {
@@ -71,6 +77,7 @@ function WPL() {
         teams: true,
         news: true,
         stats: true,
+        winners: true,
       };
 
       try {
@@ -83,7 +90,7 @@ function WPL() {
           setIsLoading(prev => ({ ...prev, matches: false }));
         }).catch(err => {
           console.error('Error fetching WPL matches:', err);
-          setError(prev => prev || 'Failed to load matches. Some data may be incomplete.');
+          setError(prev => prev || 'Failed to load matches.');
           loadingStates.matches = false;
           setIsLoading(prev => ({ ...prev, matches: false }));
         });
@@ -98,7 +105,7 @@ function WPL() {
           setIsLoading(prev => ({ ...prev, teams: false }));
         }).catch(err => {
           console.error('Error fetching WPL teams:', err);
-          setError(prev => prev || 'Failed to load teams. Some data may be incomplete.');
+          setError(prev => prev || 'Failed to load teams.');
           loadingStates.teams = false;
           setIsLoading(prev => ({ ...prev, teams: false }));
         });
@@ -112,7 +119,7 @@ function WPL() {
           setIsLoading(prev => ({ ...prev, stats: false }));
         }).catch(err => {
           console.error('Error fetching WPL points table:', err);
-          setError(prev => prev || 'Failed to load points table. Some data may be incomplete.');
+          setError(prev => prev || 'Failed to load points table.');
           loadingStates.stats = false;
           setIsLoading(prev => ({ ...prev, stats: false }));
         });
@@ -127,7 +134,7 @@ function WPL() {
           setIsLoading(prev => ({ ...prev, news: false }));
         }).catch(err => {
           console.error('Error fetching WPL news:', err);
-          setError(prev => prev || 'Failed to load news. Some data may be incomplete.');
+          setError(prev => prev || 'Failed to load news.');
           loadingStates.news = false;
           setIsLoading(prev => ({ ...prev, news: false }));
         });
@@ -142,37 +149,132 @@ function WPL() {
           setIsLoading(prev => ({ ...prev, stats: false }));
         }).catch(err => {
           console.error('Error fetching WPL player stats:', err);
-          setError(prev => prev || 'Failed to load player statistics. Some data may be incomplete.');
+          setError(prev => prev || 'Failed to load player statistics.');
           loadingStates.stats = false;
           setIsLoading(prev => ({ ...prev, stats: false }));
         });
 
-        // Wait for all requests to complete
+        // Parse winners from CSV
+        const winnersPromise = new Promise((resolve, reject) => {
+          Papa.parse(wplAuctionData, {
+            header: false,
+            skipEmptyLines: true,
+            transform: (value) => value.trim(),
+            complete: (result) => {
+
+              if (result.errors.length > 0) {
+                console.warn('CSV parsing errors encountered:', result.errors);
+              }
+
+              const data = result.data as string[][];
+              let currentSection: string | null = null;
+              let currentHeaders: string[] = [];
+              const winnersData: WinnerEntry[] = [];
+              let winnersSectionFound = false;
+
+              for (let i = 0; i < data.length; i++) {
+                const row = data[i];
+
+                if (row.length === 1) {
+                  const sectionHeader = row[0].toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
+                  if (sectionHeader === 'winners') {
+                    currentSection = 'winners';
+                    winnersSectionFound = true;
+                    currentHeaders = [];
+                    continue;
+                  } else if (['sold players', 'unsold players', 'team budgets'].includes(sectionHeader)) {
+                    currentSection = null;
+                    currentHeaders = [];
+                    continue;
+                  } else {
+                    console.warn(`Unknown section header at row ${i}: "${row[0]}"`);
+                    continue;
+                  }
+                }
+
+                if (currentSection === 'winners' && currentHeaders.length === 0) {
+                  if (row.includes('year') && row.includes('winner') && row.includes('runnerUp')) {
+                    currentHeaders = row;
+                    continue;
+                  } else {
+                    console.warn(`Expected winners headers at row ${i}, but got:`, row);
+                  }
+                }
+
+                if (currentSection === 'winners' && currentHeaders.length > 0) {
+                  if (row.length >= currentHeaders.length) {
+                    const rowData = Object.fromEntries(currentHeaders.map((header, index) => [header, row[index] || '']));
+
+                    if (rowData.year && rowData.winner && rowData.runnerUp) {
+                      const year = parseInt(rowData.year);
+                      if (!isNaN(year)) {
+                        winnersData.push({
+                          year,
+                          winner: rowData.winner,
+                          runnerUp: rowData.runnerUp,
+                        });
+                      } else {
+                        console.warn(`Skipping winners row ${i} due to invalid year:`, rowData);
+                      }
+                    } else {
+                      console.warn(`Skipping invalid winners row ${i}:`, rowData);
+                    }
+                  } else {
+                    console.warn(`Skipping row ${i} due to column mismatch in winners section (expected ${currentHeaders.length} columns, got ${row.length}):`, row);
+                  }
+                }
+              }
+
+              if (!winnersSectionFound) {
+                console.warn('Winners section not found in CSV.');
+                setError('Winners section not found in CSV. Ensure the section header is "# Winners".');
+              }
+
+              if (winnersData.length === 0 && winnersSectionFound) {
+                console.warn('No valid winners data found in CSV.');
+                setError('No valid winners data found. Please check the "# Winners" section in the CSV.');
+              }
+
+              setWinners(winnersData);
+              loadingStates.winners = false;
+              setIsLoading(prev => ({ ...prev, winners: false }));
+              resolve(winnersData);
+            },
+            error: (err:any) => {
+              console.error('Winners parse error:', err);
+              setError('Failed to parse winners data.');
+              loadingStates.winners = false;
+              setIsLoading(prev => ({ ...prev, winners: false }));
+              reject(err);
+            },
+          });
+        });
+
         await Promise.allSettled([
           matchesPromise,
           teamsPromise,
           pointsPromise,
           newsPromise,
-          playersPromise
+          playersPromise,
+          winnersPromise,
         ]);
 
       } catch (err) {
         console.error('Unexpected error in WPL fetchData:', err);
-        setError('An unexpected error occurred while loading WPL data. Please try again later.');
+        setError('An unexpected error occurred while loading WPL data.');
       } finally {
-        // Ensure all loading states are set to false
         setIsLoading({
           matches: false,
           teams: false,
           news: false,
           stats: false,
+          winners: false,
         });
       }
     };
 
     fetchData();
 
-    // Subscribe to Pusher updates
     const pusher = initPusher();
     const channel = pusher.subscribe('match-channel');
     channel.bind('match-update', (data: Match) => {
@@ -338,11 +440,9 @@ function WPL() {
               <Trophy className="w-6 h-6 mr-2 text-purple-600" />
               About WPL
             </h2>
-            
             <p className="text-gray-600 mb-6">
-              The Women's Premier League (WPL), launched in 2023 by the Board of Control for Cricket in India (BCCI), is a professional Twenty20 cricket league in India, modeled after the Indian Premier League (IPL). It features five franchise-based teams representing Indian cities, showcasing top international and domestic women cricketers. The WPL succeeded the Women's T20 Challenge (2018–2022), providing a robust platform to elevate women's cricket. With a double round-robin format and playoffs, the league has grown in popularity, featuring high-energy matches and significant fan engagement, with the opening match of WPL 2025 attracting 30 million viewers. The inaugural season saw Mumbai Indians clinch the title, followed by Royal Challengers Bengaluru in 2024, with Mumbai Indians reclaiming the title in 2025. The 2025 season expanded to multiple cities, including Mumbai, Bengaluru, Lucknow, and Vadodara. 
-              <p className='mt-2'>Backed by substantial investments, the WPL has a valuation of ₹1,350 crore ($162 million) in 2024, up 8% from ₹1,250 crore ($150 million) in 2023, driven by a ₹951 crore ($176 million) five-year media rights deal with Viacom18, translating to ₹7.09 crore per match, making it the second most valuable broadcast contract for a women’s sports league globally, behind the WNBA. The Tata Group secured title sponsorship for ₹165 crore over five years, further bolstering the league’s financial strength. The WPL continues to inspire the next generation of cricketers and promote gender equality in the sport.
-              </p>
+              The Women's Premier League (WPL), launched in 2023 by the Board of Control for Cricket in India (BCCI), is a professional Twenty20 cricket league in India, modeled after the Indian Premier League (IPL). It features five franchise-based teams representing Indian cities, showcasing top international and domestic women cricketers. The WPL succeeded the Women's T20 Challenge (2018–2022), providing a robust platform to elevate women's cricket. With a double round-robin format and playoffs, the league has grown in popularity, featuring high-energy matches and significant fan engagement, with the opening match of WPL 2025 attracting 30 million viewers.
+              <p className='mt-2'>Backed by substantial investments, the WPL has a valuation of ₹1,350 crore ($162 million) in 2024, up 8% from ₹1,250 crore ($150 million) in 2023, driven by a ₹951 crore ($176 million) five-year media rights deal with Viacom18, translating to ₹7.09 crore per match, making it the second most valuable broadcast contract for a women’s sports league globally, behind the WNBA. The Tata Group secured title sponsorship for ₹165 crore over five years, further bolstering the league’s financial strength. The WPL continues to inspire the next generation of cricketers and promote gender equality in the sport.</p>
             </p>
             <div className="relative w-full max-w-4xl mx-auto aspect-[16/9] bg-gray-200 rounded-lg overflow-hidden m-6">
               <img
@@ -355,40 +455,40 @@ function WPL() {
               <Award className="w-6 h-6 mr-2 text-purple-600" />
               WPL Winners and Runners-Up (2023–2025)
             </h3>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-purple-500">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Year</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Winner</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Runner-Up</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {[
-                    { year: 2023, winner: 'Mumbai Indians', runnerUp: 'Delhi Capitals' },
-                    { year: 2024, winner: 'Royal Challengers Bengaluru', runnerUp: 'Delhi Capitals' },
-                    { year: 2025, winner: 'Mumbai Indians', runnerUp: 'Delhi Capitals' },
-                  ].map((season, index) => (
-                    <motion.tr
-                      key={season.year}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="hover:bg-gray-50"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{season.year}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{season.winner}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{season.runnerUp}</td>
-                    </motion.tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            {winners.length === 0 ? (
+              <p className="text-gray-500">No winners data available.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-purple-500">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Year</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Winner</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Runner-Up</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {winners.map((season, index) => (
+                      <motion.tr
+                        key={season.year}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="hover:bg-gray-50"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{season.year}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{season.winner}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{season.runnerUp}</td>
+                      </motion.tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </motion.div>
         );
 
-      default: // matches
+      default:
         return (
           <div className="space-y-6">
             {matches.length > 0 && matches.some((m) => m.status === 'Live') ? (
@@ -441,7 +541,6 @@ function WPL() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
       <div className="bg-black text-white">
         <div className="container mx-auto px-4 py-16">
           <motion.div
@@ -461,7 +560,6 @@ function WPL() {
         </div>
       </div>
 
-      {/* Navigation Tabs */}
       <div className="bg-white shadow-md sticky top-0 z-10">
         <div className="container mx-auto px-4">
           <div className="flex overflow-x-auto hide-scrollbar">
@@ -491,14 +589,13 @@ function WPL() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         {(error || playersError) && (
           <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
             <div className="flex">
               <div className="flex-shrink-0">
                 <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  <path fillRule="evenodd" d="10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 </svg>
               </div>
               <div className="ml-3">
@@ -516,7 +613,7 @@ function WPL() {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
           >
-            {(isLoading.matches || isLoading.teams || isLoading.news || isLoading.stats || playersLoading) && activeTab !== 'about' ? (
+            {(isLoading.matches || isLoading.teams || isLoading.news || isLoading.stats || isLoading.winners || playersLoading) && activeTab !== 'about' ? (
               <div className="flex justify-center items-center py-16">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
               </div>

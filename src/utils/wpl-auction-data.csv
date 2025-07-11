@@ -1,0 +1,58 @@
+# Sold Players
+id,name,role,nationality,basePrice,purchasedPrice,team
+1,Simran Shaikh,Allrounder,India,10,190,Gujarat Giants
+2,Deandra Dottin,Allrounder,West Indies,50,170,Gujarat Giants
+3,G Kamalini,Wicketkeeper-Batter,India,10,160,Mumbai Indians
+4,Prema Rawat,Allrounder,India,10,120,Royal Challengers Bengaluru
+5,N Charani,Allrounder,India,10,55,Delhi Capitals
+6,Nandini Kashyap,Wicketkeeper-Batter,India,10,30,Delhi Capitals
+7,Sarah Bryce,Wicketkeeper-Batter,Scotland,10,10,Delhi Capitals
+8,Arushi Goel,Batter,India,10,10,Delhi Capitals
+9,Nadine de Klerk,Allrounder,South Africa,30,30,Mumbai Indians
+10,Sanskriti Gupta,Batter,India,10,10,Mumbai Indians
+11,Raghvi Bist,Batter,India,10,10,Royal Challengers Bengaluru
+12,Charlie Dean,Allrounder,England,30,30,Royal Challengers Bengaluru
+13,Prakakshika Naik,Bowler,India,10,10,Gujarat Giants
+14,Danielle Gibson,Allrounder,England,30,30,Gujarat Giants
+15,Mansi Joshi,Bowler,India,30,30,UP Warriorz
+16,Alana King,Bowler,Australia,30,30,UP Warriorz
+17,Kranti Goud,Allrounder,India,10,10,UP Warriorz
+18,S Yashasri,Bowler,India,10,10,UP Warriorz
+19,Archana Shinde,Bowler,India,10,10,UP Warriorz
+
+# Unsold Players
+id,name,role,nationality,basePrice
+20,Heather Knight,Batter,England,50
+21,Poonam Yadav,Bowler,India,30
+22,Sneh Rana,Allrounder,India,30
+23,Sarah Glenn,Bowler,England,30
+24,Lauren Bell,Bowler,England,30
+25,Anshu Nagar,Bowler,India,10
+26,Darcie Brown,Bowler,Australia,30
+27,Chinelle Henry,Allrounder,West Indies,30
+28,Maia Bouchier,Batter,England,30
+29,Heather Graham,Allrounder,Australia,30
+30,Smriti Mandhana,Batter,India,50
+31,Ellyse Perry,Allrounder,Australia,50
+32,Harmanpreet Kaur,Allrounder,India,50
+33,Jemimah Rodrigues,Batter,India,50
+34,Deepti Sharma,Allrounder,India,50
+35,Shafali Verma,Batter,India,50
+36,Richa Ghosh,Wicketkeeper-Batter,India,50
+37,Sophie Ecclestone,Bowler,England,50
+38,Ashleigh Gardner,Allrounder,Australia,50
+39,Nat Sciver-Brunt,Allrounder,England,50
+
+# Team Budgets
+team,totalBudget,remainingBudget
+Royal Challengers Bengaluru,15,1.95
+Mumbai Indians,15,0.65
+Delhi Capitals,15,1.75
+Gujarat Giants,15,0.80
+UP Warriorz,15,3.70
+
+# Winners
+year,winner,runnerUp
+2023,Mumbai Indians,Delhi Capitals
+2024,Royal Challengers Bengaluru,Delhi Capitals
+2025,Mumbai Indians,Delhi Capitals

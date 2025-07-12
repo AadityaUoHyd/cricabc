@@ -292,25 +292,42 @@ function WPL() {
     };
   }, []);
 
+  const navigateToTeamDetails = (teamId: string) => {
+    window.location.href = `/team/${teamId}`;
+  };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'teams':
         return (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {teams.map((team, index) => (
+            {teams.map((team, _index) => (
               <motion.div
                 key={team.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+                whileHover={{ scale: 1.03 }}
+                transition={{ duration: 0.2 }}
+                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all cursor-pointer"
+                onClick={() => navigateToTeamDetails(team.id)}
               >
                 <div className="p-4">
                   <div className="flex items-center space-x-4">
-                    <img src={team.logoUrl} alt={team.name} className="w-16 h-16 object-contain" />
+                    <img 
+                      src={team.logoUrl} 
+                      alt={team.name} 
+                      className="w-16 h-16 object-contain"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = 'https://via.placeholder.com/64';
+                      }}
+                    />
                     <div>
-                      <h3 className="text-xl font-bold text-purple-500">{team.name}</h3>
+                      <h3 className="text-xl font-bold text-purple-600">{team.name}</h3>
                       <p className="text-gray-600">{team.country}</p>
+                      <span className="text-sm text-purple-400 hover:text-purple-600 transition-colors">
+                        View Details →
+                      </span>
                     </div>
                   </div>
                 </div>

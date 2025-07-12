@@ -73,6 +73,7 @@ export default function AdminTeams() {
     leagueName: '',
     domesticTournamentName: '',
     logoUrl: '',
+    description:'',
     teamRanking: {
       testRank: 0,
       odiRank: 0,
@@ -160,6 +161,7 @@ export default function AdminTeams() {
         headquarters: '',
         teamImageUrl: '',
         majorTitles: [],
+        description:'',
         teamRanking: {
           testRank: 0,
           odiRank: 0,

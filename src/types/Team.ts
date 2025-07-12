@@ -18,6 +18,7 @@ export interface Team {
   shortName?: string;
   teamLeadership?: TeamLeadership;
   homeVenueIds?: string[];
+  description: string;
 }
 
 export interface TeamStats {

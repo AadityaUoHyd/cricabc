@@ -48,6 +48,7 @@ interface TeamDetails {
   teamLeadership?: TeamLeadership;
   homeVenueIds?: string[];
   venues?: Venue[];
+  description: string;
 }
 
 interface TeamStats {
@@ -116,27 +117,65 @@ const TeamDetails = () => {
 
   
 
-  // Filter players based on team membership
+  // Filter players based on team membership and gender
   const currentPlayers = useMemo(() => {
     if (!team?.name) return [];
+    
+    console.log('Filtering players for team:', team.name);
+    
+    // Normalize team gender for comparison
+    const teamGender = (team.gender || '').toLowerCase();
+    const isWomenTeam = teamGender.includes('female') || teamGender.includes('women');
+    const isMenTeam = teamGender.includes('male') || teamGender.includes('men') || (!isWomenTeam && teamGender);
 
-    return allPlayers.filter((player: Player) => {
+    const filteredPlayers = allPlayers.filter((player: Player) => {
       if (!player) return false;
 
-      const checkTeamMembership = (teams: (string | { name?: string } | undefined)[] = []) => {
-        return teams.some((t) => {
-          if (!t) return false;
-          const teamName = typeof t === 'string' ? t : t.name || '';
-          return teamName.includes('*') && teamName.replace(/\*/g, '') === team.name;
+      // Check gender compatibility
+      const playerGender = (player.gender || '').toLowerCase();
+      if (isMenTeam && playerGender === 'female') return false;
+      if (isWomenTeam && playerGender === 'male') return false;
+
+      // Helper function to check if player is currently in the team
+      const isPlayerInTeamList = (teamList: string[] = []) => {
+        return teamList.some(teamName => {
+          if (typeof teamName !== 'string') return false;
+          
+          // Check if this is a current team (ends with *)
+          if (teamName.endsWith('*')) {
+            // Remove the * and compare with team name
+            const baseTeamName = teamName.slice(0, -1).trim();
+            return baseTeamName === team.name;
+          }
+          return false;
         });
       };
 
-      const isInternationalPlayer = checkTeamMembership(player.internationalTeams);
-      const isDomesticPlayer = checkTeamMembership(player.domesticTeams);
-      const isLeaguePlayer = checkTeamMembership(player.leagues);
+      // Check all three team types
+      const isCurrentInternational = isPlayerInTeamList(player.internationalTeams);
+      const isCurrentDomestic = isPlayerInTeamList(player.domesticTeams);
+      const isCurrentLeague = isPlayerInTeamList(player.leagues);
 
-      return isInternationalPlayer || isDomesticPlayer || isLeaguePlayer;
+      const isPlayerInTeam = isCurrentInternational || isCurrentDomestic || isCurrentLeague;
+      
+      // Log detailed info for debugging
+      if (isPlayerInTeam) {
+        console.log(`Player found in team: ${player.name}`, {
+          team: team.name,
+          internationalTeams: player.internationalTeams,
+          domesticTeams: player.domesticTeams,
+          leagues: player.leagues,
+          isCurrentInternational,
+          isCurrentDomestic,
+          isCurrentLeague
+        });
+      }
+      
+      return isPlayerInTeam;
     });
+    
+    console.log(`Found ${filteredPlayers.length} current players for team ${team.name}`);
+    return filteredPlayers;
   }, [allPlayers, team]);
 
   // Helper function to search for a team by name
@@ -222,8 +261,68 @@ const TeamDetails = () => {
 
   // Fetch team details when component mounts or teamId changes
   useEffect(() => {
+    console.log('Fetching team details for teamId:', teamId);
     fetchTeamDetails();
   }, [fetchTeamDetails]);
+  
+  // Log when team or players data changes
+  useEffect(() => {
+    if (team) {
+      console.log('Team data loaded:', {
+        teamName: team.name,
+        teamGender: team.gender,
+        hasDescription: !!team.description,
+        description: team.description,
+        teamData: team // Log full team data for debugging
+      });
+    }
+    
+    if (allPlayers.length > 0) {
+      console.log(`Loaded ${allPlayers.length} total players`);
+      
+      // Find players that should be in this team based on team name
+      const potentialPlayers = allPlayers.filter(p => {
+        const allTeams = [
+          ...(p.internationalTeams || []),
+          ...(p.domesticTeams || []),
+          ...(p.leagues || [])
+        ];
+        
+        return allTeams.some(t => 
+          typeof t === 'string' && 
+          (t.includes(team?.name || '') || t.includes((team?.name || '') + '*'))
+        );
+      });
+      
+      console.log(`Found ${potentialPlayers.length} players that mention team '${team?.name}'`);
+      
+      // Log sample of potential players with team data
+      if (potentialPlayers.length > 0) {
+        console.log('Potential players with team data:', potentialPlayers.slice(0, 3).map(p => ({
+          name: p.name,
+          gender: p.gender,
+          internationalTeams: p.internationalTeams,
+          domesticTeams: p.domesticTeams,
+          leagues: p.leagues
+        })));
+      }
+    }
+    
+    console.log(`Found ${currentPlayers.length} current players`);
+    if (currentPlayers.length > 0) {
+      console.log('Current players sample:', currentPlayers.map(p => ({
+        name: p.name,
+        gender: p.gender,
+        teams: {
+          international: p.internationalTeams,
+          domestic: p.domesticTeams,
+          leagues: p.leagues
+        }
+      })));
+    } else if (allPlayers.length > 0) {
+      console.warn('No current players found. Check team name and player team arrays for matching names with *');
+    }
+  }, [team, allPlayers, currentPlayers]);
 
   const handlePlayerClick = useCallback((playerId: string) => {
     navigate(`/players/${playerId}`);
@@ -266,7 +365,7 @@ const TeamDetails = () => {
           <p className="text-gray-600 mb-6">The requested team could not be found.</p>
           <Button
             onClick={() => navigate('/teams')}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            className="bg-purple-300 hover:bg-blue-500 text-white"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Teams
@@ -466,27 +565,83 @@ const TeamDetails = () => {
                 About {team.name}
               </h2>
               <div className="grid grid-cols-1 gap-6">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Governing Body</h3>
-                    <p className="mt-1 text-gray-900">{team.governingBody || 'N/A'}</p>
+                {/* Team Description */}
+                {team.description && (
+                  <div className="bg-purple-50 p-6 rounded-lg border border-purple-100">
+                    <p className="text-gray-700 leading-relaxed">{team.description}</p>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Headquarters</h3>
-                    <p className="mt-1 text-gray-900">{team.headquarters || 'N/A'}</p>
-                  </div>
-                  {team.foundedYear && (
+                )}
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500">Governing Body</h3>
+                      <p className="mt-1 text-gray-900">{team.governingBody || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500">Headquarters</h3>
+                      <p className="mt-1 text-gray-900">{team.headquarters || 'N/A'}</p>
+                    </div>
                     <div>
                       <h3 className="text-sm font-medium text-gray-500">Founded</h3>
-                      <p className="mt-1 text-gray-900">{team.foundedYear}</p>
+                      <p className="mt-1 text-gray-900">{team.foundedYear || 'N/A'}</p>
                     </div>
-                  )}
-                  {team.internationalTeamType && (
                     <div>
                       <h3 className="text-sm font-medium text-gray-500">ICC Status</h3>
-                      <p className="mt-1 text-gray-900 capitalize">{team.internationalTeamType}</p>
+                      <p className="mt-1 text-gray-900 capitalize">
+                        {team.internationalTeamType || 'N/A'}
+                      </p>
                     </div>
-                  )}
+                  </div>
+                  
+                  {/* Team Rankings */}
+                  <div className="bg-gray-50 p-6 rounded-lg border border-gray-100">
+                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
+                      <Trophy className="h-5 w-5 text-purple-600" />
+                      ICC Rankings
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium text-gray-700">Test</span>
+                        <div className="flex items-center">
+                          <span className="text-lg font-bold text-gray-900 mr-2">
+                            {team.teamRanking?.testRank ? `#${team.teamRanking.testRank}` : 'N/A'}
+                          </span>
+                          {team.teamRanking?.testRating && (
+                            <span className="text-sm text-gray-500">
+                              ({team.teamRanking.testRating} pts)
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium text-gray-700">ODI</span>
+                        <div className="flex items-center">
+                          <span className="text-lg font-bold text-gray-900 mr-2">
+                            {team.teamRanking?.odiRank ? `#${team.teamRanking.odiRank}` : 'N/A'}
+                          </span>
+                          {team.teamRanking?.odiRating && (
+                            <span className="text-sm text-gray-500">
+                              ({team.teamRanking.odiRating} pts)
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium text-gray-700">T20I</span>
+                        <div className="flex items-center">
+                          <span className="text-lg font-bold text-gray-900 mr-2">
+                            {team.teamRanking?.t20Rank ? `#${team.teamRanking.t20Rank}` : 'N/A'}
+                          </span>
+                          {team.teamRanking?.t20Rating && (
+                            <span className="text-sm text-gray-500">
+                              ({team.teamRanking.t20Rating} pts)
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 {team.majorTitles && team.majorTitles.length > 0 && (
                   <div className="bg-purple-50 p-6 rounded-lg border border-purple-100">
@@ -528,83 +683,142 @@ const TeamDetails = () => {
                 Team Statistics
               </h2>
               <div className="space-y-6">
-                {team.teamStats && team.teamStats.percentageTestWin !== undefined && (
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500 mb-3">Win Percentages</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <motion.div
-                        initial={{ scale: 0.95, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: 0.4 }}
-                        className="bg-gray-50 p-4 rounded-lg text-center"
-                      >
-                        <p className="text-sm text-gray-500">Test</p>
-                        <p className="text-lg font-semibold text-gray-900">
-                          {team.teamStats.percentageTestWin ? `${team.teamStats.percentageTestWin}%` : 'N/A'}
-                        </p>
-                      </motion.div>
-                      <motion.div
-                        initial={{ scale: 0.95, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: 0.5 }}
-                        className="bg-gray-50 p-4 rounded-lg text-center"
-                      >
-                        <p className="text-sm text-gray-500">ODI</p>
-                        <p className="text-lg font-semibold text-gray-900">
-                          {team.teamStats.percentageODIWin ? `${team.teamStats.percentageODIWin}%` : 'N/A'}
-                        </p>
-                      </motion.div>
-                      <motion.div
-                        initial={{ scale: 0.95, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: 0.6 }}
-                        className="bg-gray-50 p-4 rounded-lg text-center"
-                      >
-                        <p className="text-sm text-gray-500">T20I</p>
-                        <p className="text-lg font-semibold text-gray-900">
-                          {team.teamStats.percentageT20Win ? `${team.teamStats.percentageT20Win}%` : 'N/A'}
-                        </p>
-                      </motion.div>
-                    </div>
-                  </div>
-                )}
                 {team.teamStats && (
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500 mb-3">Highest Team Score</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <motion.div
-                        initial={{ scale: 0.95, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: 0.7 }}
-                        className="bg-gray-50 p-4 rounded-lg text-center"
-                      >
-                        <p className="text-sm text-gray-500">Test</p>
-                        <p className="text-lg font-semibold text-gray-900">
-                          {team.teamStats.highestTestScore || 'N/A'}
-                        </p>
-                      </motion.div>
-                      <motion.div
-                        initial={{ scale: 0.95, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: 0.8 }}
-                        className="bg-gray-50 p-4 rounded-lg text-center"
-                      >
-                        <p className="text-sm text-gray-500">ODI</p>
-                        <p className="text-lg font-semibold text-gray-900">
-                          {team.teamStats.highestODIScore || 'N/A'}
-                        </p>
-                      </motion.div>
-                      <motion.div
-                        initial={{ scale: 0.95, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: 0.9 }}
-                        className="bg-gray-50 p-4 rounded-lg text-center"
-                      >
-                        <p className="text-sm text-gray-500">T20I</p>
-                        <p className="text-lg font-semibold text-gray-900">
-                          {team.teamStats.highestT20Score ? String(team.teamStats.highestT20Score) : 'N/A'}
-                        </p>
-                      </motion.div>
+                  <div className="space-y-8">
+                    {/* Win Percentages */}
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-3">Win Percentages</h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <motion.div
+                          initial={{ scale: 0.95, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: 0.4 }}
+                          className="bg-gradient-to-br from-purple-50 to-blue-50 p-4 rounded-lg border border-purple-100 text-center shadow-sm"
+                        >
+                          <p className="text-sm font-medium text-purple-700 mb-1">Test</p>
+                          <p className="text-2xl font-bold text-gray-900">
+                            {team.teamStats.percentageTestWin ? `${team.teamStats.percentageTestWin}%` : 'N/A'}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {team.teamStats.totalTestWins} wins in {team.teamStats.totalTestMatches} matches
+                          </p>
+                        </motion.div>
+                        <motion.div
+                          initial={{ scale: 0.95, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: 0.5 }}
+                          className="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-lg border border-blue-100 text-center shadow-sm"
+                        >
+                          <p className="text-sm font-medium text-blue-700 mb-1">ODI</p>
+                          <p className="text-2xl font-bold text-gray-900">
+                            {team.teamStats.percentageODIWin ? `${team.teamStats.percentageODIWin}%` : 'N/A'}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {team.teamStats.totalODIWins} wins in {team.teamStats.totalODIMatches} matches
+                          </p>
+                        </motion.div>
+                        <motion.div
+                          initial={{ scale: 0.95, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: 0.6 }}
+                          className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-lg border border-green-100 text-center shadow-sm"
+                        >
+                          <p className="text-sm font-medium text-green-700 mb-1">T20I</p>
+                          <p className="text-2xl font-bold text-gray-900">
+                            {team.teamStats.percentageT20Win ? `${team.teamStats.percentageT20Win}%` : 'N/A'}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {team.teamStats.totalT20Wins} wins in {team.teamStats.totalT20Matches} matches
+                          </p>
+                        </motion.div>
+                      </div>
+                    </div>
+
+                    {/* Team Records */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Highest Scores */}
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-500 mb-3">Highest Team Scores</h3>
+                        <div className="space-y-3">
+                          <div className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
+                            <p className="text-xs font-medium text-gray-500">Test</p>
+                            <p className="text-lg font-semibold text-gray-900">
+                              {team.teamStats.highestTestScore || 'N/A'}
+                            </p>
+                          </div>
+                          <div className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
+                            <p className="text-xs font-medium text-gray-500">ODI</p>
+                            <p className="text-lg font-semibold text-gray-900">
+                              {team.teamStats.highestODIScore || 'N/A'}
+                            </p>
+                          </div>
+                          <div className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
+                            <p className="text-xs font-medium text-gray-500">T20I</p>
+                            <p className="text-lg font-semibold text-gray-900">
+                              {team.teamStats.highestT20Score || 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Lowest Scores */}
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-500 mb-3">Lowest Team Scores</h3>
+                        <div className="space-y-3">
+                          <div className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
+                            <p className="text-xs font-medium text-gray-500">Test</p>
+                            <p className="text-lg font-semibold text-gray-900">
+                              {team.teamStats.lowestTestScore || 'N/A'}
+                            </p>
+                          </div>
+                          <div className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
+                            <p className="text-xs font-medium text-gray-500">ODI</p>
+                            <p className="text-lg font-semibold text-gray-900">
+                              {team.teamStats.lowestODIScore || 'N/A'}
+                            </p>
+                          </div>
+                          <div className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
+                            <p className="text-xs font-medium text-gray-500">T20I</p>
+                            <p className="text-lg font-semibold text-gray-900">
+                              {team.teamStats.lowestT20Score || 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Match Summary */}
+                    <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
+                      <h3 className="text-sm font-medium text-gray-500 mb-4">Match Summary</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="text-center">
+                          <p className="text-2xl font-bold text-purple-700">
+                            {team.teamStats.totalTestWins || 0}
+                          </p>
+                          <p className="text-sm text-gray-600">Test Wins</p>
+                          <p className="text-xs text-gray-400">
+                            {team.teamStats.totalTestLosses} losses • {team.teamStats.totalTestDraws} draws • {team.teamStats.totalTestTies} ties
+                          </p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-2xl font-bold text-blue-600">
+                            {team.teamStats.totalODIWins || 0}
+                          </p>
+                          <p className="text-sm text-gray-600">ODI Wins</p>
+                          <p className="text-xs text-gray-400">
+                            {team.teamStats.totalODILosses} losses • {team.teamStats.totalODIDraws} draws • {team.teamStats.totalODITies} ties
+                          </p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-2xl font-bold text-green-600">
+                            {team.teamStats.totalT20Wins || 0}
+                          </p>
+                          <p className="text-sm text-gray-600">T20I Wins</p>
+                          <p className="text-xs text-gray-400">
+                            {team.teamStats.totalT20Losses} losses • {team.teamStats.totalT20Draws} draws • {team.teamStats.totalT20Ties} ties
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -713,7 +927,7 @@ const TeamDetails = () => {
             className="lg:sticky lg:top-20 h-fit"
           >
             <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
-              <div className="p-8 border-b border-gray-100">
+              <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-blue-50">
                 <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                   <Users className="h-6 w-6 text-purple-600" />
                   Current Squad
@@ -721,10 +935,11 @@ const TeamDetails = () => {
                     {currentPlayers.length} players
                   </span>
                 </h2>
+                <p className="text-sm text-gray-600 mt-1">Players currently active in {team.name}</p>
               </div>
               <AnimatePresence>
                 {currentPlayers.length > 0 ? (
-                  <div className="divide-y divide-gray-100 max-h-[500px] overflow-y-auto">
+                  <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
                     {currentPlayers.map((player) => (
                       <motion.div
                         key={player.id}
@@ -732,43 +947,85 @@ const TeamDetails = () => {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -10 }}
                         transition={{ type: 'spring', stiffness: 300 }}
-                        className="flex items-center p-6 hover:bg-purple-50 cursor-pointer group"
+                        className="flex items-center p-4 hover:bg-purple-50 cursor-pointer group transition-colors duration-200"
                         onClick={() => handlePlayerClick(player.id)}
                       >
-                        <div className="relative">
+                        <div className="relative flex-shrink-0">
                           <img
                             src={player.photoUrl || 'https://res.cloudinary.com/dppx4dm9a/image/upload/v1752302971/ff_nybtqf.jpg'}
                             alt={player.name}
-                            className="h-12 w-12 rounded-full object-cover border-2 border-white shadow-sm"
+                            className="h-14 w-14 rounded-full object-cover border-2 border-white shadow-sm group-hover:border-purple-200 transition-colors duration-200"
                             onError={(e) => {
                               e.currentTarget.src = 'https://res.cloudinary.com/dppx4dm9a/image/upload/v1752302971/ff_nybtqf.jpg';
                             }}
                           />
-                          <span className="absolute -bottom-1 -right-1 bg-green-500 rounded-full w-3 h-3 border-2 border-white"></span>
+                          <span className="absolute -bottom-1 -right-1 bg-green-500 rounded-full w-3.5 h-3.5 border-2 border-white"></span>
                         </div>
                         <div className="ml-4 flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate group-hover:text-purple-600">
-                            {player.name}
-                          </p>
-                          <div className="flex flex-wrap gap-2 mt-1">
+                          <div className="flex items-center justify-between">
+                            <p className="text-base font-semibold text-gray-900 truncate group-hover:text-purple-600 transition-colors">
+                              {player.name}
+                            </p>
+                            {player.jerseyNo && (
+                              <span className="ml-2 bg-gray-100 text-gray-800 text-xs font-medium px-2 py-0.5 rounded">
+                                #{player.jerseyNo}
+                              </span>
+                            )}
+                          </div>
+                          
+                          {player.country && (
+                            <p className="text-xs text-gray-500 mt-0.5">
+                              {player.country}
+                            </p>
+                          )}
+                          
+                          <div className="flex flex-wrap gap-1.5 mt-2">
                             {player.role && (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
                                 {player.role}
                               </span>
                             )}
                             {player.battingStyle && (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-800 border border-blue-100">
                                 {player.battingStyle}
                               </span>
                             )}
                             {player.bowlingStyle && player.bowlingStyle !== 'N/A' && (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-800 border border-green-100">
                                 {player.bowlingStyle}
                               </span>
                             )}
                           </div>
+                          
+                          {/* Player stats summary */}
+                          <div className="flex items-center mt-2 space-x-3 text-xs text-gray-500">
+                            {player.testStats && (
+                              <span className="flex items-center">
+                                <span className="font-medium text-gray-700 mr-1">Test</span>
+                                <span className="text-gray-600">
+                                  {player.testStats.batting?.matches || 0} Matches
+                                </span>
+                              </span>
+                            )}
+                            {player.odiStats && (
+                              <span className="flex items-center">
+                                <span className="font-medium text-gray-700 mr-1">ODI</span>
+                                <span className="text-gray-600">
+                                  {player.odiStats.batting?.matches || 0} Matches
+                                </span>
+                              </span>
+                            )}
+                            {player.ttwentyInternationalsStats && (
+                              <span className="flex items-center">
+                                <span className="font-medium text-gray-700 mr-1">T20I</span>
+                                <span className="text-gray-600">
+                                  {player.ttwentyInternationalsStats.batting?.matches || 0} Matches
+                                </span>
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <FaChevronRight className="h-4 w-4 text-gray-400 group-hover:text-purple-600" />
+                        <FaChevronRight className="h-4 w-4 text-gray-300 group-hover:text-purple-500 transition-colors ml-2" />
                       </motion.div>
                     ))}
                   </div>

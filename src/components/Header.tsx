@@ -39,6 +39,7 @@ const Header: FC = () => {
   ];
 
   const moreItems: NavItem[] = [
+    { name: 'Know Your Cricket', path: '/know-your-cricket' },
     { name: 'About Us', path: '/about' },
     { name: 'Contact Us', path: '/contact' },
     { name: 'Careers', path: '/careers' },

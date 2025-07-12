@@ -21,6 +21,17 @@ interface TeamBudget {
 }
 
 function IplAuction() {
+  const [currentImage, setCurrentImage] = useState(1);
+
+  useEffect(() => {
+    // Auto-advance the carousel every 5 seconds
+    const interval = setInterval(() => {
+      setCurrentImage(prev => (prev % 6) + 1);
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
   const [soldPlayers, setSoldPlayers] = useState<AuctionPlayer[]>([]);
   const [unsoldPlayers, setUnsoldPlayers] = useState<AuctionPlayer[]>([]);
   const [teamBudgets, setTeamBudgets] = useState<TeamBudget[]>([]);
@@ -210,11 +221,30 @@ function IplAuction() {
               Relive the excitement of the IPL 2025 mega auction, where top players were signed and new team strategies emerged.
             </p>
             <div className="relative w-full max-w-4xl mx-auto aspect-[16/9] bg-gray-200 rounded-lg overflow-hidden">
-              <img
-                src="src/assets/ipl-auction-2025.png"
-                alt="IPL 2025 Auction"
-                className="w-full h-full object-cover"
-              />
+              <div className="relative w-full h-full">
+                {[1, 2, 3, 4, 5, 6].map((num) => (
+                  <img
+                    key={num}
+                    src={`src/assets/auc${num}.png`}
+                    alt={`IPL 2025 Auction ${num}`}
+                    className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+                    style={{
+                      opacity: currentImage === num ? 1 : 0,
+                      zIndex: currentImage === num ? 1 : 0
+                    }}
+                  />
+                ))}
+                <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2 z-10">
+                  {[1, 2, 3, 4, 5, 6].map((num) => (
+                    <button
+                      key={num}
+                      onClick={() => setCurrentImage(num)}
+                      className={`w-3 h-3 rounded-full ${currentImage === num ? 'bg-white' : 'bg-white/50'}`}
+                      aria-label={`Go to slide ${num}`}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
             <a
               href="https://www.youtube.com/watch?v=YpbjdI1HRg4"

@@ -30,6 +30,7 @@ const AdminSeries = lazy(() => import('./pages/Admin/AdminSeries'));
 const AdminVideos = lazy(() => import('./pages/Admin/AdminVideos'));
 const AdminQuiz = lazy(() => import('./pages/Admin/AdminQuiz')); 
 const About = lazy(() => import('./pages/More/About')); 
+const KnowYourCricket = lazy(() => import('./pages/More/KnowYourCricket')); 
 const Contact = lazy(() => import('./pages/More/Contact')); 
 const Career = lazy(() => import('./pages/More/Career')); 
 const Advertise = lazy(() => import('./pages/More/Advertise')); 
@@ -129,6 +130,7 @@ const App: FC = () => {
                   <Route path="/login" element={<Login />} />
                   <Route path="/player/:id" element={<PlayerProfile />} />
                   <Route path="/about" element={<About />} />
+                  <Route path="/know-your-cricket" element={<KnowYourCricket />} />
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/careers" element={<Career />} />
                   <Route path="/advertise" element={<Advertise />} />

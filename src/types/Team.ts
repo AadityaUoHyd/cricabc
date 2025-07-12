@@ -14,8 +14,62 @@ export interface Team {
   teamImageUrl: string;
   majorTitles: string[];
   foundedYear?: number;
+  teamStats?: TeamStats;
   shortName?: string;
-  venues?: Venues;
+  teamLeadership?: TeamLeadership;
+  homeVenueIds?: string[];
+}
+
+export interface TeamStats {
+  totalTestMatches: number;
+  totalODIMatches: number;
+  totalT20Matches: number;
+
+  totalTestDraws: number;
+  totalODIDraws: number;
+  totalT20Draws: number;
+
+  totalTestTies: number;
+  totalODITies: number;
+  totalT20Ties: number;
+
+  totalTestWins: number;
+  totalODIWins: number;
+  totalT20Wins: number;
+
+  totalTestLosses: number;
+  totalODILosses: number;
+  totalT20Losses: number;
+
+  percentageTestWin: number;
+  percentageODIWin: number;
+  percentageT20Win: number;
+
+  highestTestScore: number;
+  highestODIScore: number;
+  highestT20Score: number;
+
+  lowestTestScore: number;
+  lowestODIScore: number;
+  lowestT20Score: number;
+}
+
+export interface TeamLeadership {
+  testCaptain: string; // International only
+  odiCaptain: string; // International only
+  ttwentyInternationalsCaptain: string; // International, League
+  firstClassCaptain: string; // Domestic only
+  listACaptain: string; // Domestic only
+  twenty20Captain: string; // leagues, Domestic only
+
+  testHeadCoach: string; // International only
+  odiHeadCoach: string; // International only
+  ttwentyInternationalsHeadCoach: string; // International, League
+  firstClassHeadCoach: string; // Domestic only
+  listAHeadCoach: string; // Domestic only
+  twenty20HeadCoach: string; // Domestic only
+
+  coachingStaff?: { [key: string]: string }; //key:coachingStaffRole, value:StaffName
 }
 
 export interface Venues {

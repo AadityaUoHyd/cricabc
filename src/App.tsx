@@ -6,6 +6,7 @@ import { MatchesProvider } from './context/MatchesContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import AdminVenue from './pages/Admin/AdminVenue';
+import TeamDetails from './pages/TeamDetails';
 
 // Lazy-loaded components
 const Home = lazy(() => import('./pages/Home'));
@@ -120,6 +121,7 @@ const App: FC = () => {
                   <Route path="/news/:slug" element={<NewsDetail />} />
                   <Route path="/series" element={<Series />} />
                   <Route path="/teams" element={<Teams />} />
+                  <Route path="/team/:id" element={<TeamDetails />} />
                   <Route path="/videos" element={<Videos />} />
                   <Route path="/rankings" element={<Rankings />} />
                   <Route path="/venues" element={<Venues />} />

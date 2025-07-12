@@ -4,19 +4,16 @@ import { motion } from 'framer-motion';
 import { Tabs, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { Users, User } from 'lucide-react';
+import { Users } from 'lucide-react';
 import { type Team } from '../types/Team';
-import { type Player } from '../types/Player';
 import { useNavigate } from 'react-router-dom';
 
 export default function Teams() {
   const [teams, setTeams] = useState<Team[]>([]);
-  const [players, setPlayers] = useState<Player[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const [category, setCategory] = useState<'international' | 'domestic' | 'league'>('international');
   const [gender, setGender] = useState<'male' | 'female'>('male');
   const [leagueName, setLeagueName] = useState<string>('');
@@ -105,26 +102,13 @@ export default function Teams() {
     }
   };
 
-  const fetchPlayers = async (team: Team) => {
-    setLoading(true);
-    try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/players`, {
-        params: { teamId: team.id, category: team.category, page: 0, size: 100 },
-      });
-      setPlayers(response.data as Player[]);
-      setSelectedTeam(team);
-      setError(null);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch players');
-      console.error('Fetch players error:', err);
-    } finally {
-      setLoading(false);
-    }
+    // Removed unused state and functions
+
+  const handleViewTeamDetails = (teamId: string) => {
+    navigate(`/team/${teamId}`);
   };
 
-  const handlePlayerClick = (playerId: string) => {
-    navigate(`/player/${playerId}`);
-  };
+
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -273,59 +257,20 @@ export default function Teams() {
 
               <CardContent className="pt-0">
                 <Button
+                  variant="outline"
                   size="sm"
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white mt-2"
-                  onClick={() => fetchPlayers(team)}
+                  className="text-purple-600 border-purple-300 hover:bg-purple-50 hover:text-purple-700 mt-2 text-xs"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleViewTeamDetails(team.id as string);
+                  }}
                 >
-                  View Players
+                  View Team Details
                 </Button>
               </CardContent>
             </Card>
-
           ))}
         </div>
-
-        {selectedTeam && players.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-8"
-          >
-            <h2 className="text-2xl font-bold mb-4 text-purple-800">
-              Players of {selectedTeam?.name}
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {players.map((player) => (
-                <Card key={player.id} className="shadow-md hover:shadow-lg transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-4">
-                      {player.photoUrl ? (
-                        <img
-                          src={player.photoUrl}
-                          alt={player.name}
-                          className="w-12 h-12 object-cover rounded-full"
-                        />
-                      ) : (
-                        <User className="w-12 h-12 text-purple-600" />
-                      )}
-                      <div>
-                        <h3
-                          className="text-lg font-semibold text-purple-600 cursor-pointer hover:underline"
-                          onClick={() => handlePlayerClick(player.id)}
-                        >
-                          {player.name}
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                          {player.role} | {player.country}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </motion.div>
-        )}
 
         <div className="flex justify-center gap-2 mt-8">
           <Button

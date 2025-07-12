@@ -302,7 +302,7 @@ export default function AdminNews() {
   };
 
   const handleEdit = (news: News) => {
-    console.log('Editing news content:', news.content); // Debug log
+    // Removed debug log
     setForm(news);
     setImageFile(null);
     setPreviewUrl(null);
@@ -310,13 +310,13 @@ export default function AdminNews() {
       try {
         // Sanitize content
         const sanitizedContent = DOMPurify.sanitize(news.content, { USE_PROFILES: { html: true }, ADD_TAGS: ['img'], ADD_ATTR: ['src', 'alt', 'style'] });
-        console.log('Sanitized content:', sanitizedContent); // Debug log
+        // Removed debug log
 
         editorRef.current.update(() => {
           const parser = new DOMParser();
           const dom = parser.parseFromString(sanitizedContent, 'text/html');
           let nodes = $generateNodesFromDOM(editorRef.current!, dom);
-          console.log('Parsed nodes:', nodes); // Debug log
+          // Removed debug log
 
           // Transform unsupported nodes
           nodes = nodes.map(node => {
@@ -337,7 +337,7 @@ export default function AdminNews() {
           if (nodes.length > 0) {
             $insertNodes(nodes);
             $setSelection(null);
-            console.log('Nodes inserted successfully');
+            // Removed debug log
           } else {
             console.warn('No valid nodes generated, using fallback');
             const paragraph = $createParagraphNode();

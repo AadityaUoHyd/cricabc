@@ -21,6 +21,7 @@ interface NewsItem {
   content: string;
   imageUrl: string;
   publishedDate: string;
+  slug?: string; // Optional slug field for SEO-friendly URLs
 }
 
 interface TeamsResponse {
@@ -321,26 +322,87 @@ function WPL() {
       case 'news':
         return (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {news.map((item) => (
-              <motion.div
-                key={item._id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
-              >
-                <img src={item.imageUrl} alt={item.title} className="w-full h-48 object-cover" />
-                <div className="p-4">
-                  <p className="text-sm text-gray-500 mb-2">
-                    {new Date(item.publishedDate).toLocaleDateString()}
-                  </p>
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">{item.title}</h3>
-                  <div className="text-gray-600" dangerouslySetInnerHTML={{ __html: item.content.substring(0, 100) + '...' }} />
-                  <button className="mt-4 text-purple-600 hover:text-purple-800 font-medium">
-                    Read More →
-                  </button>
-                </div>
-              </motion.div>
-            ))}
+            {news.map((item, index) => {
+              // Create a unique key using _id if available, otherwise use a combination of index and title
+              const itemKey = item._id || `item-${index}-${item.title?.substring(0, 20).replace(/\s+/g, '-') || 'news'}`;
+              
+              // Function to handle news item click
+              const handleNewsClick = () => {
+                // Navigate to news detail page with the news item's slug
+                // First, create a URL-friendly slug from the title if slug is not available
+                const slug = item.slug || (item.title || '')
+                  .toLowerCase()
+                  .replace(/[^\w\s-]/g, '') // Remove special characters
+                  .replace(/\s+/g, '-')      // Replace spaces with hyphens
+                  .replace(/--+/g, '-');      // Replace multiple hyphens with single
+                
+                // Use React Router's navigate if available, otherwise use window.location
+                if (typeof window !== 'undefined' && window.location) {
+                  // Make sure to include the base URL if your app is not at the root
+                  const baseUrl = window.location.origin;
+                  window.location.href = `${baseUrl}/news/${slug}`;
+                }
+              };
+
+              return (
+                <motion.div
+                  key={`news-${itemKey}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={handleNewsClick}
+                >
+                  <img 
+                    src={item.imageUrl} 
+                    alt={item.title || 'News image'} 
+                    className="w-full h-48 object-cover"
+                    key={`img-${itemKey}`}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.onerror = null;
+                      target.src = 'https://via.placeholder.com/300x200?text=Image+Not+Available';
+                    }}
+                  />
+                  <div 
+                    className="p-4"
+                    key={`content-${itemKey}`}
+                  >
+                    {item.publishedDate && (
+                      <p 
+                        className="text-sm text-gray-500 mb-2"
+                        key={`date-${itemKey}`}
+                      >
+                        {new Date(item.publishedDate).toLocaleDateString()}
+                      </p>
+                    )}
+                    <h3 
+                      className="text-xl font-bold text-gray-800 mb-2"
+                      key={`title-${itemKey}`}
+                    >
+                      {item.title || 'Untitled'}
+                    </h3>
+                    <div 
+                      className="text-gray-600 news-content"
+                      dangerouslySetInnerHTML={{ 
+                        __html: item.content ? 
+                          (item.content.length > 100 ? item.content.substring(0, 100) + '...' : item.content) 
+                          : 'No content available' 
+                      }} 
+                    />
+                    <button 
+                      className="mt-4 text-purple-600 hover:text-purple-800 font-medium"
+                      key={`btn-${itemKey}`}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent triggering the parent div's onClick
+                        handleNewsClick();
+                      }}
+                    >
+                      Read More →
+                    </button>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         );
 
@@ -360,24 +422,70 @@ function WPL() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {pointsTable.map((entry, index) => (
-                  <tr key={entry.team.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{index + 1}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <img className="h-8 w-8 mr-2" src={entry.team.logoUrl} alt={entry.team.name} />
-                        <span className="text-sm font-medium text-gray-900">{entry.team.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.matchesPlayed}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.matchesWon}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.matchesLost}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{entry.points}</td>
-                    <td className={`px-6 py-4 whitespace-nowrap text-sm ${entry.nrr >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {entry.nrr > 0 ? `+${entry.nrr.toFixed(2)}` : entry.nrr.toFixed(2)}
+                {isLoading.stats ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500">
+                      Loading points table...
                     </td>
                   </tr>
-                ))}
+                ) : error ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-4 text-center text-sm text-red-500">
+                      {error}
+                    </td>
+                  </tr>
+                ) : pointsTable.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500">
+                      No points table data available
+                    </td>
+                  </tr>
+                ) : (
+                  pointsTable.map((entry, index) => (
+                    entry.team ? (
+                      <tr key={entry.team.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{index + 1}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            {entry.team.logoUrl && (
+                              <img 
+                                className="h-8 w-8 mr-2" 
+                                src={entry.team.logoUrl} 
+                                alt={entry.team.name} 
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                }}
+                              />
+                            )}
+                            <span className="text-sm font-medium text-gray-900">
+                              {entry.team.name || `Team ${index + 1}`}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {entry.matchesPlayed ?? '-'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {entry.matchesWon ?? '-'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {entry.matchesLost ?? '-'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {entry.points ?? '-'}
+                        </td>
+                        <td className={`px-6 py-4 whitespace-nowrap text-sm ${
+                          entry.nrr >= 0 ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          {entry.nrr !== undefined ? 
+                            (entry.nrr > 0 ? `+${entry.nrr.toFixed(2)}` : entry.nrr.toFixed(2)) : 
+                            '-'}
+                        </td>
+                      </tr>
+                    ) : null
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -440,10 +548,10 @@ function WPL() {
               <Trophy className="w-6 h-6 mr-2 text-purple-600" />
               About WPL
             </h2>
-            <p className="text-gray-600 mb-6">
-              The Women's Premier League (WPL), launched in 2023 by the Board of Control for Cricket in India (BCCI), is a professional Twenty20 cricket league in India, modeled after the Indian Premier League (IPL). It features five franchise-based teams representing Indian cities, showcasing top international and domestic women cricketers. The WPL succeeded the Women's T20 Challenge (2018–2022), providing a robust platform to elevate women's cricket. With a double round-robin format and playoffs, the league has grown in popularity, featuring high-energy matches and significant fan engagement, with the opening match of WPL 2025 attracting 30 million viewers.
-              <p className='mt-2'>Backed by substantial investments, the WPL has a valuation of ₹1,350 crore ($162 million) in 2024, up 8% from ₹1,250 crore ($150 million) in 2023, driven by a ₹951 crore ($176 million) five-year media rights deal with Viacom18, translating to ₹7.09 crore per match, making it the second most valuable broadcast contract for a women’s sports league globally, behind the WNBA. The Tata Group secured title sponsorship for ₹165 crore over five years, further bolstering the league’s financial strength. The WPL continues to inspire the next generation of cricketers and promote gender equality in the sport.</p>
-            </p>
+            <div className="text-gray-600 mb-6">
+              <p className="mb-4">The Women's Premier League (WPL), launched in 2023 by the Board of Control for Cricket in India (BCCI), is a professional Twenty20 cricket league in India, modeled after the Indian Premier League (IPL). It features five franchise-based teams representing Indian cities, showcasing top international and domestic women cricketers. The WPL succeeded the Women's T20 Challenge (2018–2022), providing a robust platform to elevate women's cricket. With a double round-robin format and playoffs, the league has grown in popularity, featuring high-energy matches and significant fan engagement, with the opening match of WPL 2025 attracting 30 million viewers.</p>
+              <p className="mb-4">Backed by substantial investments, the WPL has a valuation of ₹1,350 crore ($162 million) in 2024, up 8% from ₹1,250 crore ($150 million) in 2023, driven by a ₹951 crore ($176 million) five-year media rights deal with Viacom18, translating to ₹7.09 crore per match, making it the second most valuable broadcast contract for a women's sports league globally, behind the WNBA. The Tata Group secured title sponsorship for ₹165 crore over five years, further bolstering the league's financial strength. The WPL continues to inspire the next generation of cricketers and promote gender equality in the sport.</p>
+            </div>
             <div className="relative w-full max-w-4xl mx-auto aspect-[16/9] bg-gray-200 rounded-lg overflow-hidden m-6">
               <img
                 src="src/assets/about-wpl.png"
@@ -497,24 +605,35 @@ function WPL() {
                 <div className="flex items-center justify-between">
                   <div className="text-center">
                     <img
-                      src={teams.find((t) => t.id === matches.find((m) => m.status === 'Live')?.team1)?.logoUrl}
+                      src={teams.find((t) => t.name === matches.find((m) => m.status === 'Live')?.team1)?.logoUrl}
                       alt="Team 1"
                       className="h-16 mx-auto mb-2"
                     />
-                    <p className="font-bold">{teams.find((t) => t.id === matches.find((m) => m.status === 'Live')?.team1)?.name || 'TBD'}</p>
+                    <p className="font-bold">{matches.find((m) => m.status === 'Live')?.team1 || 'TBD'}</p>
                   </div>
                   <div className="text-center">
                     <p className="text-2xl font-bold">VS</p>
                     <p className="text-sm mt-2">{new Date(matches.find((m) => m.status === 'Live')?.dateTimeGMT || '').toLocaleString()}</p>
-                    <p className="text-xs mt-1">{matches.find((m) => m.status === 'Live')?.venue}</p>
+                    <p className="text-xs mt-1">
+                      {(() => {
+                        const liveMatch = matches.find((m) => m.status === 'Live');
+                        if (!liveMatch) return '';
+                        const venue = liveMatch.venue;
+                        return typeof venue === 'string' 
+                          ? venue 
+                          : venue && 'stadiumName' in venue 
+                            ? venue.stadiumName 
+                            : '';
+                      })()}
+                    </p>
                   </div>
                   <div className="text-center">
                     <img
-                      src={teams.find((t) => t.id === matches.find((m) => m.status === 'Live')?.team2)?.logoUrl}
+                      src={teams.find((t) => t.name === matches.find((m) => m.status === 'Live')?.team2)?.logoUrl}
                       alt="Team 2"
                       className="h-16 mx-auto mb-2"
                     />
-                    <p className="font-bold">{teams.find((t) => t.id === matches.find((m) => m.status === 'Live')?.team2)?.name || 'TBD'}</p>
+                    <p className="font-bold">{matches.find((m) => m.status === 'Live')?.team2 || 'TBD'}</p>
                   </div>
                 </div>
               </div>
@@ -527,7 +646,12 @@ function WPL() {
               {matches.length > 0 ? (
                 matches
                   .filter((match) => match.status !== 'Live')
-                  .map((match) => <MatchCard key={match.matchId} match={match} />)
+                  .map((match, index) => (
+                    <MatchCard 
+                      key={`${match.matchId || 'match'}-${index}-${match.team1}-${match.team2}-${match.dateTimeGMT}`} 
+                      match={match} 
+                    />
+                  ))
               ) : (
                 <div className="col-span-3 text-center py-8">
                   <p className="text-gray-500">No upcoming matches found</p>

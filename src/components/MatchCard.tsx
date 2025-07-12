@@ -33,7 +33,19 @@ export default function MatchCard({ match }: MatchCardProps) {
       </div>
 
       <p className="text-sm text-gray-600">{match.matchType.toUpperCase()} • {match.tournament}</p>
-      <p className="text-sm text-gray-600">Venue: {match.venue}</p>
+      <p className="text-sm text-gray-600">
+        Venue: {(() => {
+          if (!match.venue) return 'TBD';
+          if (typeof match.venue === 'string') return match.venue;
+          
+          // Debug log the venue object
+          // Removed debug log
+          
+          // Safely access stadiumName or any other property
+          const venueObj = match.venue as any;
+          return venueObj.stadiumName || venueObj.name || 'TBD';
+        })()}
+      </p>
 
       <div className="mt-2 flex-grow">
         <p className="text-gray-700 font-medium">{match.team1} vs {match.team2}</p>

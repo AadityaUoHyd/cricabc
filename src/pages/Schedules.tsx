@@ -48,7 +48,7 @@ export default function Schedules() {
         
         // Process and validate matches
         const validMatches: Match[] = [];
-        
+
         for (const match of matchesData) {
           try {
             // Skip invalid matches
@@ -68,7 +68,7 @@ export default function Schedules() {
               dateTimeGMT: match.dateTimeGMT || null,
               matchStarted: Boolean(match.matchStarted),
               matchEnded: Boolean(match.matchEnded),
-              venue: String(match.venue || 'TBD'),
+              venue: match.venue || { stadiumName: 'TBD', city: '', country: '' },
               tournament: String(match.tournament || 'Cricket Match'),
               matchType: String(match.matchType || 'T20'),
               fantasyEnabled: Boolean(match.fantasyEnabled || false),
@@ -141,7 +141,7 @@ export default function Schedules() {
         (match) =>
           match.team1.toLowerCase().includes(query) ||
           match.team2.toLowerCase().includes(query) ||
-          match.venue.toLowerCase().includes(query) ||
+          ((match.venue && typeof match.venue === 'object' ? match.venue.stadiumName?.toLowerCase() : match.venue?.toLowerCase() || '')).includes(query) ||
           match.tournament.toLowerCase().includes(query)
       );
     }
@@ -316,8 +316,8 @@ export default function Schedules() {
               </button>
               <button
                 onClick={() => {
-                  console.log('Current matches state:', matches);
-                  console.log('Current error state:', error);
+                  // Removed debug log
+                  // Removed debug log
                 }}
                 className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
               >
@@ -401,7 +401,9 @@ export default function Schedules() {
                           <span className="inline-block bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-md">
                             {match.matchType.toUpperCase()}
                           </span>
-                          <p className="mt-1 text-xs text-gray-500">{match.venue}</p>
+                          <p className="mt-1 text-xs text-gray-500">
+                            {typeof match.venue === 'string' ? match.venue : match.venue.stadiumName}
+                          </p>
                           <p className="mt-1 text-xs font-medium text-purple-600">{match.tournament}</p>
                         </div>
                       </motion.div>

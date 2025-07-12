@@ -2,8 +2,10 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { type FC, Suspense, lazy, Component, type ReactNode } from 'react';
 import { useRestoreUser } from './hooks/useRestoreUser';
 import { PlayerProvider } from './context/PlayerContext';
+import { MatchesProvider } from './context/MatchesContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import AdminVenue from './pages/Admin/AdminVenue';
 
 // Lazy-loaded components
 const Home = lazy(() => import('./pages/Home'));
@@ -40,6 +42,8 @@ const AdminTeams = lazy(() => import('./pages/Admin/AdminTeams'));
 const AdminIPL = lazy(() => import('./pages/Admin/AdminIPL'));
 const AdminWPL = lazy(() => import('./pages/Admin/AdminWPL'));
 const WPL = lazy(() => import('./pages/WPL'));
+const Venues = lazy(() => import('./pages/Venues/Venues'));
+const VenueDetail = lazy(() => import('./pages/Venues/VenueDetail'));
 
 // Protected Route component
 interface ProtectedRouteProps {
@@ -99,59 +103,64 @@ const App: FC = () => {
         <main className="flex-grow">
           <ErrorBoundary>
             <PlayerProvider>
-            <Suspense fallback={
-              <div className="flex justify-center items-center h-screen">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
-              </div>
-            }>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/live/:matchId" element={<LiveScore />} />
-                <Route path="/ipl" element={<IPL />} />
-                <Route path="/wpl" element={<WPL />} />
-                <Route path="/schedules" element={<Schedules />} />
-                <Route path="/archives" element={<Archive />} />
-                <Route path="/news" element={<News />} />
-                <Route path="/news/:slug" element={<NewsDetail />} />
-                <Route path="/series" element={<Series />} />
-                <Route path="/teams" element={<Teams />} />
-                <Route path="/videos" element={<Videos />} />
-                <Route path="/rankings" element={<Rankings />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/player/:id" element={<PlayerProfile />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/careers" element={<Career />} />
-                <Route path="/advertise" element={<Advertise />} />
-                <Route path="/privacy" element={<PrivacyPolicy />} />
-                <Route path="/terms" element={<TermsOfUse />} />
-                <Route path="/cricabc-team" element={<CricABCTeam />} />
-                <Route path="/quiz" element={<CricABCCricketQuiz />} />
-                <Route
-                  path="/admin/*"
-                  element={
-                    <ProtectedRoute>
-                      <Admin />
-                    </ProtectedRoute>
-                  }
-                >
-                  <Route index element={<AdminTeams />} />
-                  <Route path="matches" element={<AdminMatchesPage />} />
-                  <Route path="news" element={<AdminNews />} />
-                  <Route path="rankings" element={<AdminRankings />} />
-                  <Route path="player" element={<AdminPlayer />} /> 
-                  <Route path="schedules" element={<AdminSchedules />} />
-                  <Route path="series" element={<AdminSeries />} />
-                  <Route path="ipl" element={<AdminIPL />} />
-                  <Route path="wpl" element={<AdminWPL />} />
-                  <Route path="videos" element={<AdminVideos />} />
-                  <Route path="teams" element={<AdminTeams />} />
-                  <Route path="quiz" element={<AdminQuiz />} />
-                </Route>
-                <Route path="*" element={<h1 className="text-center py-5 font-extrabold">Sorry for the inconvenience. CricABC will develop this page soon...</h1>} />
-              </Routes>
-            </Suspense>
-            </PlayerProvider>
+            <MatchesProvider>
+              <Suspense fallback={
+                <div className="flex justify-center items-center h-screen">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
+                </div>
+              }>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/live/:matchId" element={<LiveScore />} />
+                  <Route path="/ipl" element={<IPL />} />
+                  <Route path="/wpl" element={<WPL />} />
+                  <Route path="/schedules" element={<Schedules />} />
+                  <Route path="/archives" element={<Archive />} />
+                  <Route path="/news" element={<News />} />
+                  <Route path="/news/:slug" element={<NewsDetail />} />
+                  <Route path="/series" element={<Series />} />
+                  <Route path="/teams" element={<Teams />} />
+                  <Route path="/videos" element={<Videos />} />
+                  <Route path="/rankings" element={<Rankings />} />
+                  <Route path="/venues" element={<Venues />} />
+                  <Route path="/venues/:id" element={<VenueDetail />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/player/:id" element={<PlayerProfile />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/careers" element={<Career />} />
+                  <Route path="/advertise" element={<Advertise />} />
+                  <Route path="/privacy" element={<PrivacyPolicy />} />
+                  <Route path="/terms" element={<TermsOfUse />} />
+                  <Route path="/cricabc-team" element={<CricABCTeam />} />
+                  <Route path="/quiz" element={<CricABCCricketQuiz />} />
+                  <Route
+                    path="/admin/*"
+                    element={
+                      <ProtectedRoute>
+                        <Admin />
+                      </ProtectedRoute>
+                    }
+                  >
+                    <Route index element={<AdminTeams />} />
+                    <Route path="matches" element={<AdminMatchesPage />} />
+                    <Route path="news" element={<AdminNews />} />
+                    <Route path="rankings" element={<AdminRankings />} />
+                    <Route path="player" element={<AdminPlayer />} /> 
+                    <Route path="schedules" element={<AdminSchedules />} />
+                    <Route path="series" element={<AdminSeries />} />
+                    <Route path="ipl" element={<AdminIPL />} />
+                    <Route path="wpl" element={<AdminWPL />} />
+                    <Route path="venues" element={<AdminVenue />} />
+                    <Route path="videos" element={<AdminVideos />} />
+                    <Route path="teams" element={<AdminTeams />} />
+                    <Route path="quiz" element={<AdminQuiz />} />
+                  </Route>
+                  <Route path="*" element={<h1 className="text-center py-5 font-extrabold">Sorry for the inconvenience. CricABC will develop this page soon...</h1>} />
+                </Routes>
+              </Suspense>
+              </MatchesProvider>
+              </PlayerProvider>
           </ErrorBoundary>
         </main>
         <Footer />

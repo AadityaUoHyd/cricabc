@@ -305,7 +305,9 @@ export default function Archives() {
                       <FiClock className="mr-1" />
                       {match.dateTimeGMT ? new Date(match.dateTimeGMT).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Time TBD'}
                     </span>
-                    <span className="text-sm text-gray-500">{match.venue}</span>
+                    <span className="text-sm text-gray-500">
+                      {typeof match.venue === 'string' ? match.venue : match.venue?.stadiumName || 'Venue TBD'}
+                    </span>
                   </div>
                 </div>
                 
@@ -340,7 +342,9 @@ export default function Archives() {
                         <div>
                           <p className="font-medium text-gray-900">Match Info</p>
                           <p className="text-gray-600">{match.tournament}</p>
-                          <p className="text-gray-600">{match.venue}</p>
+                          <p className="text-gray-600">
+                            {typeof match.venue === 'string' ? match.venue : match.venue?.stadiumName || 'Venue TBD'}
+                          </p>
                         </div>
                         <div>
                           <p className="font-medium text-gray-900">Date & Time</p>

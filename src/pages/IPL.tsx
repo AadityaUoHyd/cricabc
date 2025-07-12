@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Award, ChevronLeft, ChevronRight } from 'lucide-react';
 import iplLogo from '../assets/ipl_logo.png';
 import { type Match } from '../types/Match';
-import { type Team } from '../types/Team';
+import { type Team, type Venues } from '../types/Team';
 import { type Player, type BattingStats, type BowlingStats } from '../types/Player';
 import { usePlayers } from '../context/PlayerContext';
 import { FaCalendarAlt, FaNewspaper, FaTable, FaChartLine, FaUsers, FaInfoCircle } from 'react-icons/fa';
@@ -27,6 +27,7 @@ interface NewsItem {
   content: string;
   imageUrl: string;
   publishedDate: string;
+  slug?: string; // Optional slug field for SEO-friendly URLs
 }
 
 interface TeamsResponse {
@@ -60,6 +61,7 @@ function IPL() {
   });
   const [error, setError] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  // Import images directly
   const images = [
     'src/assets/about-ipl1.png',
     'src/assets/about-ipl2.png',
@@ -96,18 +98,76 @@ function IPL() {
       });
 
       try {
-        // Fetch IPL matches
+        // Fetch IPL matches from backend
         const matchesPromise = axios
           .get<Match[]>(`${import.meta.env.VITE_API_URL}/matches/tournament/IPL`)
           .then((response) => {
-            setMatches(response.data);
-            setIsLoading((prev) => ({ ...prev, matches: false }));
+            if (response.data && Array.isArray(response.data)) {
+              // Transform the data to match the expected format
+              const formattedMatches = response.data.map(match => {
+                // Handle venue - it could be a string, object, or undefined
+                let venue: string | Venues = 'TBD';
+                if (match.venue) {
+                  if (typeof match.venue === 'string') {
+                    venue = match.venue;
+                  } else if (match.venue && typeof match.venue === 'object') {
+                    const venueObj = match.venue as Venues;
+                    if ('stadiumName' in venueObj) {
+                      venue = {
+                        stadiumName: venueObj.stadiumName || 'Unknown Stadium',
+                        city: venueObj.city || 'Unknown City',
+                        country: venueObj.country || 'Unknown Country',
+                        capacity: venueObj.capacity,
+                        location: venueObj.location,
+                        imageUrl: venueObj.imageUrl,
+                        description: venueObj.description,
+                        establishedYear: venueObj.establishedYear,
+                        matchesHosted: venueObj.matchesHosted
+                      };
+                    }
+                  }
+                }
+                
+                const team1 = typeof match.team1 === 'string' ? match.team1 : 'TBD';
+                const team2 = typeof match.team2 === 'string' ? match.team2 : 'TBD';
+                
+                return {
+                  ...match,
+                  team1,
+                  team2,
+                  dateTimeGMT: match.dateTimeGMT || new Date().toISOString(),
+                  venue,
+                  status: match.status || 'Scheduled',
+                  matchStarted: match.matchStarted || false,
+                  matchEnded: match.matchEnded || false,
+                  id: match.id || match.matchId || `match-${Date.now()}`,
+                  matchId: match.matchId || match.id || `match-${Date.now()}`,
+                  title: match.title || `${team1} vs ${team2}`,
+                  matchType: match.matchType || 'T20',
+                  tournament: match.tournament || 'IPL',
+                  fantasyEnabled: match.fantasyEnabled || false,
+                  bbbEnabled: match.bbbEnabled || false,
+                  hasSquad: match.hasSquad || false,
+                  fantasyLink: match.fantasyLink || '',
+                  pointsTableLink: match.pointsTableLink || '',
+                  scheduleLink: match.scheduleLink || ''
+                } as Match;
+              });
+              
+              setMatches(formattedMatches);
+              return formattedMatches;
+            } else {
+              setMatches([]);
+              console.warn('Unexpected response format for IPL matches:', response.data);
+              return [];
+            }
           })
           .catch((err) => {
-            console.error('Error fetching matches:', err);
-            setError((prev) => prev || 'Failed to load matches. Some data may be incomplete.');
-            setIsLoading((prev) => ({ ...prev, matches: false }));
-          });
+            console.error('Error fetching IPL matches:', err);
+            setError('Failed to load IPL matches');
+            setMatches([]);
+            return [];
+          }) as Promise<Match[]>;
 
         // Fetch IPL teams
         const teamsPromise = axios
@@ -168,101 +228,115 @@ function IPL() {
 
         // Parse winners from CSV
         const parseWinnersData = () => {
-          try {
-            const parsed = Papa.parse(auctionData, {
-              header: false,
-              skipEmptyLines: true,
-              transform: (value) => value.trim(),
-            });
+          return new Promise<void>((resolve, reject) => {
+            try {
+              // Split the CSV into sections
+              const sections = auctionData.split(/^#\s*(\w+.*?)$/gm);
+              let winnersSection = '';
+              let foundWinnersSection = false;
 
-            if (parsed.errors.length > 0) {
-              console.warn('CSV parsing errors encountered:', parsed.errors);
-            }
-
-            const data = parsed.data as string[][];
-            let currentSection: string | null = null;
-            let currentHeaders: string[] = [];
-            const winners: Winner[] = [];
-            let winnersSectionFound = false;
-
-            for (let i = 0; i < data.length; i++) {
-              const row = data[i];
-
-              if (row.length === 1) {
-                const sectionHeader = row[0].toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
-                if (sectionHeader === 'winners') {
-                  currentSection = 'winners';
-                  winnersSectionFound = true;
-                  currentHeaders = [];
-                  continue;
-                } else if (['sold players', 'unsold players', 'team budgets'].includes(sectionHeader)) {
-                  currentSection = null;
-                  currentHeaders = [];
-                  continue;
-                } else {
-                  console.warn(`Unknown section header at row ${i}: "${row[0]}"`);
-                  continue;
-                }
-              }
-
-              if (currentSection === 'winners' && currentHeaders.length === 0) {
-                if (row.includes('year') && row.includes('winner') && row.includes('runnerUp')) {
-                  currentHeaders = row;
-                  continue;
-                } else {
-                  console.warn(`Expected winners headers at row ${i}, but got:`, row);
-                }
-              }
-
-              if (currentSection === 'winners' && currentHeaders.length > 0) {
-                if (row.length >= currentHeaders.length) {
-                  const rowData = Object.fromEntries(currentHeaders.map((header, index) => [header, row[index] || '']));
-
-                  if (rowData.year && rowData.winner && rowData.runnerUp) {
-                    const year = parseInt(rowData.year);
-                    if (!isNaN(year)) {
-                      winners.push({
-                        year,
-                        winner: rowData.winner,
-                        runnerUp: rowData.runnerUp,
-                      });
-                    } else {
-                      console.warn(`Skipping winners row ${i} due to invalid year:`, rowData);
-                    }
-                  } else {
-                    console.warn(`Skipping invalid winners row ${i}:`, rowData);
+              // Find the Winners section
+              for (let i = 0; i < sections.length; i++) {
+                const section = sections[i].trim();
+                if (section.toLowerCase() === 'winners') {
+                  // The next section contains the winners data
+                  if (i + 1 < sections.length) {
+                    winnersSection = sections[i + 1].trim();
+                    foundWinnersSection = true;
                   }
-                } else {
-                  console.warn(`Skipping row ${i} due to column mismatch in winners section (expected ${currentHeaders.length} columns, got ${row.length}):`, row);
+                  break;
                 }
               }
-            }
 
-            if (!winnersSectionFound) {
-              console.warn('Winners section not found in CSV.');
-              setError('Winners section not found in CSV. Ensure the section header is "# Winners".');
-            }
+              if (!foundWinnersSection) {
+                console.warn('Winners section not found in CSV');
+                setError('Winners section not found in CSV. Ensure the section header is "# Winners".');
+                setIsLoading(prev => ({ ...prev, winners: false }));
+                resolve();
+                return;
+              }
 
-            if (winners.length === 0 && winnersSectionFound) {
-              console.warn('No valid winners data found in CSV.');
-              setError('No valid winners data found. Please check the "# Winners" section in the CSV.');
-            }
+              // Parse the winners section
+              Papa.parse(winnersSection, {
+                header: true,
+                skipEmptyLines: true,
+                transform: (value) => value.trim(),
+                complete: (result) => {
+                  const winnersData: Winner[] = [];
+                  
+                  for (const row of result.data as any[]) {
+                    if (row && row.year && row.winner && row.runnerUp) {
+                      const year = parseInt(row.year);
+                      if (!isNaN(year)) {
+                        winnersData.push({
+                          year,
+                          winner: row.winner,
+                          runnerUp: row.runnerUp,
+                        });
+                      } else {
+                        console.warn('Skipping invalid year in winners data:', row);
+                      }
+                    }
+                  }
 
-            setWinners(winners);
-            setIsLoading((prev) => ({ ...prev, winners: false }));
-          } catch (err) {
-            console.error('Error parsing winners data:', err);
-            setError('Failed to load IPL winners data. Please verify the "# Winners" section in the CSV.');
-            setIsLoading((prev) => ({ ...prev, winners: false }));
-          }
+                  if (winnersData.length === 0) {
+                    console.warn('No valid winners data found in CSV');
+                    setError('No valid winners data found. Please check the "# Winners" section in the CSV.');
+                  } else {
+                    // Sort winners by year in ascending order
+                    winnersData.sort((a, b) => a.year - b.year);
+                    // Removed debug log
+                  }
+
+                  setWinners(winnersData);
+                  setIsLoading(prev => ({ ...prev, winners: false }));
+                  resolve();
+                },
+                error: (err:any) => {
+                  console.error('Error parsing winners section:', err);
+                  setError('Failed to parse winners data.');
+                  setIsLoading(prev => ({ ...prev, winners: false }));
+                  reject(err);
+                },
+              });
+            } catch (err) {
+              console.error('Error in parseWinnersData:', err);
+              setError('An error occurred while processing winners data.');
+              setIsLoading(prev => ({ ...prev, winners: false }));
+              reject(err);
+            }
+          });
         };
 
-        parseWinnersData();
+        // Execute all promises in parallel
+        const results = await Promise.allSettled([
+          matchesPromise,
+          teamsPromise,
+          pointsPromise,
+          newsPromise,
+          playersPromise,
+          parseWinnersData()
+        ]);
 
-        await Promise.allSettled([matchesPromise, teamsPromise, pointsPromise, newsPromise, playersPromise]);
+        // Log any errors for debugging
+        results.forEach((result, index) => {
+          if (result.status === 'rejected') {
+            console.error(`Error in promise ${index}:`, result.reason);
+          }
+        });
+
+        // Ensure all loading states are set to false after all promises settle
+        setIsLoading({
+          matches: false,
+          teams: false,
+          news: false,
+          stats: false,
+          winners: false,
+        });
       } catch (err) {
         console.error('Unexpected error in fetchData:', err);
         setError('An unexpected error occurred while loading IPL data. Please try again later.');
+        // Set all loading states to false in case of error
         setIsLoading({
           matches: false,
           teams: false,
@@ -321,26 +395,78 @@ function IPL() {
       case 'news':
         return (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {news.map((item) => (
-              <motion.div
-                key={item._id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
-              >
-                <img src={item.imageUrl} alt={item.title} className="w-full h-48 object-cover" />
-                <div className="p-4">
-                  <p className="text-sm text-gray-500 mb-2">
-                    {new Date(item.publishedDate).toLocaleDateString()}
-                  </p>
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">{item.title}</h3>
-                  <div className="text-gray-600" dangerouslySetInnerHTML={{ __html: item.content.substring(0, 100) + '...' }} />
-                  <button className="mt-4 text-purple-600 hover:text-purple-800 font-medium">
-                    Read More →
-                  </button>
-                </div>
-              </motion.div>
-            ))}
+            {news.map((item, index) => {
+              // Create a unique key using _id if available, otherwise use index and a portion of the title
+              const itemKey = item._id || `news-${index}-${item.title?.substring(0, 20).replace(/\s+/g, '-') || 'item'}`;
+              
+              // Safely handle potentially undefined or null values
+              const title = item.title || 'No Title';
+              const content = item.content ? 
+                `${item.content.substring(0, 100)}${item.content.length > 100 ? '...' : ''}` : 
+                'No content available';
+              const date = item.publishedDate ? new Date(item.publishedDate).toLocaleDateString() : 'Date not available';
+              const imageUrl = item.imageUrl || 'https://via.placeholder.com/300x200?text=No+Image';
+              
+              // Function to handle news item click
+              const handleNewsClick = () => {
+                // Navigate to news detail page with the news item's slug
+                // First, create a URL-friendly slug from the title if slug is not available
+                const slug = item.slug || item.title
+                  .toLowerCase()
+                  .replace(/[^\w\s-]/g, '') // Remove special characters
+                  .replace(/\s+/g, '-')      // Replace spaces with hyphens
+                  .replace(/--+/g, '-');      // Replace multiple hyphens with single
+                
+                // Use React Router's navigate if available, otherwise use window.location
+                if (typeof window !== 'undefined' && window.location) {
+                  // Make sure to include the base URL if your app is not at the root
+                  const baseUrl = window.location.origin;
+                  window.location.href = `${baseUrl}/news/${slug}`;
+                }
+              };
+              
+              return (
+                <motion.div
+                  key={itemKey}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={handleNewsClick}
+                >
+                  <img 
+                    src={imageUrl} 
+                    alt={title} 
+                    className="w-full h-48 object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.onerror = null;
+                      target.src = 'https://via.placeholder.com/300x200?text=Image+Not+Available';
+                    }}
+                  />
+                  <div className="p-4">
+                    <p className="text-sm text-gray-500 mb-2">
+                      {date}
+                    </p>
+                    <h3 className="text-xl font-bold text-gray-800 mb-2">{title}</h3>
+                    <div 
+                      className="text-gray-600" 
+                      dangerouslySetInnerHTML={{ 
+                        __html: content.replace(/<\/p>\s*<p>/g, ' ').replace(/<[^>]*>/g, '').substring(0, 100) + '...' 
+                      }} 
+                    />
+                    <button 
+                      className="mt-4 text-purple-600 hover:text-purple-800 font-medium"
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent triggering the parent div's onClick
+                        handleNewsClick();
+                      }}
+                    >
+                      Read More →
+                    </button>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         );
 
@@ -360,24 +486,68 @@ function IPL() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {pointsTable.map((entry, index) => (
-                  <tr key={entry.team.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{index + 1}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <img className="h-8 w-8 mr-2" src={entry.team.logoUrl} alt={entry.team.name} />
-                        <span className="text-sm font-medium text-gray-900">{entry.team.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.matchesPlayed}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.matchesWon}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.matchesLost}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{entry.points}</td>
-                    <td className={`px-6 py-4 whitespace-nowrap text-sm ${entry.nrr >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {entry.nrr > 0 ? `+${entry.nrr.toFixed(2)}` : entry.nrr.toFixed(2)}
+                {isLoading.stats ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500">
+                      Loading points table...
                     </td>
                   </tr>
-                ))}
+                ) : error ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-4 text-center text-sm text-red-500">
+                      {error}
+                    </td>
+                  </tr>
+                ) : pointsTable.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500">
+                      No points table data available
+                    </td>
+                  </tr>
+                ) : (
+                  pointsTable.map((entry, index) => (
+                    entry.team ? (
+                      <tr key={entry.team?.id || index} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{index + 1}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            {entry.team.logoUrl && (
+                              <img 
+                                className="h-8 w-8 mr-2" 
+                                src={entry.team.logoUrl} 
+                                alt={entry.team.name || `Team ${index + 1}`} 
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                }}
+                              />
+                            )}
+                            <span className="text-sm font-medium text-gray-900">
+                              {entry.team.name || `Team ${index + 1}`}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {entry.matchesPlayed ?? '-'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {entry.matchesWon ?? '-'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {entry.matchesLost ?? '-'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {entry.points ?? '-'}
+                        </td>
+                        <td className={`px-6 py-4 whitespace-nowrap text-sm ${entry.nrr >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {entry.nrr !== undefined ? 
+                            (entry.nrr > 0 ? `+${entry.nrr.toFixed(2)}` : entry.nrr.toFixed(2)) : 
+                            '-'}
+                        </td>
+                      </tr>
+                    ) : null
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -441,12 +611,12 @@ function IPL() {
               About IPL
             </h2>
 
-            <p className="text-gray-600 mb-6">
+            <div className="text-gray-600 mb-6">
               The Indian Premier League (IPL), established in 2008 by the Board of Control for Cricket in India (BCCI), is a professional Twenty20 cricket league that has redefined global cricket. Held annually, it features ten franchise-based teams representing Indian cities and regions, attracting top international and domestic players. Renowned for its high-octane matches, massive fanbase, and unparalleled commercial success, the IPL is the world's second-largest sports league financially, valued at ₹92,500 crore ($11.1 billion) in 2024, trailing only the NFL. Its media rights for 2023–2027 were sold to Star India and Viacom18 for ₹48,390 crore ($8.9 billion), equating to ₹118 crore per match, the highest per-match value globally for any team sport.
-              <p className="mt-2">
+              <div className="mt-2">
                 The IPL has significantly bolstered the BCCI’s financial clout, contributing over 60% of its revenue, enabling investments in domestic cricket infrastructure and grassroots programs. The league has driven cricket’s growth by introducing innovations like the Decision Review System (DRS), strategic timeouts, and a vibrant blend of sport and entertainment, influencing T20 leagues worldwide. It has created opportunities for young talent, with players like Yashasvi Jaiswal and Umran Malik rising to prominence, and supports women’s cricket through initiatives like the WPL. The IPL’s viewership reached 510 million in 2024, with digital streaming on JioCinema hitting 2,600 crore minutes of watch time. Despite challenges like the 2013 spot-fixing scandal and relocations to South Africa (2009) and the UAE (2014, 2020), the IPL continues to thrive, fostering talent and delivering thrilling cricket that captivates a global audience.
-              </p>
-            </p>
+              </div>
+            </div>
 
             <div className="relative w-full max-w-4xl mx-auto aspect-[16/9] bg-gray-200 rounded-lg overflow-hidden mb-6">
               <motion.img
@@ -486,7 +656,7 @@ function IPL() {
             </div>
 
             <h3 className="text-xl font-semibold mb-4 text-gray-800 flex items-center">
-              <Award className="w-6 h-6 mr-2 text-purple-600 mt-4" />
+              <Award className="w-6 h-6 mr-2 text-purple-600 " />
               IPL Winners and Runners-Up (2008–2025)
             </h3>
             {isLoading.winners ? (
@@ -530,32 +700,214 @@ function IPL() {
         return (
           <div className="space-y-6">
             {matches.length > 0 && matches.some((m) => m.status === 'Live') ? (
-              <div className="bg-gradient-to-r from-purple-400 to-indigo-800 text-white p-6 rounded-lg shadow-lg">
-                <h2 className="text-2xl font-bold mb-2">Live Match</h2>
-                <div className="flex items-center justify-between">
-                  <div className="text-center">
-                    <img
-                      src={teams.find((t) => t.id === matches.find((m) => m.status === 'Live')?.team1)?.logoUrl}
-                      alt="Team 1"
-                      className="h-16 mx-auto mb-2"
-                    />
-                    <p className="font-bold">{teams.find((t) => t.id === matches.find((m) => m.status === 'Live')?.team1)?.name || 'TBD'}</p>
+              (() => {
+                const liveMatch = matches.find(m => m.status === 'Live');
+                // Map of common team abbreviations to full names with alternative names
+                const teamMappings: Record<string, string> = {
+                  // Full names
+                  'mumbai indians': 'Mumbai Indians',
+                  'chennai super kings': 'Chennai Super Kings',
+                  'royal challengers bengaluru': 'Royal Challengers Bengaluru',
+                  'royal challengers bangalore': 'Royal Challengers Bengaluru',
+                  'kolkata knight riders': 'Kolkata Knight Riders',
+                  'sunrisers hyderabad': 'Sunrisers Hyderabad',
+                  'delhi capitals': 'Delhi Capitals',
+                  'delhi daredevils': 'Delhi Capitals',
+                  'rajasthan royals': 'Rajasthan Royals',
+                  'punjab kings': 'Punjab Kings',
+                  'kings xi punjab': 'Punjab Kings',
+                  'gujarat titans': 'Gujarat Titans',
+                  'lucknow super giants': 'Lucknow Super Giants',
+                  // Abbreviations
+                  'mi': 'Mumbai Indians',
+                  'csk': 'Chennai Super Kings',
+                  'rcb': 'Royal Challengers Bengaluru',
+                  'kkr': 'Kolkata Knight Riders',
+                  'srh': 'Sunrisers Hyderabad',
+                  'dc': 'Delhi Capitals',
+                  'dd': 'Delhi Capitals',
+                  'rr': 'Rajasthan Royals',
+                  'pbks': 'Punjab Kings',
+                  'kxip': 'Punjab Kings',
+                  'gt': 'Gujarat Titans',
+                  'lsg': 'Lucknow Super Giants',
+                  // Common misspellings and variations
+                  'mumbai': 'Mumbai Indians',
+                  'chennai': 'Chennai Super Kings',
+                  'bengaluru': 'Royal Challengers Bengaluru',
+                  'bangalore': 'Royal Challengers Bengaluru',
+                  'kolkata': 'Kolkata Knight Riders',
+                  'hyderabad': 'Sunrisers Hyderabad',
+                  'delhi': 'Delhi Capitals',
+                  'rajasthan': 'Rajasthan Royals',
+                  'punjab': 'Punjab Kings',
+                  'gujarat': 'Gujarat Titans',
+                  'lucknow': 'Lucknow Super Giants'
+                };
+
+                // Helper function to find team by name or abbreviation
+                const findTeam = (teamName: string | undefined) => {
+                  if (!teamName) return undefined;
+                  
+                  const lowerName = teamName.toLowerCase().trim();
+                  
+                  // Try direct mapping first
+                  const mappedName = teamMappings[lowerName];
+                  if (mappedName) {
+                    return teams.find(t => t.name === mappedName);
+                  }
+                  
+                  // Try exact match
+                  let team = teams.find(t => t.name.toLowerCase() === lowerName);
+                  if (team) return team;
+                  
+                  // Try short name match
+                  if (teams.some(t => t.shortName && t.shortName.toLowerCase() === lowerName)) {
+                    return teams.find(t => t.shortName && t.shortName.toLowerCase() === lowerName);
+                  }
+                  
+                  // Try partial match with higher threshold
+                  const partialMatches = teams.filter(t => 
+                    t.name.toLowerCase().includes(lowerName) || 
+                    (t.shortName && t.shortName.toLowerCase().includes(lowerName)) ||
+                    lowerName.includes(t.name.toLowerCase())
+                  );
+                  
+                  // If we have exactly one match with high confidence, return it
+                  if (partialMatches.length === 1) {
+                    return partialMatches[0];
+                  }
+                  
+                  // If we have multiple matches, try to find the best one
+                  if (partialMatches.length > 1) {
+                    // Look for a team where the name is contained within the input
+                    const containedMatch = partialMatches.find(t => 
+                      lowerName.includes(t.name.toLowerCase()) ||
+                      (t.shortName && lowerName.includes(t.shortName.toLowerCase()))
+                    );
+                    if (containedMatch) return containedMatch;
+                    
+                    // Otherwise return the first match
+                    return partialMatches[0];
+                  }
+                  
+                  // If no matches found, try to match by first letters of each word
+                  const teamAbbr = lowerName.split(/\s+/)
+                    .map(word => word[0])
+                    .join('')
+                    .toLowerCase();
+                    
+                  if (teamAbbr.length > 1) {
+                    const abbrMatches = teams.filter(t => {
+                      const tAbbr = t.name.split(/\s+/)
+                        .map(w => w[0])
+                        .join('')
+                        .toLowerCase();
+                      return tAbbr === teamAbbr || 
+                             (t.shortName && t.shortName.toLowerCase() === teamAbbr);
+                    });
+                    
+                    if (abbrMatches.length === 1) {
+                      return abbrMatches[0];
+                    }
+                  }
+                  
+                  return undefined;
+                };
+
+                // Get team names, handling both string and object formats
+                const getTeamName = (team: string | Team | undefined): string => {
+                  if (!team) return 'TBD';
+                  if (typeof team === 'string') return team;
+                  return team.name || 'TBD';
+                };
+                
+                const team1Name = getTeamName(liveMatch?.team1);
+                const team2Name = getTeamName(liveMatch?.team2);
+                
+                // Find team objects
+                const team1 = findTeam(team1Name);
+                const team2 = findTeam(team2Name);
+                
+                // Debug logging in development only - removed
+
+                // Helper to get venue name
+                const getVenueName = (venue: Match['venue'] | undefined): string => {
+                  if (!venue) return 'TBD';
+                  if (typeof venue === 'string') return venue;
+                  
+                  // Safely access stadiumName or any other property
+                  const venueObj = venue as any;
+                  return venueObj.stadiumName || venueObj.name || 'TBD';
+                };
+
+                // Helper to get team logo
+                const TeamLogo = ({ team, name }: { team?: Team; name: string }) => {
+                  const logoUrl = team?.logoUrl;
+                  const displayName = team?.name || name || 'TBD';
+                  
+                  return (
+                    <div className="text-center">
+                      {logoUrl ? (
+                        <img
+                          src={logoUrl}
+                          alt={displayName}
+                          className="h-16 mx-auto mb-2 object-contain"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.onerror = null; // Prevent infinite loop
+                            target.style.display = 'none';
+                            const fallback = target.parentElement?.querySelector('.team-logo-fallback') as HTMLElement;
+                            if (fallback) fallback.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div 
+                        className="h-16 w-16 bg-gray-200 rounded-full mx-auto mb-2 items-center justify-center team-logo-fallback"
+                        style={{ display: logoUrl ? 'none' : 'flex' }}
+                      >
+                        <span className="text-xs text-gray-500">{displayName.split(' ').map(w => w[0]).join('')}</span>
+                      </div>
+                      <p className="font-bold">{displayName}</p>
+                    </div>
+                  );
+                };
+
+                return (
+                  <div className="bg-gradient-to-r from-purple-400 to-indigo-800 text-white p-6 rounded-lg shadow-lg">
+                    <h2 className="text-2xl font-bold mb-2">Live Match</h2>
+                    <div className="flex items-center justify-between">
+                      <TeamLogo team={team1} name={team1Name} />
+                      
+                      <div className="text-center">
+                        <p className="text-2xl font-bold">VS</p>
+                        <p className="text-sm mt-2">
+                          {liveMatch?.dateTimeGMT 
+                            ? new Date(liveMatch.dateTimeGMT).toLocaleString('en-IN', {
+                                weekday: 'short',
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: true
+                              })
+                            : 'TBD'}
+                        </p>
+                        <p className="text-xs mt-1">
+                          {getVenueName(liveMatch?.venue)}
+                        </p>
+                        {liveMatch?.status && (
+                          <span className="inline-block mt-2 px-2 py-1 text-xs font-semibold bg-red-500 rounded-full animate-pulse">
+                            {liveMatch.status.toUpperCase()}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <TeamLogo team={team2} name={team2Name} />
+                    </div>
                   </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold">VS</p>
-                    <p className="text-sm mt-2">{new Date(matches.find((m) => m.status === 'Live')?.dateTimeGMT || '').toLocaleString()}</p>
-                    <p className="text-xs mt-1">{matches.find((m) => m.status === 'Live')?.venue}</p>
-                  </div>
-                  <div className="text-center">
-                    <img
-                      src={teams.find((t) => t.id === matches.find((m) => m.status === 'Live')?.team2)?.logoUrl}
-                      alt="Team 2"
-                      className="h-16 mx-auto mb-2"
-                    />
-                    <p className="font-bold">{teams.find((t) => t.id === matches.find((m) => m.status === 'Live')?.team2)?.name || 'TBD'}</p>
-                  </div>
-                </div>
-              </div>
+                );
+              })()
             ) : (
               <p>No live matches currently</p>
             )}
@@ -663,8 +1015,12 @@ function IPL() {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
           >
-            {(isLoading.matches || isLoading.teams || isLoading.news || isLoading.stats || isLoading.winners || playersLoading) &&
-            activeTab !== 'auction' ? (
+            {(isLoading.matches && activeTab === 'matches') ||
+             (isLoading.teams && activeTab === 'teams') ||
+             (isLoading.news && activeTab === 'news') ||
+             (isLoading.stats && activeTab === 'stats') ||
+             (isLoading.winners && activeTab === 'about') ||
+             (playersLoading && (activeTab === 'stats' || activeTab === 'matches')) ? (
               <div className="flex justify-center items-center py-16">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
               </div>

@@ -31,9 +31,8 @@ function IplAuction() {
     const parseAuctionData = () => {
       try {
         const parsed = Papa.parse(auctionData, {
-          header: false, // Treat CSV as raw rows
           skipEmptyLines: true,
-          transform: value => value.trim(),
+          transform: value => typeof value === 'string' ? value.trim() : value,
         });
 
         if (parsed.errors.length > 0) {
@@ -41,7 +40,7 @@ function IplAuction() {
         }
 
         const data = parsed.data as string[][];
-        let currentSection: string | null = null;
+        let currentSection: 'sold' | 'unsold' | 'budgets' | null = null;
         let currentHeaders: string[] = [];
         const sold: AuctionPlayer[] = [];
         const unsold: AuctionPlayer[] = [];
@@ -49,53 +48,79 @@ function IplAuction() {
         let unsoldSectionFound = false;
 
         for (let i = 0; i < data.length; i++) {
-          const row = data[i];
+          const row = data[i].filter(cell => cell !== '');
+          if (row.length === 0) continue;
 
-          // Detect section headers
-          if (row.length === 1) {
-            const sectionHeader = row[0].toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
-            if (sectionHeader === 'sold players' || sectionHeader.includes('soldplayers')) {
+          // Check for section headers
+          const firstCell = String(row[0]).toLowerCase().trim();
+          
+          if (firstCell.startsWith('#')) {
+            const sectionName = firstCell.replace(/^#\s*/, '').toLowerCase();
+            
+            if (sectionName.includes('sold') && !sectionName.includes('unsold')) {
               currentSection = 'sold';
-              currentHeaders = []; // Reset headers
-              continue;
-            } else if (sectionHeader === 'unsold players' || sectionHeader.includes('unsoldplayers')) {
+              currentHeaders = [];
+            } else if (sectionName.includes('unsold')) {
               currentSection = 'unsold';
               unsoldSectionFound = true;
-              currentHeaders = []; // Reset headers
-              continue;
-            } else if (sectionHeader === 'team budgets' || sectionHeader.includes('teambudgets')) {
+              currentHeaders = [];
+            } else if (sectionName.includes('budget')) {
               currentSection = 'budgets';
-              currentHeaders = []; // Reset headers
+              currentHeaders = [];
+            } else if (sectionName.includes('winners')) {
+              // Skip the winners section completely as it's not being used
+              currentSection = null;
               continue;
             } else {
-              console.warn(`Unknown section header at row ${i}: "${row[0]}"`);
-              continue;
+              console.warn(`Unknown section header at row ${i + 1}: "${row[0]}"`);
+              currentSection = null;
             }
+            continue;
           }
 
-          // Detect headers for the current section
-          if (currentSection && currentHeaders.length === 0) {
-            if (
-              (currentSection === 'sold' && row.includes('id') && row.includes('name') && row.includes('purchasedPrice') && row.includes('team')) ||
-              (currentSection === 'unsold' && row.includes('id') && row.includes('name') && row.includes('basePrice')) ||
-              (currentSection === 'budgets' && row.includes('team') && row.includes('totalBudget'))
-            ) {
-              currentHeaders = row;
-              continue;
+          // Process data rows based on current section
+          if (!currentSection) continue;
+
+          // Handle header row
+          if (currentHeaders.length === 0) {
+            // Validate headers based on section
+            const isSoldHeader = currentSection === 'sold' && 
+              row.some(cell => cell.toLowerCase().includes('purchased')) &&
+              row.some(cell => cell.toLowerCase().includes('team'));
+              
+            const isUnsoldHeader = currentSection === 'unsold' && 
+              row.some(cell => cell.toLowerCase().includes('baseprice')) &&
+              !row.some(cell => cell.toLowerCase().includes('purchased'));
+              
+            const isBudgetHeader = currentSection === 'budgets' && 
+              row.some(cell => cell.toLowerCase().includes('total')) &&
+              row.some(cell => cell.toLowerCase().includes('remaining'));
+
+            if (isSoldHeader || isUnsoldHeader || isBudgetHeader) {
+              currentHeaders = row.map(h => h.trim());
             } else {
-              console.warn(`Expected headers for ${currentSection} at row ${i}, but got:`, row);
+              console.warn(`Skipping invalid headers for ${currentSection} at row ${i + 1}:`, row);
+              currentSection = null;
             }
+            continue;
           }
 
           // Process data rows
-          if (currentSection && currentHeaders.length > 0) {
-            if (row.length >= currentHeaders.length) {
-              const rowData = Object.fromEntries(currentHeaders.map((header, index) => [header, row[index] || '']));
+          if (currentHeaders.length > 0) {
+            const rowData: Record<string, string> = {};
+            
+            // Create row data object with headers as keys
+            for (let j = 0; j < Math.min(row.length, currentHeaders.length); j++) {
+              rowData[currentHeaders[j].toLowerCase()] = String(row[j] || '').trim();
+            }
 
-              if (currentSection === 'sold' && rowData.id && rowData.name && rowData.basePrice && rowData.purchasedPrice && rowData.team) {
-                const basePrice = parseFloat(rowData.basePrice);
-                const purchasedPrice = parseFloat(rowData.purchasedPrice);
-                if (!isNaN(basePrice) && !isNaN(purchasedPrice)) {
+            try {
+              // Process based on section
+              if (currentSection === 'sold' && rowData.id && rowData.name) {
+                const basePrice = parseFloat(rowData.baseprice || '0');
+                const purchasedPrice = parseFloat(rowData.purchasedprice || '0');
+                
+                if (!isNaN(basePrice) && !isNaN(purchasedPrice) && rowData.team) {
                   sold.push({
                     id: rowData.id,
                     name: rowData.name,
@@ -106,10 +131,11 @@ function IplAuction() {
                     team: rowData.team,
                   });
                 } else {
-                  console.warn(`Skipping sold player row ${i} due to invalid numbers:`, rowData);
+                  console.warn(`Skipping sold player row ${i + 1} due to missing or invalid data:`, rowData);
                 }
-              } else if (currentSection === 'unsold' && rowData.id && rowData.name && rowData.basePrice) {
-                const basePrice = parseFloat(rowData.basePrice);
+              } 
+              else if (currentSection === 'unsold' && rowData.id && rowData.name) {
+                const basePrice = parseFloat(rowData.baseprice || '0');
                 if (!isNaN(basePrice)) {
                   unsold.push({
                     id: rowData.id,
@@ -121,11 +147,13 @@ function IplAuction() {
                     team: undefined,
                   });
                 } else {
-                  console.warn(`Skipping unsold player row ${i} due to invalid basePrice:`, rowData);
+                  console.warn(`Skipping unsold player row ${i + 1} due to invalid basePrice:`, rowData);
                 }
-              } else if (currentSection === 'budgets' && rowData.team && rowData.totalBudget && rowData.remainingBudget) {
-                const totalBudget = parseFloat(rowData.totalBudget);
-                const remainingBudget = parseFloat(rowData.remainingBudget);
+              }
+              else if (currentSection === 'budgets' && rowData.team) {
+                const totalBudget = parseFloat(rowData.totalbudget || '0');
+                const remainingBudget = parseFloat(rowData.remainingbudget || '0');
+                
                 if (!isNaN(totalBudget) && !isNaN(remainingBudget)) {
                   budgets.push({
                     team: rowData.team,
@@ -133,16 +161,12 @@ function IplAuction() {
                     remainingBudget,
                   });
                 } else {
-                  console.warn(`Skipping budgets row ${i} due to invalid numbers:`, rowData);
+                  console.warn(`Skipping budget row ${i + 1} due to invalid numbers:`, rowData);
                 }
-              } else {
-                console.warn(`Skipping invalid row in ${currentSection} section at row ${i}:`, rowData);
               }
-            } else {
-              console.warn(`Skipping row ${i} due to column mismatch in ${currentSection} section (expected ${currentHeaders.length} columns, got ${row.length}):`, row);
+            } catch (err) {
+              console.error(`Error processing row ${i + 1}:`, row, err);
             }
-          } else {
-            console.warn(`Skipping row ${i} (no section or headers defined):`, row);
           }
         }
 

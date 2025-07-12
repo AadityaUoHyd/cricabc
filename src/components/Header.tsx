@@ -34,6 +34,7 @@ const Header: FC = () => {
     { name: 'Teams', path: '/teams' },
     { name: 'Videos', path: '/videos' },
     { name: 'Rankings', path: '/rankings' },
+    { name: 'Venues', path: '/venues' },
     { name: 'Cricket Quiz', path: '/quiz' },
   ];
 

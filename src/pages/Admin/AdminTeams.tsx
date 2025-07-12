@@ -81,6 +81,10 @@ export default function AdminTeams() {
       odiRating: 0,
       t20Rating: 0,
     },
+    governingBody: 'International Cricket Council (ICC)',
+    headquarters: '',
+    teamImageUrl: '',
+    majorTitles: [],
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -152,6 +156,10 @@ export default function AdminTeams() {
         leagueName: '',
         domesticTournamentName: '',
         logoUrl: '',
+        governingBody: '',
+        headquarters: '',
+        teamImageUrl: '',
+        majorTitles: [],
         teamRanking: {
           testRank: 0,
           odiRank: 0,

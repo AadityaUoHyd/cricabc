@@ -1,3 +1,5 @@
+import type { Venues } from "./Team";
+
 export interface Match {
   id: string;
   matchId: string;
@@ -5,7 +7,7 @@ export interface Match {
   team1: string;
   team2: string;
   status: string;
-  venue: string;
+  venue: Venues | string; // Can be a Venues object or a string
   matchType: string;
   tournament: string;
   dateTimeGMT: string | null; // ISO string (e.g., "2025-05-25T13:00:00")

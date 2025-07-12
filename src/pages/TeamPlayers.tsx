@@ -21,8 +21,8 @@ const TeamPlayers: React.FC = () => {
 
 const filteredPlayers = React.useMemo(() => {
   // Debug logs for filtering
-  console.log("State in TeamPlayers:", state);
-  console.log("Players in TeamPlayers:", players);
+  // Removed debug log
+  // Removed debug log
   if (!state?.category) return [];
 
   // Helper to safely get and clean a string
@@ -65,7 +65,7 @@ const filteredPlayers = React.useMemo(() => {
 }, [players, state]);
 
   // Debug log for filtered players
-  console.log("Filtered players:", filteredPlayers);
+  // Removed debug log
 
   return (
     <div style={{ maxWidth: 600, margin: '0 auto' }}>

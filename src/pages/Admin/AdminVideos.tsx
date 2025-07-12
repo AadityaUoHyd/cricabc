@@ -54,10 +54,7 @@ export default function AdminVideos() {
       formData.append('file', videoFile);
     }
 
-    // Debug FormData
-    for (const [key, value] of formData.entries()) {
-      console.log(`FormData: ${key}=${value}`);
-    }
+    // Debug FormData - removed
 
     try {
       if (form.id) {

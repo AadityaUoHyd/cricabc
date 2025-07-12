@@ -325,7 +325,7 @@ function AdminWPL() {
               <Label htmlFor="venue">Venue</Label>
               <Input
                 id="venue"
-                value={newMatch.venue}
+                value={typeof newMatch.venue === 'string' ? newMatch.venue : newMatch.venue?.stadiumName || ''}
                 onChange={(e) => setNewMatch({ ...newMatch, venue: e.target.value })}
                 placeholder="Enter venue"
               />
@@ -352,7 +352,9 @@ function AdminWPL() {
               <div key={match.matchId} className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center">
                 <div>
                   <span>{match.title}</span>
-                  <p className="text-sm text-gray-500">{match.venue} - {new Date(match.dateTimeGMT || '').toLocaleString()}</p>
+                  <p className="text-sm text-gray-500">
+                    {typeof match.venue === 'string' ? match.venue : match.venue.stadiumName} - {new Date(match.dateTimeGMT || '').toLocaleString()}
+                  </p>
                 </div>
                 <Button variant="destructive" onClick={() => handleDeleteMatch(match.matchId)}>
                   Delete

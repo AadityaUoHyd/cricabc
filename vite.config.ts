@@ -13,6 +13,9 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    headers: {
+      'Permissions-Policy': 'camera=(), microphone=(), geolocation=()'
+    },
   },
   build: {
     outDir: 'dist',

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { GiCricketBat } from 'react-icons/gi';
 import { type Match } from '../../types/Match';
+import type { Venues } from '../../types/Team';
 import axios from 'axios';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -14,15 +15,58 @@ interface AdminMatchProps {
 
 export default function AdminMatches({ match, onUpdate }: AdminMatchProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState<Match>({ ...match });
+  const [formData, setFormData] = useState<Match>(match || {
+    matchId: '',
+    team1: { teamId: '', teamName: '' },
+    team2: { teamId: '', teamName: '' },
+    date: '',
+    venue: { venueId: '', stadiumName: '', city: '' },
+    matchType: '',
+    status: 'UPCOMING',
+    tossWinner: '',
+    tossDecision: '',
+    winner: '',
+    winByRuns: 0,
+    winByWickets: 0,
+    playerOfTheMatch: '',
+    matchSummary: '',
+    innings: []
+  });
   const [error, setError] = useState<string | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
-    }));
+    
+    // Special handling for venue field
+    if (name === 'venue') {
+      setFormData((prev) => {
+        // Create a new venue object with all required fields
+        const newVenue: Venues = {
+          stadiumName: value,
+          city: typeof prev.venue === 'string' ? '' : (prev.venue?.city || ''),
+          country: typeof prev.venue === 'string' ? '' : (prev.venue?.country || ''),
+          // Include any additional fields from the previous venue if it was an object
+          ...(typeof prev.venue === 'object' && prev.venue ? {
+            capacity: prev.venue.capacity,
+            location: prev.venue.location,
+            imageUrl: prev.venue.imageUrl,
+            description: prev.venue.description,
+            establishedYear: prev.venue.establishedYear,
+            matchesHosted: prev.venue.matchesHosted
+          } : {})
+        };
+        
+        return {
+          ...prev,
+          venue: newVenue
+        };
+      });
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -107,7 +151,7 @@ export default function AdminMatches({ match, onUpdate }: AdminMatchProps) {
             <Input
               id="venue"
               name="venue"
-              value={formData.venue}
+              value={typeof formData.venue === 'string' ? formData.venue : formData.venue?.stadiumName || ''}
               onChange={handleInputChange}
               required
             />
@@ -214,7 +258,9 @@ export default function AdminMatches({ match, onUpdate }: AdminMatchProps) {
             </span>
           </div>
           <p className="text-sm text-gray-600">{match.matchType.toUpperCase()} • {match.tournament}</p>
-          <p className="text-sm text-gray-600">Venue: {match.venue}</p>
+          <p className="text-sm text-gray-600">
+            Venue: {typeof match.venue === 'string' ? match.venue : match.venue.stadiumName}
+          </p>
           <div className="mt-2">
             <p className="text-gray-700 font-medium">{match.team1} vs {match.team2}</p>
             <p className="text-xs text-gray-500">

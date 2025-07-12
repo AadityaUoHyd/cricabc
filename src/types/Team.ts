@@ -9,6 +9,25 @@ export interface Team {
   gender?: 'male' | 'female';
   logoUrl?: string;
   teamRanking?: TeamRanking;
+  governingBody: string;
+  headquarters: string;
+  teamImageUrl: string;
+  majorTitles: string[];
+  foundedYear?: number;
+  shortName?: string;
+  venues?: Venues;
+}
+
+export interface Venues {
+  stadiumName: string;
+  city: string;
+  country: string;
+  capacity?: number;
+  location?: string;
+  imageUrl?: string;
+  description?: string;
+  establishedYear?: number;
+  matchesHosted?: number;
 }
 
 export interface TeamRanking {

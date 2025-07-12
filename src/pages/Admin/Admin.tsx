@@ -44,6 +44,7 @@ const Admin: FC = () => {
     { to: 'player', label: 'Players' },
     { to: 'ipl', label: 'IPL' },
     { to: 'wpl', label: 'WPL' },
+    { to: 'venues', label: 'Venues' },
     { to: 'videos', label: 'Videos' },
     { to: 'quiz', label: 'Quiz' },
   ];

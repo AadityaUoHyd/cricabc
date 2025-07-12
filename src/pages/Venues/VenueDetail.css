@@ -1,0 +1,148 @@
+/* Base styles */
+.venue-detail {
+  background-color: #f9fafb;
+}
+
+/* Header image */
+.venue-header {
+  position: relative;
+  height: 24rem;
+  overflow: hidden;
+}
+
+.venue-header img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.venue-header:hover img {
+  transform: scale(1.02);
+}
+
+.venue-title {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 2rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
+  color: white;
+}
+
+/* Content sections */
+.venue-content {
+  padding: 2.5rem;
+}
+
+@media (min-width: 768px) {
+  .venue-content {
+    padding: 3rem;
+  }
+}
+
+/* Info cards */
+.info-card {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.info-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.info-content {
+  flex: 1;
+}
+
+.info-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 0.25rem;
+}
+
+.info-value {
+  font-weight: 500;
+  color: #111827;
+}
+
+/* Map placeholder */
+.map-placeholder {
+  background-color: #f3f4f6;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  height: 100%;
+  min-height: 16rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  text-align: center;
+  padding: 2rem;
+}
+
+/* Back button */
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  color: #3b82f6;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  transition: color 0.2s ease;
+}
+
+.back-button:hover {
+  color: #2563eb;
+}
+
+.back-button svg {
+  margin-right: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+  .venue-header {
+    height: 18rem;
+  }
+  
+  .venue-title h1 {
+    font-size: 1.75rem;
+  }
+  
+  .info-card {
+    padding: 0.75rem;
+  }
+  
+  .info-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}
+
+/* Animation for loading */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}

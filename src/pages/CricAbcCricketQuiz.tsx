@@ -47,9 +47,9 @@ const CricABCCricketQuiz: FC = () => {
     const fetchQuestions = async () => {
       try {
         const apiUrl = `${import.meta.env.VITE_API_URL}/quiz/random`;
-        console.log('Fetching quiz questions from:', apiUrl);
+        // Removed debug log
         const response = await axios.get(apiUrl);
-        console.log('Raw API Response Data:', response.data);
+        // Removed debug log
 
         if (Array.isArray(response.data) && response.data.length > 0) {
           const validatedQuestions: QuizQuestion[] = response.data.map((q: any) => ({
@@ -60,7 +60,7 @@ const CricABCCricketQuiz: FC = () => {
           })).slice(0, 5); // Limit to 5 questions
 
           setQuestions(validatedQuestions);
-          console.log('Questions set in state:', validatedQuestions);
+          // Removed debug log
         } else {
           console.warn('API response data is not an array or is empty. Setting questions to empty array.');
           setQuestions([]);
@@ -123,18 +123,18 @@ const CricABCCricketQuiz: FC = () => {
       pointsAwarded = 0;
       isAnswerCorrect = null;
       userAnswered = null;
-      console.log(`Question ${currentQuestionIndex + 1}: Skipped.`);
+      // Removed debug log
     } else {
       if (selectedAnswer === currentQuestion.correctAnswer) {
         pointsAwarded = 20;
         isAnswerCorrect = true;
         playSound(true);
-        console.log(`Question ${currentQuestionIndex + 1}: Correct! +${pointsAwarded} points.`);
+        // Removed debug log
       } else {
         pointsAwarded = -10;
         isAnswerCorrect = false;
         playSound(false);
-        console.log(`Question ${currentQuestionIndex + 1}: Incorrect! ${pointsAwarded} points.`);
+        // Removed debug log
       }
     }
 

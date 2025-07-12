@@ -24,6 +24,7 @@ function WplAuction() {
   const [soldPlayers, setSoldPlayers] = useState<AuctionPlayer[]>([]);
   const [unsoldPlayers, setUnsoldPlayers] = useState<AuctionPlayer[]>([]);
   const [teamBudgets, setTeamBudgets] = useState<TeamBudget[]>([]);
+  const [winners, setWinners] = useState<Array<{year: string, winner: string, runnerUp: string}>>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,6 +47,7 @@ function WplAuction() {
         const sold: AuctionPlayer[] = [];
         const unsold: AuctionPlayer[] = [];
         const budgets: TeamBudget[] = [];
+        const winnersData: Array<{year: string, winner: string, runnerUp: string}> = [];
         let unsoldSectionFound = false;
 
         for (let i = 0; i < data.length; i++) {
@@ -67,7 +69,7 @@ function WplAuction() {
               currentHeaders = [];
               continue;
             } else if (sectionHeader === 'winners') {
-              currentSection = null;
+              currentSection = 'winners';
               currentHeaders = [];
               continue;
             } else {
@@ -78,9 +80,10 @@ function WplAuction() {
 
           if (currentSection && currentHeaders.length === 0) {
             if (
-              (currentSection === 'sold' && row.includes('id') && row.includes('name') && row.includes('purchasedPrice') && row.includes('team')) ||
-              (currentSection === 'unsold' && row.includes('id') && row.includes('name') && row.includes('basePrice')) ||
-              (currentSection === 'budgets' && row.includes('team') && row.includes('totalBudget'))
+              (currentSection === 'sold' && row.some(cell => cell.toLowerCase().includes('id')) && row.some(cell => cell.toLowerCase().includes('name')) && row.some(cell => cell.toLowerCase().includes('purchased'))) ||
+              (currentSection === 'unsold' && row.some(cell => cell.toLowerCase().includes('id')) && row.some(cell => cell.toLowerCase().includes('name')) && row.some(cell => cell.toLowerCase().includes('base'))) ||
+              (currentSection === 'budgets' && row.some(cell => cell.toLowerCase().includes('team')) && row.some(cell => cell.toLowerCase().includes('total'))) ||
+              (currentSection === 'winners' && row.some(cell => cell.toLowerCase().includes('year')) && row.some(cell => cell.toLowerCase().includes('winner')) && row.some(cell => cell.toLowerCase().includes('runnerup')))
             ) {
               currentHeaders = row;
               continue;
@@ -93,7 +96,13 @@ function WplAuction() {
             if (row.length >= currentHeaders.length) {
               const rowData = Object.fromEntries(currentHeaders.map((header, index) => [header, row[index] || '']));
 
-              if (currentSection === 'sold' && rowData.id && rowData.name && rowData.basePrice && rowData.purchasedPrice && rowData.team) {
+              if (currentSection === 'winners' && rowData.year && rowData.winner && rowData.runnerUp) {
+                winnersData.push({
+                  year: rowData.year,
+                  winner: rowData.winner,
+                  runnerUp: rowData.runnerUp
+                });
+              } else if (currentSection === 'sold' && rowData.id && rowData.name && rowData.basePrice && rowData.purchasedPrice && rowData.team) {
                 const basePrice = parseFloat(rowData.basePrice);
                 const purchasedPrice = parseFloat(rowData.purchasedPrice);
                 if (!isNaN(basePrice) && !isNaN(purchasedPrice)) {
@@ -153,6 +162,7 @@ function WplAuction() {
         setSoldPlayers(sold);
         setUnsoldPlayers(unsold);
         setTeamBudgets(budgets);
+        setWinners(winnersData);
         setIsLoading(false);
         setError(null);
       } catch (err) {
@@ -201,10 +211,38 @@ function WplAuction() {
 
       <div className="container mx-auto px-4 py-8">
         {error && (
-          <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+          <div className="mb-8">
             <p className="text-sm text-red-700">{error}</p>
           </div>
         )}
+
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-4 flex items-center">
+            <Trophy className="mr-2" /> WPL Winners
+          </h2>
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Winner</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Runner-Up</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {winners.map((winner, index) => (
+                    <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{winner.year}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{winner.winner}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{winner.runnerUp}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
 
         {isLoading ? (
           <div className="flex justify-center items-center py-16">

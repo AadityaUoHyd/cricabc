@@ -254,11 +254,11 @@ const getCountryCode = (country: string): string => {
   transition={{ duration: 0.4 }}
   onError={(e) => {
     const countryCode = getCountryCode(player.country.toLowerCase());
-    console.log('Attempted flag URL:', `https://flagicons.lipis.dev/flags/4x3/${countryCode}.svg`);
+    // Removed debug log
     console.error('Flag load error for country:', player.country, 'Code:', countryCode, e);
     (e.target as HTMLImageElement).style.display = 'none';
   }}
-  onLoad={() => console.log('Flag loaded successfully for country:', player.country)}
+  onLoad={() => {}}
 />
     )}
   </CardTitle>

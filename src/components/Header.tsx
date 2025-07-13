@@ -36,6 +36,7 @@ const Header: FC = () => {
     { name: 'Rankings', path: '/rankings' },
     { name: 'Venues', path: '/venues' },
     { name: 'Cricket Quiz', path: '/quiz' },
+    { name: 'CricAbcSocial', path: 'https://cric-abc-social.onrender.com/' },
   ];
 
   const moreItems: NavItem[] = [

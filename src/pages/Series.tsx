@@ -1,28 +1,45 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import type { Series } from '../types/Series';
+import type { Series as SeriesType } from '../types/Series';
+
+// Extend the Series type to handle both string[] and string for teams
+interface CustomSeries extends Omit<SeriesType, 'teams'> {
+  teams: string[] | string;
+}
 
 interface SeriesCardProps {
-  series: Series;
+  series: CustomSeries;
 }
 
 const SeriesCard: React.FC<SeriesCardProps> = ({ series }) => {
-  // Parse teams from comma-separated string
-  const teamNames = series.teams ? series.teams.split(',').map(t => t.trim()) : [];
+  // Safely handle teams whether they're an array or comma-separated string
+  const teamNames: string[] = (() => {
+    if (!series.teams) return [];
+    if (Array.isArray(series.teams)) return series.teams;
+    if (typeof series.teams === 'string') {
+      return series.teams.split(',').map((t: string) => t.trim()).filter(Boolean);
+    }
+    return [];
+  })();
   
   // Format date
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateInput: string | Date): string => {
+    if (!dateInput) return 'N/A';
+    
+    const date = new Date(dateInput);
+    if (isNaN(date.getTime())) return 'Invalid date';
+    
     const options: Intl.DateTimeFormatOptions = { 
       year: 'numeric', 
       month: 'short', 
       day: 'numeric' 
     };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    return date.toLocaleDateString(undefined, options);
   };
 
   // Get cricket-related background color based on series name
-  const getSeriesTheme = (name: string) => {
+  const getSeriesTheme = (name: string): string => {
     const themes = [
       'from-green-500 to-emerald-700',
       'from-blue-500 to-cyan-700',
@@ -77,7 +94,7 @@ const SeriesCard: React.FC<SeriesCardProps> = ({ series }) => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <span className="text-xs text-gray-500">
-              {new Date(series.endDate) > new Date() ? 'Ongoing' : 'Completed'}
+              {new Date(series.endDate).getTime() > Date.now() ? 'Ongoing' : 'Completed'}
             </span>
           </div>
           <button className="text-xs font-medium text-purple-600 hover:text-purple-800 transition-colors">
@@ -90,7 +107,7 @@ const SeriesCard: React.FC<SeriesCardProps> = ({ series }) => {
 };
 
 export default function Series() {
-  const [series, setSeries] = useState<Series[]>([]);
+  const [series, setSeries] = useState<CustomSeries[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
   const fetchSeries = useCallback(async () => {
@@ -99,7 +116,7 @@ export default function Series() {
       const baseUrl = import.meta.env.VITE_API_URL?.endsWith('/') 
         ? import.meta.env.VITE_API_URL.slice(0, -1) 
         : import.meta.env.VITE_API_URL;
-      const response = await axios.get<Series[]>(`${baseUrl}/series`);
+      const response = await axios.get<CustomSeries[]>(`${baseUrl}/series`);
       setSeries(response.data);
     } catch (err) {
       console.error('Error fetching series:', err);

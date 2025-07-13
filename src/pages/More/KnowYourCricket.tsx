@@ -59,7 +59,8 @@ const KnowYourCricket: React.FC = () => {
                 Discover the thrill of cricket with CricABC—your guide to this exciting sport!
               </motion.p>
               <motion.a
-                href="#"
+                href="https://cric-abc-social.onrender.com/"
+                target="_blank"
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.4 }}
@@ -471,7 +472,8 @@ const KnowYourCricket: React.FC = () => {
             CricAbcSocial is coming soon, our social media platform where you can connect with cricket fans and share your passion for the game. Exclusive for cricket gossips!
           </p>
           <a
-            href="#join-now"
+            href="https://cric-abc-social.onrender.com/"
+            target="_blank"
             className="inline-block bg-purple-600 text-white font-semibold py-3 px-8 rounded-full hover:bg-purple-700 transition-colors"
           >
             Join the CricAbcSocial

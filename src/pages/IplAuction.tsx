@@ -4,6 +4,16 @@ import { Trophy, DollarSign, Users, ExternalLink } from 'lucide-react';
 import Papa from 'papaparse';
 import auctionData from '../utils/ipl-auction-data.csv?raw';
 
+// Import images
+import auc1 from '../assets/auc1.png';
+import auc2 from '../assets/auc2.png';
+import auc3 from '../assets/auc3.png';
+import auc4 from '../assets/auc4.png';
+import auc5 from '../assets/auc5.png';
+import auc6 from '../assets/auc6.png';
+
+const auctionImages = [auc1, auc2, auc3, auc4, auc5, auc6];
+
 interface AuctionPlayer {
   id: string;
   name: string;
@@ -222,25 +232,25 @@ function IplAuction() {
             </p>
             <div className="relative w-full max-w-4xl mx-auto aspect-[16/9] bg-gray-200 rounded-lg overflow-hidden">
               <div className="relative w-full h-full">
-                {[1, 2, 3, 4, 5, 6].map((num) => (
+                {auctionImages.map((img, index) => (
                   <img
-                    key={num}
-                    src={`src/assets/auc${num}.png`}
-                    alt={`IPL 2025 Auction ${num}`}
+                    key={index + 1}
+                    src={img}
+                    alt={`IPL 2025 Auction ${index + 1}`}
                     className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
                     style={{
-                      opacity: currentImage === num ? 1 : 0,
-                      zIndex: currentImage === num ? 1 : 0
+                      opacity: currentImage === index + 1 ? 1 : 0,
+                      zIndex: currentImage === index + 1 ? 1 : 0
                     }}
                   />
                 ))}
                 <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2 z-10">
-                  {[1, 2, 3, 4, 5, 6].map((num) => (
+                  {auctionImages.map((_, index) => (
                     <button
-                      key={num}
-                      onClick={() => setCurrentImage(num)}
-                      className={`w-3 h-3 rounded-full ${currentImage === num ? 'bg-white' : 'bg-white/50'}`}
-                      aria-label={`Go to slide ${num}`}
+                      key={index + 1}
+                      onClick={() => setCurrentImage(index + 1)}
+                      className={`w-3 h-3 rounded-full ${currentImage === index + 1 ? 'bg-white' : 'bg-white/50'}`}
+                      aria-label={`Go to slide ${index + 1}`}
                     />
                   ))}
                 </div>

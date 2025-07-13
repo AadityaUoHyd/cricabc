@@ -4,6 +4,13 @@ import { Trophy, DollarSign, Users, ExternalLink } from 'lucide-react';
 import Papa from 'papaparse';
 import auctionData from '../utils/wpl-auction-data.csv?raw';
 
+// Import images
+import wplAuc1 from '../assets/wpl-auc1.png';
+import wplAuc2 from '../assets/wpl-auc2.png';
+import wplAuc3 from '../assets/wpl-auc3.png';
+
+const auctionImages = [wplAuc1, wplAuc2, wplAuc3];
+
 interface AuctionPlayer {
   id: string;
   name: string;
@@ -201,25 +208,25 @@ function WplAuction() {
             </p>
             <div className="relative w-full max-w-4xl mx-auto aspect-[16/9] bg-gray-200 rounded-lg overflow-hidden">
               <div className="relative w-full h-full">
-                {[1, 2, 3].map((num) => (
+                {auctionImages.map((img, index) => (
                   <img
-                    key={num}
-                    src={`src/assets/wpl-auc${num}.png`}
-                    alt={`WPL 2025 Auction ${num}`}
+                    key={index + 1}
+                    src={img}
+                    alt={`WPL 2025 Auction ${index + 1}`}
                     className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
                     style={{
-                      opacity: currentImage === num ? 1 : 0,
-                      zIndex: currentImage === num ? 1 : 0
+                      opacity: currentImage === index + 1 ? 1 : 0,
+                      zIndex: currentImage === index + 1 ? 1 : 0
                     }}
                   />
                 ))}
                 <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2 z-10">
-                  {[1, 2, 3].map((num) => (
+                  {auctionImages.map((_, index) => (
                     <button
-                      key={num}
-                      onClick={() => setCurrentImage(num)}
-                      className={`w-3 h-3 rounded-full ${currentImage === num ? 'bg-white' : 'bg-white/50'}`}
-                      aria-label={`Go to slide ${num}`}
+                      key={index + 1}
+                      onClick={() => setCurrentImage(index + 1)}
+                      className={`w-3 h-3 rounded-full ${currentImage === index + 1 ? 'bg-white' : 'bg-white/50'}`}
+                      aria-label={`Go to slide ${index + 1}`}
                     />
                   ))}
                 </div>

@@ -4,6 +4,8 @@ import axios from 'axios';
 import type { Player } from '../types/Player';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Award, MapPin, Shield, Star, Trophy, Users } from 'lucide-react';
+import ReactCountryFlag from 'react-country-flag';
+import countryCodeMap from './countryCodeMap';
 import { FaChevronRight } from 'react-icons/fa';
 import { Button } from '../components/ui/button';
 
@@ -115,14 +117,14 @@ const TeamDetails = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<ErrorState | null>(null);
 
-  
+
 
   // Filter players based on team membership and gender
   const currentPlayers = useMemo(() => {
     if (!team?.name) return [];
-    
+
     console.log('Filtering players for team:', team.name);
-    
+
     // Normalize team gender for comparison
     const teamGender = (team.gender || '').toLowerCase();
     const isWomenTeam = teamGender.includes('female') || teamGender.includes('women');
@@ -140,7 +142,7 @@ const TeamDetails = () => {
       const isPlayerInTeamList = (teamList: string[] = []) => {
         return teamList.some(teamName => {
           if (typeof teamName !== 'string') return false;
-          
+
           // Check if this is a current team (ends with *)
           if (teamName.endsWith('*')) {
             // Remove the * and compare with team name
@@ -157,7 +159,7 @@ const TeamDetails = () => {
       const isCurrentLeague = isPlayerInTeamList(player.leagues);
 
       const isPlayerInTeam = isCurrentInternational || isCurrentDomestic || isCurrentLeague;
-      
+
       // Log detailed info for debugging
       if (isPlayerInTeam) {
         console.log(`Player found in team: ${player.name}`, {
@@ -170,10 +172,10 @@ const TeamDetails = () => {
           isCurrentLeague
         });
       }
-      
+
       return isPlayerInTeam;
     });
-    
+
     console.log(`Found ${filteredPlayers.length} current players for team ${team.name}`);
     return filteredPlayers;
   }, [allPlayers, team]);
@@ -197,12 +199,12 @@ const TeamDetails = () => {
         const teamRes = await axios.get<TeamDetails>(
           `${import.meta.env.VITE_API_URL}/teams/${searchRes.data.content[0].id}`
         );
-        
+
         // Fetch players for the found team
         const playersRes = await axios.get<Player[]>(
           `${import.meta.env.VITE_API_URL}/players`
         );
-        
+
         setTeam(teamRes.data);
         setAllPlayers(playersRes.data);
         setError(null);
@@ -231,7 +233,7 @@ const TeamDetails = () => {
       // First try direct lookup by ID (for all ID types)
       try {
         const teamRes = await axios.get<TeamDetails>(`${import.meta.env.VITE_API_URL}/teams/${teamId}`);
-        
+
         // If direct lookup succeeds, fetch players and update state
         if (teamRes?.data) {
           const playersRes = await axios.get<Player[]>(`${import.meta.env.VITE_API_URL}/players`);
@@ -264,7 +266,7 @@ const TeamDetails = () => {
     console.log('Fetching team details for teamId:', teamId);
     fetchTeamDetails();
   }, [fetchTeamDetails]);
-  
+
   // Log when team or players data changes
   useEffect(() => {
     if (team) {
@@ -276,10 +278,10 @@ const TeamDetails = () => {
         teamData: team // Log full team data for debugging
       });
     }
-    
+
     if (allPlayers.length > 0) {
       console.log(`Loaded ${allPlayers.length} total players`);
-      
+
       // Find players that should be in this team based on team name
       const potentialPlayers = allPlayers.filter(p => {
         const allTeams = [
@@ -287,15 +289,15 @@ const TeamDetails = () => {
           ...(p.domesticTeams || []),
           ...(p.leagues || [])
         ];
-        
-        return allTeams.some(t => 
-          typeof t === 'string' && 
+
+        return allTeams.some(t =>
+          typeof t === 'string' &&
           (t.includes(team?.name || '') || t.includes((team?.name || '') + '*'))
         );
       });
-      
+
       console.log(`Found ${potentialPlayers.length} players that mention team '${team?.name}'`);
-      
+
       // Log sample of potential players with team data
       if (potentialPlayers.length > 0) {
         console.log('Potential players with team data:', potentialPlayers.slice(0, 3).map(p => ({
@@ -307,7 +309,7 @@ const TeamDetails = () => {
         })));
       }
     }
-    
+
     console.log(`Found ${currentPlayers.length} current players`);
     if (currentPlayers.length > 0) {
       console.log('Current players sample:', currentPlayers.map(p => ({
@@ -325,7 +327,7 @@ const TeamDetails = () => {
   }, [team, allPlayers, currentPlayers]);
 
   const handlePlayerClick = useCallback((playerId: string) => {
-    navigate(`/players/${playerId}`);
+    navigate(`/player/${playerId}`);
   }, [navigate]);
 
   if (loading) {
@@ -375,9 +377,19 @@ const TeamDetails = () => {
     );
   }
 
+  const formatPlayerName = (rawName: string | undefined): string => {
+  if (!rawName) return 'N/A'; // Handle undefined or empty strings
+  // Remove 'player_' prefix and '_id' suffix, then split by '_'
+  const name = rawName.replace(/^player_/, '').replace(/_id$/, '').split('_');
+  // Capitalize each word and join with spaces
+  return name
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+};
+
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
-      
+
 
       {/* Hero Section */}
       <motion.div
@@ -388,8 +400,8 @@ const TeamDetails = () => {
       >
         {team.teamImageUrl ? (
           <div className="w-full aspect-[16/9] overflow-hidden">
-            
-        
+
+
             {team.teamImageUrl ? (
               <img
                 src={team.teamImageUrl}
@@ -434,15 +446,15 @@ const TeamDetails = () => {
                     >
                       {team.name}
                     </motion.h1>
-                    <div className="flex flex-wrap gap-3 text-sm md:text-base">
+                    <div className="flex flex-wrap items-center gap-2 text-sm md:text-base -ml-1">
                       <motion.span
                         initial={{ y: 10, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.4 }}
                         className="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full"
                       >
-                        <MapPin className="h-4 w-4" />
-                        {team.country}
+                        <MapPin className="h-3.5 w-3.5 text-white/80" />
+                        <span className="ml-1.5">{team.country}</span>
                       </motion.span>
                       <motion.span
                         initial={{ y: 10, opacity: 0 }}
@@ -450,32 +462,52 @@ const TeamDetails = () => {
                         transition={{ delay: 0.5 }}
                         className="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full"
                       >
-                        <Shield className="h-4 w-4" />
-                        {team.category}
+                        <Shield className="h-3.5 w-3.5 text-white/80" />
+                        <span className="ml-1.5">{team.category}</span>
                       </motion.span>
                       {team.internationalTeamType && (
                         <motion.span
                           initial={{ y: 10, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 0.6 }}
-                          className="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full"
+                          className="flex items-center gap-1 bg-white/10 hover:bg-white/20 transition-colors px-3 py-1.5 rounded-md"
                         >
-                          <Award className="h-4 w-4" />
-                          {team.internationalTeamType}
+                          <Award className="h-3.5 w-3.5 text-white/80" />
+                          <span className="ml-1.5">{team.internationalTeamType}</span>
                         </motion.span>
                       )}
-                      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                      {team.country && (
+                        <motion.span
+                          initial={{ y: 10, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          transition={{ delay: 0.7 }}
+                          className="flex items-center bg-white/10 hover:bg-white/20 transition-colors px-3 py-1.5 rounded-md"
+                        >
+                          <ReactCountryFlag
+                            countryCode={countryCodeMap[team.country.toLowerCase().replace(/\\s+/g, '')] || 'XX'}
+                            svg
+                            style={{
+                              width: '1.1rem',
+                              height: '0.8rem',
+                              borderRadius: '2px',
+                              boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                            }}
+                            title={team.country}
+                            className="mr-1.5"
+                          />
+                        </motion.span>
+                      )}
                         <Button
                           variant="ghost"
                           onClick={() => navigate(-1)}
-                          className="text-purple-600 hover:bg-purple-50 flex items-center gap-2 text-sm font-medium"
+                          className="text-white/90 hover:text-white hover:bg-white/10 px-4 py-1.5 text-sm font-medium"
                         >
-                          <ArrowLeft className="h-4 w-4" />
+                          <ArrowLeft className="h-4 w-4 mr-1.5" />
                           Back to Teams
                         </Button>
+                      
                     </div>
-                    </div>
-                    
+
                   </div>
                 </div>
               </div>
@@ -571,7 +603,7 @@ const TeamDetails = () => {
                     <p className="text-gray-700 leading-relaxed">{team.description}</p>
                   </div>
                 )}
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div>
@@ -593,7 +625,7 @@ const TeamDetails = () => {
                       </p>
                     </div>
                   </div>
-                  
+
                   {/* Team Rankings */}
                   <div className="bg-gray-50 p-6 rounded-lg border border-gray-100">
                     <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
@@ -760,7 +792,7 @@ const TeamDetails = () => {
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Lowest Scores */}
                       <div>
                         <h3 className="text-sm font-medium text-gray-500 mb-3">Lowest Team Scores</h3>
@@ -786,7 +818,7 @@ const TeamDetails = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Match Summary */}
                     <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
                       <h3 className="text-sm font-medium text-gray-500 mb-4">Match Summary</h3>
@@ -844,17 +876,18 @@ const TeamDetails = () => {
                       <div className="space-y-2">
                         {team.teamLeadership.testCaptain && (
                           <p className="text-sm text-gray-900">
-                            <span className="font-medium">Test:</span> {team.teamLeadership.testCaptain}
+                            <span className="font-medium">Test:</span> {formatPlayerName(team.teamLeadership.testCaptain)}
                           </p>
                         )}
                         {team.teamLeadership.odiCaptain && (
                           <p className="text-sm text-gray-900">
-                            <span className="font-medium">ODI:</span> {team.teamLeadership.odiCaptain}
+                            <span className="font-medium">ODI:</span> {formatPlayerName(team.teamLeadership.odiCaptain)}
                           </p>
                         )}
                         {team.teamLeadership.ttwentyInternationalsCaptain && (
                           <p className="text-sm text-gray-900">
-                            <span className="font-medium">T20I:</span> {team.teamLeadership.ttwentyInternationalsCaptain}
+                            <span className="font-medium">T20I:</span>{' '}
+                            {formatPlayerName(team.teamLeadership.ttwentyInternationalsCaptain)}
                           </p>
                         )}
                       </div>
@@ -972,13 +1005,13 @@ const TeamDetails = () => {
                               </span>
                             )}
                           </div>
-                          
+
                           {player.country && (
                             <p className="text-xs text-gray-500 mt-0.5">
                               {player.country}
                             </p>
                           )}
-                          
+
                           <div className="flex flex-wrap gap-1.5 mt-2">
                             {player.role && (
                               <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
@@ -996,7 +1029,7 @@ const TeamDetails = () => {
                               </span>
                             )}
                           </div>
-                          
+
                           {/* Player stats summary */}
                           <div className="flex items-center mt-2 space-x-3 text-xs text-gray-500">
                             {player.testStats && (

@@ -1,0 +1,19 @@
+{
+  "rewrites": [
+    {
+      "source": "/team/(?<id>[^/]+)",
+      "destination": "/"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/"
+    }
+  ],
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/team/(?<id>[^/]+)", "dest": "/" },
+    { "src": "/.*", "dest": "/" }
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false
+}

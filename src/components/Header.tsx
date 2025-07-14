@@ -137,30 +137,30 @@ const Header: FC = () => {
         >
           <ul className="flex flex-col md:flex-row items-center justify-center md:space-x-4 md:space-y-0 md:p-0 px-4 py-2 md:py-0">
             {navItems.map((item) => (
-  <li key={item.name} className="my-1 md:my-0">
-    {item.path.startsWith('http') ? (
-      <a
-        href={item.path}
-        className="block px-2 py-1 text-white hover:text-blue-900 transition-colors text-sm"
-        onClick={() => setIsOpen(false)}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {item.name}
-      </a>
-    ) : (
-      <NavLink
-        to={item.path}
-        className={({ isActive }) =>
-          `block px-2 py-1 ${isActive ? 'text-blue-900 font-semibold' : 'text-white'} hover:text-blue-900 transition-colors text-sm`
-        }
-        onClick={() => setIsOpen(false)}
-      >
-        {item.name}
-      </NavLink>
-    )}
-  </li>
-))}
+                <li key={item.name} className="my-1 md:my-0">
+                  {item.path.startsWith('http') ? (
+                    <a
+                      href={item.path}
+                      className="block px-2 py-1 text-white hover:text-blue-900 transition-colors text-sm"
+                      onClick={() => setIsOpen(false)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {item.name}
+                    </a>
+                  ) : (
+                    <NavLink
+                      to={item.path}
+                      className={({ isActive }) =>
+                        `block px-2 py-1 ${isActive ? 'text-blue-900 font-semibold' : 'text-white'} hover:text-blue-900 transition-colors text-sm`
+                      }
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {item.name}
+                    </NavLink>
+                  )}
+                </li>
+              ))}
             {/* Fixtures Dropdown */}
             <li className="my-1 md:my-0">
               <DropdownMenu>
@@ -187,53 +187,7 @@ const Header: FC = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             </li>
-            {/* Leagues Dropdown */}
-            <li className="my-1 md:my-0">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="px-2 py-1 text-white hover:text-blue-900 transition-colors"
-                  >
-                    Leagues
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>Men</DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent>
-                      {leaguesMenItems.map((item) => (
-                        <DropdownMenuItem
-                          key={item.name}
-                          onSelect={() => {
-                            navigate(item.path);
-                            setIsOpen(false);
-                          }}
-                        >
-                          {item.name}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuSubContent>
-                  </DropdownMenuSub>
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>Women</DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent>
-                      {leaguesWomenItems.map((item) => (
-                        <DropdownMenuItem
-                          key={item.name}
-                          onSelect={() => {
-                            navigate(item.path);
-                            setIsOpen(false);
-                          }}
-                        >
-                          {item.name}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuSubContent>
-                  </DropdownMenuSub>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </li>
+            
             {/* Overview Dropdown */}
             <li className="my-1 md:my-0">
               <DropdownMenu>
@@ -260,6 +214,7 @@ const Header: FC = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             </li>
+
             {/* Insights Dropdown */}
             <li className="my-1 md:my-0">
               <DropdownMenu>
@@ -286,6 +241,7 @@ const Header: FC = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             </li>
+            
             {/* ICC Events Dropdown */}
             <li className="my-1 md:my-0">
               <DropdownMenu>
@@ -333,6 +289,55 @@ const Header: FC = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             </li>
+
+            {/* Leagues Dropdown */}
+            <li className="my-1 md:my-0">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="px-2 py-1 text-white hover:text-blue-900 transition-colors"
+                  >
+                    Leagues
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>Men</DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent>
+                      {leaguesMenItems.map((item) => (
+                        <DropdownMenuItem
+                          key={item.name}
+                          onSelect={() => {
+                            navigate(item.path);
+                            setIsOpen(false);
+                          }}
+                        >
+                          {item.name}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>Women</DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent>
+                      {leaguesWomenItems.map((item) => (
+                        <DropdownMenuItem
+                          key={item.name}
+                          onSelect={() => {
+                            navigate(item.path);
+                            setIsOpen(false);
+                          }}
+                        >
+                          {item.name}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </li>
+
             {/* Domestic Contest Dropdown */}
             <li className="my-1 md:my-0">
               <DropdownMenu>

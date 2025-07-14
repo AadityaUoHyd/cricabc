@@ -92,11 +92,11 @@ cricabc/
 - Vite: Fast build tool and development server.
 - Axios: HTTP client for API requests.
 
-## Pending main issues:
-- IPL.tsx, AdminIPL.tsx giving errors, need to implement few pending endpoints.
-- WPL.tsx, AdminWPL.tsx giving errors, need to implement few pending endpoints.
-- 'view player' of Teams.tsx, yet to be implemented.
+## Pending main task:
 - Purchase CricAPI api-key to ensure pusher works for live score update.
+- Players inside team.
+- Live Commentary need to be implemented.
+- Pending few things in Admin Panel.
 
 
 ## Prerequisites
